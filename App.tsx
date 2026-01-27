@@ -78,7 +78,6 @@ const App: React.FC = () => {
     const storedUsersRaw = localStorage.getItem(USERS_STORAGE_KEY);
     let usersList: User[] = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
     
-    // Garantir que o Administrador Vbsjunior.Biomagnetismo sempre exista na base como permanente
     const adminExists = usersList.some(u => u.username === 'Vbsjunior.Biomagnetismo');
     if (!adminExists) {
       usersList.push({
@@ -88,7 +87,6 @@ const App: React.FC = () => {
         approvalType: 'permanent'
       });
     } else {
-      // Forçar atualização do admin se já existir (para garantir tipo permanente)
       usersList = usersList.map(u => 
         u.username === 'Vbsjunior.Biomagnetismo' ? { ...u, isApproved: true, approvalType: 'permanent', password: '@Va135482' } : u
       );
@@ -96,6 +94,13 @@ const App: React.FC = () => {
     
     setAllUsers(usersList);
   }, []);
+
+  // Persist Master Pairs (Shared base)
+  useEffect(() => {
+    if (biomagneticPairs.length > 0) {
+      localStorage.setItem(PAIRS_STORAGE_KEY, JSON.stringify(biomagneticPairs));
+    }
+  }, [biomagneticPairs]);
 
   // Persist Users
   useEffect(() => {
@@ -163,7 +168,28 @@ const App: React.FC = () => {
         return;
       }
 
-      setRemainingTime(getRemainingTimeText(diffMs));
+      // NOVAS REGRAS DE EXIBIÇÃO:
+      const threshold5Days = 5 * 24 * 60 * 60 * 1000;
+      const threshold1Minute = 60 * 1000;
+      
+      let shouldShow = false;
+      if (currentUser.approvalType === '5min') {
+        // Para o plano de 5 minutos, mostra apenas quando faltar 1 minuto
+        if (diffMs <= threshold1Minute) {
+          shouldShow = true;
+        }
+      } else {
+        // Para os demais planos, mostra apenas quando faltar 5 dias ou menos
+        if (diffMs <= threshold5Days) {
+          shouldShow = true;
+        }
+      }
+
+      if (shouldShow) {
+        setRemainingTime(getRemainingTimeText(diffMs));
+      } else {
+        setRemainingTime(null);
+      }
     };
 
     const timer = setInterval(checkExpiry, 1000);
@@ -323,7 +349,6 @@ const App: React.FC = () => {
           <h1 className="text-4xl font-bold text-teal-600">Assistente para Rastreios no Biomagnetismo</h1>
           <p className="text-slate-500">Conectado como: <span className="font-bold">{currentUser?.username}</span></p>
           
-          {/* MENSAGEM DE ALERTA DE EXPIRAÇÃO - CONFORME SOLICITADO */}
           {remainingTime && (
             <div className="mt-2 max-w-2xl mx-auto">
               <p className="text-red-600 font-bold animate-blink text-sm md:text-base leading-tight">
