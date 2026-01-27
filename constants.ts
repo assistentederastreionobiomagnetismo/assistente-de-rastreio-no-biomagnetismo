@@ -1,0 +1,30 @@
+
+import { BiomagneticPair } from './types';
+
+export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
+  { name: 'Timo - Reto', point1: 'Timo', point2: 'Reto', order: 1, details: [] },
+  { name: 'Parietal - Parietal', point1: 'Parietal Direito', point2: 'Parietal Esquerdo', order: 2, details: [] },
+  { name: 'Pineal - Bulbo Raquidiano', point1: 'Pineal', point2: 'Bulbo Raquidiano', order: 3, details: [] },
+  { name: 'Ouvido - Ouvido', point1: 'Ouvido Direito', point2: 'Ouvido Esquerdo', order: 4, details: [] },
+  { name: 'Nervo Vago - Rim Contralateral', point1: 'Nervo Vago', point2: 'Rim Contralateral', order: 5, details: [] },
+  { name: 'Fígado - Rim Direito', point1: 'Fígado', point2: 'Rim Direito', order: 6, details: [] },
+  { name: 'Apêndice - Pleura', point1: 'Apêndice', point2: 'Pleura Direita', order: 7, details: [] },
+  { name: 'Clavícula - Clavícula', point1: 'Clavícula Média', point2: 'Clavícula Média', order: 8, details: [] },
+  { name: 'Cervical - Sacro', point1: 'Primeira Cervical', point2: 'Sacro', order: 9, details: [] },
+  { name: 'Costo Diafragmático - Costo Diafragmático', point1: 'Costo Diafragmático', point2: 'Costo Diafragmático', order: 10, details: [] },
+  { name: 'Duodeno - Rim Esquerdo', point1: 'Duodeno', point2: 'Rim Esquerdo', order: 11, details: [] },
+  { name: 'Escápula - Escápula', point1: 'Escápula', point2: 'Escápula', order: 12, details: [] },
+  { name: 'Estômago - Suprarrenais', point1: 'Estômago', point2: 'Suprarrenais', order: 13, details: [] },
+  { name: 'Glúteo - Píloro', point1: 'Glúteo', point2: 'Píloro', order: 14, details: [] },
+  { name: 'Íliaco - Íliaco', point1: 'Íliaco', point2: 'Íliaco', order: 15, details: [] },
+  { name: 'Ligamento Pancreático - Baço', point1: 'Ligamento Pancreático', point2: 'Baço', order: 16, details: [] },
+  { name: 'Lombar - Dorsal', point1: 'Quarta Lombar', point2: 'Quarta Dorsal', order: 17, details: [] },
+  { name: 'Maléolo - Maléolo', point1: 'Maléolo Interno', point2: 'Maléolo Interno', order: 18, details: [] },
+  { name: 'Poplíteo - Poplíteo', point1: 'Poplíteo', point2: 'Poplíteo', order: 19, details: [] },
+  { name: 'Rim - Rim', point1: 'Rim Direito', point2: 'Rim Esquerdo', order: 20, details: [] },
+  { name: 'Supraespinoso - Supraespinoso', point1: 'Supraespinoso', point2: 'Supraespinoso', order: 21, details: [] },
+  { name: 'Calcanhar - Calcanhar', point1: 'Calcanhar', point2: 'Calcanhar', order: 22, details: [] },
+  { name: 'Bexiga - Bexiga', point1: 'Bexiga', point2: 'Bexiga', order: 23, details: [] },
+  { name: 'Pâncreas - Pâncreas', point1: 'Cabeça do Pâncreas', point2: 'Cauda do Pâncreas', order: 24, details: [] },
+  { name: 'Baço - Baço', point1: 'Baço', point2: 'Baço', order: 25, details: [] },
+];

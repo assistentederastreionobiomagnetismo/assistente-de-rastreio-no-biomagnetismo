@@ -1,0 +1,371 @@
+
+import React, { useState, useEffect } from 'react';
+import { Patient, BiomagneticPair, User, Session, PhenomenaData, ProtocolData } from './types';
+import PatientForm from './components/PatientForm';
+import StartProtocol from './components/StartProtocol';
+import Scanning from './components/Scanning';
+import Phenomena from './components/Phenomena';
+import Emocional from './components/Emocional';
+import Treatment from './components/Treatment';
+import SessionSummary from './components/SessionSummary';
+import Login from './components/Login';
+import Register from './components/Register';
+import Dashboard from './components/Dashboard';
+import UserManager from './components/UserManager';
+import SessionDetailModal from './components/SessionDetailModal';
+import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon, BrainIcon, SuccessIcon, ReportIcon } from './components/icons/Icons';
+import { BIOMAGNETIC_PAIRS } from './constants';
+
+enum Step {
+  PATIENT_INFO,
+  START_PROTOCOL,
+  SCANNING_LEVEL_I,
+  SCANNING_LEVEL_II,
+  SCANNING_LEVEL_III,
+  PHENOMENA,
+  EMOTIONAL,
+  TREATMENT,
+  SUMMARY
+}
+
+type AuthView = 'login' | 'register';
+type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager';
+const USERS_STORAGE_KEY = 'biomag_therapist_users';
+const PAIRS_STORAGE_KEY = 'biomag_master_pair_list';
+
+const App: React.FC = () => {
+  // Session State
+  const [currentStep, setCurrentStep] = useState<Step>(Step.PATIENT_INFO);
+  const [patient, setPatient] = useState<Patient>({ name: '', mainComplaint: '' });
+  const [protocolData, setProtocolData] = useState<ProtocolData>({ legResponse: '', sessionType: '' });
+  const [selectedPairs, setSelectedPairs] = useState<BiomagneticPair[]>([]);
+  const [phenomena, setPhenomena] = useState<PhenomenaData>({
+    vascularAccidents: [],
+    tumoralPhenomena: [],
+    tumoralGenesis: [],
+    traumas: [],
+    portalPairs: []
+  });
+  const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
+  const [selectedSensations, setSelectedSensations] = useState<string[]>([]);
+  const [emotionsNotes, setEmotionsNotes] = useState<string>('');
+  const [sensationsNotes, setSensationsNotes] = useState<string>('');
+  const [impactionTime, setImpactionTime] = useState<string>('');
+  const [sessionNotes, setSessionNotes] = useState<string>('');
+  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
+  const [sessionEndTime, setSessionEndTime] = useState<Date | null>(null);
+
+  // App Data State
+  const [biomagneticPairs, setBiomagneticPairs] = useState<BiomagneticPair[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [viewingHistoricalSession, setViewingHistoricalSession] = useState<Session | null>(null);
+
+  // Auth & View State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authView, setAuthView] = useState<AuthView>('login');
+  const [appView, setAppView] = useState<AppView>('dashboard');
+  const [remainingTime, setRemainingTime] = useState<string | null>(null);
+
+  // Load master data
+  useEffect(() => {
+    const storedPairsRaw = localStorage.getItem(PAIRS_STORAGE_KEY);
+    if (storedPairsRaw) setBiomagneticPairs(JSON.parse(storedPairsRaw));
+    else setBiomagneticPairs(BIOMAGNETIC_PAIRS);
+
+    const storedUsersRaw = localStorage.getItem(USERS_STORAGE_KEY);
+    if (storedUsersRaw) setAllUsers(JSON.parse(storedUsersRaw));
+  }, []);
+
+  // Persist Users
+  useEffect(() => {
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(allUsers));
+  }, [allUsers]);
+
+  // Sync isolated data
+  useEffect(() => {
+    if (currentUser) {
+      const sessionsKey = `biomag_sessions_${currentUser.username}`;
+      const patientsKey = `biomag_patients_${currentUser.username}`;
+      const storedSessions = localStorage.getItem(sessionsKey);
+      const storedPatients = localStorage.getItem(patientsKey);
+      
+      setSessions(storedSessions ? JSON.parse(storedSessions).map((s:any) => ({
+          ...s, 
+          startTime: s.startTime ? new Date(s.startTime) : null, 
+          endTime: s.endTime ? new Date(s.endTime) : null
+      })) : []);
+      setPatients(storedPatients ? JSON.parse(storedPatients) : []);
+    }
+  }, [currentUser]);
+
+  // Persist Patients
+  useEffect(() => {
+    if (currentUser && patients.length > 0) {
+      const patientsKey = `biomag_patients_${currentUser.username}`;
+      localStorage.setItem(patientsKey, JSON.stringify(patients));
+    }
+  }, [patients, currentUser]);
+
+  // MONITORAMENTO DE EXPIRAÇÃO EM TEMPO REAL
+  useEffect(() => {
+    if (!isAuthenticated || !currentUser || currentUser.username === 'Vbsjunior.Biomagnetismo') return;
+
+    const getRemainingTimeText = (diffMs: number) => {
+      const seconds = Math.floor(diffMs / 1000);
+      if (seconds < 60) return `${seconds} segundos`;
+      
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`;
+      
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours} ${hours === 1 ? 'hora' : 'horas'}`;
+      
+      const days = Math.floor(hours / 24);
+      return `${days} ${days === 1 ? 'dia' : 'dias'}`;
+    };
+
+    const checkExpiry = () => {
+      if (!currentUser.approvalExpiry) return;
+      
+      const now = new Date();
+      const expiry = new Date(currentUser.approvalExpiry);
+      const diffMs = expiry.getTime() - now.getTime();
+
+      if (diffMs <= 0) {
+        alert("Seu período de acesso expirou. Entre em contato com o administrador.");
+        handleLogout();
+        return;
+      }
+
+      // Regra: 5 minutos -> avisar quando faltar 1 minuto
+      if (currentUser.approvalType === '5min') {
+        if (diffMs <= 60000) {
+           setRemainingTime(getRemainingTimeText(diffMs));
+        } else {
+           setRemainingTime(null);
+        }
+      } 
+      // Regra: Outros (1m, 3m, 6m, 1y) -> avisar quando faltar 5 dias
+      else {
+        const thresholdMs = 5 * 24 * 60 * 60 * 1000;
+        if (diffMs <= thresholdMs) {
+           setRemainingTime(getRemainingTimeText(diffMs));
+        } else {
+           setRemainingTime(null);
+        }
+      }
+    };
+
+    const timer = setInterval(checkExpiry, 1000);
+    checkExpiry();
+
+    return () => clearInterval(timer);
+  }, [isAuthenticated, currentUser]);
+
+  const handleRegister = (username: string, password: string): boolean => {
+    const userExists = allUsers.some(u => u.username.toLowerCase() === username.toLowerCase());
+    if (userExists) return false;
+    const newUser: User = { username, password, isApproved: false };
+    setAllUsers(prev => [...prev, newUser]);
+    return true;
+  };
+
+  const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
+    if (username === 'Vbsjunior.Biomagnetismo' && password === '@Va135482') {
+      const adminUser: User = { username, password, isApproved: true, approvalType: 'permanent' };
+      setIsAuthenticated(true);
+      setCurrentUser(adminUser);
+      setAppView('dashboard');
+      return { success: true };
+    }
+
+    const foundUser = allUsers.find(u => u.username === username && u.password === password);
+    if (!foundUser) return { success: false, message: 'Usuário ou senha inválidos.' };
+    
+    if (!foundUser.isApproved) return { success: false, message: 'Seu cadastro está aguardando aprovação do Administrador do Aplicativo!' };
+
+    if (foundUser.approvalExpiry) {
+      const expiryDate = new Date(foundUser.approvalExpiry);
+      if (expiryDate < new Date()) {
+        return { success: false, message: 'Seu período de acesso expirou. Procure o administrador para renovação.' };
+      }
+    }
+
+    setIsAuthenticated(true);
+    setCurrentUser(foundUser);
+    setAppView('dashboard');
+    return { success: true };
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    setPatients([]);
+    setSessions([]);
+    setAuthView('login');
+    setAppView('dashboard');
+    setRemainingTime(null);
+  };
+
+  const nextStep = () => {
+    if (currentStep === Step.TREATMENT && !sessionEndTime) setSessionEndTime(new Date());
+    if (currentStep < Step.SUMMARY) setCurrentStep(currentStep + 1);
+  };
+
+  const prevStep = () => {
+    if (currentStep > Step.PATIENT_INFO) setCurrentStep(currentStep - 1);
+  };
+
+  const resetSessionState = () => {
+      setCurrentStep(Step.PATIENT_INFO);
+      setPatient({ name: '', mainComplaint: '' });
+      setProtocolData({ legResponse: '', sessionType: '' });
+      setSelectedPairs([]);
+      setPhenomena({ vascularAccidents: [], tumoralPhenomena: [], tumoralGenesis: [], traumas: [], portalPairs: [] });
+      setSelectedEmotions([]);
+      setSelectedSensations([]);
+      setEmotionsNotes('');
+      setSensationsNotes('');
+      setImpactionTime('');
+      setSessionNotes('');
+      setSessionStartTime(null);
+      setSessionEndTime(null);
+  };
+
+  const handleFinishSession = () => {
+    const newSession: Session = {
+        id: new Date().toISOString(),
+        patient,
+        protocolData,
+        pairs: selectedPairs,
+        phenomena,
+        emotions: selectedEmotions,
+        sensations: selectedSensations,
+        emotionsNotes,
+        sensationsNotes,
+        impactionTime,
+        notes: sessionNotes,
+        startTime: sessionStartTime,
+        endTime: sessionEndTime
+    };
+    const updatedSessions = [newSession, ...sessions];
+    setSessions(updatedSessions);
+    const sessionsKey = `biomag_sessions_${currentUser?.username}`;
+    localStorage.setItem(sessionsKey, JSON.stringify(updatedSessions));
+    resetSessionState();
+    setAppView('dashboard');
+  };
+
+  const renderWorkflow = () => {
+    switch (currentStep) {
+      case Step.PATIENT_INFO: return <PatientForm patient={patient} setPatient={setPatient} onNext={nextStep} patientsList={patients} setPatientsList={setPatients} />;
+      case Step.START_PROTOCOL: return <StartProtocol data={protocolData} setData={setProtocolData} onNext={nextStep} onBack={prevStep} patientName={patient.name} />;
+      case Step.SCANNING_LEVEL_I: return <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />;
+      case Step.SCANNING_LEVEL_II: return <Scanning levelTitle="Nível II" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />;
+      case Step.SCANNING_LEVEL_III: return <Scanning levelTitle="Nível III" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />;
+      case Step.PHENOMENA: return <Phenomena data={phenomena} setData={setPhenomena} onNext={nextStep} onBack={prevStep} />;
+      case Step.EMOTIONAL: return <Emocional 
+          selectedEmotions={selectedEmotions} setSelectedEmotions={setSelectedEmotions} 
+          selectedSensations={selectedSensations} setSelectedSensations={setSelectedSensations} 
+          emotionsNotes={emotionsNotes} setEmotionsNotes={setEmotionsNotes}
+          sensationsNotes={sensationsNotes} setSensationsNotes={setSensationsNotes}
+          onNext={nextStep} onBack={prevStep} />;
+      case Step.TREATMENT: return <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} onNext={nextStep} onBack={prevStep} />;
+      case Step.SUMMARY: return <SessionSummary 
+          patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} 
+          emotions={selectedEmotions} sensations={selectedSensations} 
+          emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes}
+          impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} onFinish={handleFinishSession} onBack={prevStep} />;
+      default: return null;
+    }
+  };
+
+  if (!isAuthenticated) {
+    if (authView === 'register') return <Register onRegister={handleRegister} onGoToLogin={() => setAuthView('login')} />;
+    return <Login onLogin={(u, p) => handleTherapistLogin(u, p)} onGoToAdmin={() => {}} onGoToRegister={() => setAuthView('register')} />;
+  }
+
+  return (
+    <div className="bg-slate-100 min-h-screen text-slate-800 relative">
+      {viewingHistoricalSession && (
+          <SessionDetailModal session={viewingHistoricalSession} onClose={() => setViewingHistoricalSession(null)} />
+      )}
+      <div className="absolute top-4 right-4 z-10 print:hidden">
+        <button onClick={handleLogout} className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 text-sm font-medium rounded-md shadow-sm text-slate-700 bg-white hover:bg-slate-100 transition-colors">
+          <LogoutIcon className="w-5 h-5" /> Sair
+        </button>
+      </div>
+      <div className="container mx-auto p-4 md:p-8">
+        <header className="text-center mb-8 print:hidden">
+          <h1 className="text-4xl font-bold text-teal-600">Assistente para Rastreios no Biomagnetismo</h1>
+          <p className="text-slate-500">Conectado como: <span className="font-bold">{currentUser?.username}</span></p>
+          
+          {/* MENSAGEM DE ALERTA DE EXPIRAÇÃO - CONFORME PRINT SOLICITADO */}
+          {remainingTime && (
+            <div className="mt-2 max-w-2xl mx-auto">
+              <p className="text-red-600 font-bold animate-blink text-sm md:text-base leading-tight">
+                Atenção! Seu acesso ao aplicativo expira em {remainingTime}. Fale com o Administrador para renovar seu acesso!
+              </p>
+            </div>
+          )}
+        </header>
+        
+        {appView === 'dashboard' && (
+          <Dashboard 
+            currentUser={currentUser}
+            onStartNewSession={() => { resetSessionState(); setSessionStartTime(new Date()); setAppView('sessionWorkflow'); }}
+            sessions={sessions}
+            patients={patients}
+            setPatients={setPatients}
+            biomagneticPairs={biomagneticPairs}
+            setBiomagneticPairs={setBiomagneticPairs}
+            onManageUsers={() => setAppView('userManager')}
+            onViewSessionDetail={(s) => setViewingHistoricalSession(s)}
+          />
+        )}
+        
+        {appView === 'userManager' && (
+          <UserManager users={allUsers} setUsers={setAllUsers} onBack={() => setAppView('dashboard')} />
+        )}
+        
+        {appView === 'sessionWorkflow' && (
+          <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden relative">
+            <div className="p-4 md:p-6 border-b border-slate-200 overflow-x-auto print:hidden">
+              <nav aria-label="Progress">
+                <ol role="list" className="flex items-center min-w-[800px]">
+                  {[
+                    { name: 'Paciente', icon: <UserIcon />, step: Step.PATIENT_INFO },
+                    { name: 'Início', icon: <InfoIcon />, step: Step.START_PROTOCOL },
+                    { name: 'Nível I', icon: <ClipboardIcon />, step: Step.SCANNING_LEVEL_I },
+                    { name: 'Nível II', icon: <ClipboardIcon />, step: Step.SCANNING_LEVEL_II },
+                    { name: 'Nível III', icon: <ClipboardIcon />, step: Step.SCANNING_LEVEL_III },
+                    { name: 'Fenômenos', icon: <SparklesIcon />, step: Step.PHENOMENA },
+                    { name: 'Emocionais', icon: <BrainIcon />, step: Step.EMOTIONAL },
+                    { name: 'Final', icon: <SuccessIcon />, step: Step.TREATMENT },
+                    { name: 'Relatório', icon: <ReportIcon />, step: Step.SUMMARY }
+                  ].map((s, idx) => (
+                    <li key={s.name} className={`relative ${idx !== 8 ? 'flex-1' : ''}`}>
+                      <div className="flex flex-col items-center text-sm">
+                        <span className={`flex h-10 w-10 items-center justify-center rounded-full z-10 ${currentStep >= s.step ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                          {React.cloneElement(s.icon as React.ReactElement<any>, { className: "w-6 h-6" })}
+                        </span>
+                        <span className={`mt-2 text-xs font-medium ${currentStep >= s.step ? 'text-teal-600 font-bold' : 'text-slate-400'}`}>{s.name}</span>
+                      </div>
+                      {idx !== 8 && <div className="absolute inset-x-0 top-5 left-1/2 -z-0 h-0.5 w-full bg-slate-200" />}
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            </div>
+            <main className="p-6 md:p-10">{renderWorkflow()}</main>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default App;

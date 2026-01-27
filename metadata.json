@@ -1,0 +1,5 @@
+{
+  "name": "Assistente para Rastreios no Biomagnetismo",
+  "description": "An application for Biomagnetism therapists to register a complete therapy session, from patient intake to treatment notes and summary, enhanced with AI-powered insights on biomagnetic pairs.",
+  "requestFramePermissions": []
+}

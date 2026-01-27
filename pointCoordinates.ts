@@ -1,0 +1,48 @@
+
+export const POINT_DEFINITIONS: { [key: string]: { x: number; y: number; view: 'front' | 'back'; offset?: number } } = {
+  // Cabeça
+  'Parietal Direito': { x: 40, y: 20, view: 'front' },
+  'Parietal Esquerdo': { x: 60, y: 20, view: 'front' },
+  'Pineal': { x: 50, y: 22, view: 'front' },
+  'Bulbo Raquidiano': { x: 50, y: 28, view: 'back' },
+  'Ouvido Direito': { x: 38, y: 26, view: 'front' },
+  'Ouvido Esquerdo': { x: 62, y: 26, view: 'front' },
+  // Pescoço / Tórax (Frente)
+  'Timo': { x: 50, y: 40, view: 'front' },
+  'Nervo Vago': { x: 50, y: 35, view: 'front' },
+  'Clavícula Média': { x: 50, y: 38, view: 'front', offset: 10 },
+  // Pescoço / Tórax (Costas)
+  'Primeira Cervical': { x: 50, y: 30, view: 'back' },
+  'Supraespinoso': { x: 50, y: 38, view: 'back', offset: 15 },
+  'Escápula': { x: 50, y: 45, view: 'back', offset: 10 },
+  'Quarta Dorsal': { x: 50, y: 48, view: 'back' },
+  // Abdômen (Frente)
+  'Fígado': { x: 40, y: 60, view: 'front' },
+  'Apêndice': { x: 42, y: 75, view: 'front' },
+  'Pleura Direita': { x: 40, y: 55, view: 'front' },
+  'Costo Diafragmático': { x: 50, y: 65, view: 'front', offset: 15 },
+  'Duodeno': { x: 50, y: 68, view: 'front' },
+  'Estômago': { x: 55, y: 65, view: 'front' },
+  'Píloro': { x: 48, y: 68, view: 'front' },
+  'Íliaco': { x: 50, y: 80, view: 'front', offset: 8 },
+  'Ligamento Pancreático': { x: 58, y: 68, view: 'front' },
+  'Baço': { x: 60, y: 65, view: 'front' },
+  'Bexiga': { x: 50, y: 85, view: 'front' },
+  'Cabeça do Pâncreas': { x: 52, y: 67, view: 'front' },
+  'Cauda do Pâncreas': { x: 58, y: 66, view: 'front' },
+  'Pâncreas': { x: 55, y: 66, view: 'front' },
+  // Abdômen (Costas)
+  'Reto': { x: 50, y: 90, view: 'back' },
+  'Rim Direito': { x: 42, y: 70, view: 'back' },
+  'Rim Esquerdo': { x: 58, y: 70, view: 'back' },
+  'Suprarrenais': { x: 58, y: 68, view: 'back' },
+  'Glúteo': { x: 50, y: 85, view: 'back', offset: 8 },
+  'Sacro': { x: 50, y: 82, view: 'back' },
+  'Quarta Lombar': { x: 50, y: 78, view: 'back' },
+  // Pernas
+  'Maléolo Interno': { x: 50, y: 140, view: 'front', offset: 4 },
+  'Poplíteo': { x: 50, y: 115, view: 'back', offset: 4 },
+  'Calcanhar': { x: 50, y: 150, view: 'back', offset: 4 },
+  // Casos Especiais - o componente lida com a lógica
+  'Rim Contralateral': { x: 0, y: 0, view: 'back' },
+};
