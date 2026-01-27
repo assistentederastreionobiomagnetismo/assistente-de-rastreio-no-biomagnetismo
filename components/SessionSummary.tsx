@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Patient, BiomagneticPair, PhenomenaData, ProtocolData, Session } from '../types';
-import { PrinterIcon, EnvelopeIcon } from './icons/Icons';
+import { PrinterIcon } from './icons/Icons';
 
 interface SessionSummaryProps {
   patient: Patient;
@@ -63,53 +63,11 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
     window.print();
   };
 
-  const handleSendEmail = () => {
-    const subject = encodeURIComponent(`Relatório de Atendimento Biomagnético - ${patient.name}`);
-    
-    let bodyText = `Olá ${patient.name},\n\nSegue o resumo do seu atendimento realizado em ${startTime ? new Date(startTime).toLocaleDateString('pt-BR') : 'N/A'}.\n\n`;
-    bodyText += `DURAÇÃO: ${formatDuration(startTime, endTime)}\n`;
-    if (impactionTime) bodyText += `TEMPO DE IMPACTAÇÃO: ${impactionTime}\n\n`;
-    
-    bodyText += `PARES IDENTIFICADOS:\n`;
-    if (pairs.length > 0) {
-        pairs.forEach(p => bodyText += `- ${p.name}\n`);
-    } else {
-        bodyText += `Nenhum par específico identificado.\n`;
-    }
-    
-    if (emotions?.length) {
-        bodyText += `\nEQUILÍBRIO EMOCIONAL:\n${emotions.join(', ')}\n`;
-        if (emotionsNotes) bodyText += `NOTAS: ${emotionsNotes}\n`;
-    }
-
-    if (sensations?.length) {
-        bodyText += `\nSENSAÇÕES LIBERADAS:\n${sensations.join(', ')}\n`;
-        if (sensationsNotes) bodyText += `NOTAS: ${sensationsNotes}\n`;
-    }
-
-    if (notes) {
-        bodyText += `\nOBSERVAÇÕES E RECOMENDAÇÕES:\n${notes}\n`;
-    }
-
-    bodyText += `\n\nAtenciosamente,\nEquipe de Biomagnetismo`;
-
-    const mailtoUrl = `mailto:${patient.email || ''}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
-    window.location.href = mailtoUrl;
-  };
-
   return (
     <div className="animate-fade-in pb-10">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 print:hidden">
         <h2 className="text-2xl font-bold text-slate-700">Relatório da Sessão</h2>
         <div className="flex gap-3">
-            <button
-                onClick={handleSendEmail}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-md"
-                title="Enviar resumo por e-mail"
-            >
-                <EnvelopeIcon className="w-5 h-5" />
-                Enviar E-mail
-            </button>
             <button
                 onClick={handlePrint}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition-colors shadow-md"

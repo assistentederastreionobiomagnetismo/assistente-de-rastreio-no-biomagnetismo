@@ -43,6 +43,8 @@ export interface User {
   isApproved?: boolean;
   approvalExpiry?: string; // ISO Date String
   approvalType?: ApprovalPeriod;
+  passwordResetPending?: boolean;
+  pendingPassword?: string;
 }
 
 export interface ProtocolData {

@@ -69,19 +69,39 @@ const App: React.FC = () => {
   const [appView, setAppView] = useState<AppView>('dashboard');
   const [remainingTime, setRemainingTime] = useState<string | null>(null);
 
-  // Load master data
+  // Load master data and ensure Admin is present
   useEffect(() => {
     const storedPairsRaw = localStorage.getItem(PAIRS_STORAGE_KEY);
     if (storedPairsRaw) setBiomagneticPairs(JSON.parse(storedPairsRaw));
     else setBiomagneticPairs(BIOMAGNETIC_PAIRS);
 
     const storedUsersRaw = localStorage.getItem(USERS_STORAGE_KEY);
-    if (storedUsersRaw) setAllUsers(JSON.parse(storedUsersRaw));
+    let usersList: User[] = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
+    
+    // Garantir que o Administrador Vbsjunior.Biomagnetismo sempre exista na base como permanente
+    const adminExists = usersList.some(u => u.username === 'Vbsjunior.Biomagnetismo');
+    if (!adminExists) {
+      usersList.push({
+        username: 'Vbsjunior.Biomagnetismo',
+        password: '@Va135482',
+        isApproved: true,
+        approvalType: 'permanent'
+      });
+    } else {
+      // Forçar atualização do admin se já existir (para garantir tipo permanente)
+      usersList = usersList.map(u => 
+        u.username === 'Vbsjunior.Biomagnetismo' ? { ...u, isApproved: true, approvalType: 'permanent', password: '@Va135482' } : u
+      );
+    }
+    
+    setAllUsers(usersList);
   }, []);
 
   // Persist Users
   useEffect(() => {
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(allUsers));
+    if (allUsers.length > 0) {
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(allUsers));
+    }
   }, [allUsers]);
 
   // Sync isolated data
@@ -111,7 +131,10 @@ const App: React.FC = () => {
 
   // MONITORAMENTO DE EXPIRAÇÃO EM TEMPO REAL
   useEffect(() => {
-    if (!isAuthenticated || !currentUser || currentUser.username === 'Vbsjunior.Biomagnetismo') return;
+    if (!isAuthenticated || !currentUser || currentUser.approvalType === 'permanent') {
+      setRemainingTime(null);
+      return;
+    }
 
     const getRemainingTimeText = (diffMs: number) => {
       const seconds = Math.floor(diffMs / 1000);
@@ -140,23 +163,7 @@ const App: React.FC = () => {
         return;
       }
 
-      // Regra: 5 minutos -> avisar quando faltar 1 minuto
-      if (currentUser.approvalType === '5min') {
-        if (diffMs <= 60000) {
-           setRemainingTime(getRemainingTimeText(diffMs));
-        } else {
-           setRemainingTime(null);
-        }
-      } 
-      // Regra: Outros (1m, 3m, 6m, 1y) -> avisar quando faltar 5 dias
-      else {
-        const thresholdMs = 5 * 24 * 60 * 60 * 1000;
-        if (diffMs <= thresholdMs) {
-           setRemainingTime(getRemainingTimeText(diffMs));
-        } else {
-           setRemainingTime(null);
-        }
-      }
+      setRemainingTime(getRemainingTimeText(diffMs));
     };
 
     const timer = setInterval(checkExpiry, 1000);
@@ -174,20 +181,12 @@ const App: React.FC = () => {
   };
 
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
-    if (username === 'Vbsjunior.Biomagnetismo' && password === '@Va135482') {
-      const adminUser: User = { username, password, isApproved: true, approvalType: 'permanent' };
-      setIsAuthenticated(true);
-      setCurrentUser(adminUser);
-      setAppView('dashboard');
-      return { success: true };
-    }
-
     const foundUser = allUsers.find(u => u.username === username && u.password === password);
     if (!foundUser) return { success: false, message: 'Usuário ou senha inválidos.' };
     
     if (!foundUser.isApproved) return { success: false, message: 'Seu cadastro está aguardando aprovação do Administrador do Aplicativo!' };
 
-    if (foundUser.approvalExpiry) {
+    if (foundUser.approvalExpiry && foundUser.approvalType !== 'permanent') {
       const expiryDate = new Date(foundUser.approvalExpiry);
       if (expiryDate < new Date()) {
         return { success: false, message: 'Seu período de acesso expirou. Procure o administrador para renovação.' };
@@ -199,6 +198,27 @@ const App: React.FC = () => {
     setAppView('dashboard');
     return { success: true };
   };
+
+  const handleRequestPasswordReset = (username: string, newPass: string): { success: boolean, message: string } => {
+    const userIndex = allUsers.findIndex(u => u.username === username);
+    if (userIndex === -1) {
+        return { success: false, message: "Usuário não encontrado." };
+    }
+    
+    if (username === 'Vbsjunior.Biomagnetismo') {
+        return { success: false, message: "A senha do administrador não pode ser resetada por aqui." };
+    }
+
+    const updatedUsers = [...allUsers];
+    updatedUsers[userIndex] = {
+        ...updatedUsers[userIndex],
+        passwordResetPending: true,
+        pendingPassword: newPass
+    };
+    
+    setAllUsers(updatedUsers);
+    return { success: true, message: "Solicitação enviada com sucesso! Aguarde a aprovação do administrador." };
+  }
 
   const handleLogout = () => {
     setIsAuthenticated(false);
@@ -285,7 +305,7 @@ const App: React.FC = () => {
 
   if (!isAuthenticated) {
     if (authView === 'register') return <Register onRegister={handleRegister} onGoToLogin={() => setAuthView('login')} />;
-    return <Login onLogin={(u, p) => handleTherapistLogin(u, p)} onGoToAdmin={() => {}} onGoToRegister={() => setAuthView('register')} />;
+    return <Login onLogin={(u, p) => handleTherapistLogin(u, p)} onGoToRegister={() => setAuthView('register')} onRequestReset={handleRequestPasswordReset} />;
   }
 
   return (
@@ -303,7 +323,7 @@ const App: React.FC = () => {
           <h1 className="text-4xl font-bold text-teal-600">Assistente para Rastreios no Biomagnetismo</h1>
           <p className="text-slate-500">Conectado como: <span className="font-bold">{currentUser?.username}</span></p>
           
-          {/* MENSAGEM DE ALERTA DE EXPIRAÇÃO - CONFORME PRINT SOLICITADO */}
+          {/* MENSAGEM DE ALERTA DE EXPIRAÇÃO - CONFORME SOLICITADO */}
           {remainingTime && (
             <div className="mt-2 max-w-2xl mx-auto">
               <p className="text-red-600 font-bold animate-blink text-sm md:text-base leading-tight">
