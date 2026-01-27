@@ -94,7 +94,7 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
           <div className="space-y-2">
             <h3 className="text-lg font-bold text-teal-700 border-b border-teal-100 pb-1 mb-3">Identificação do Paciente</h3>
             <p className="text-sm"><strong className="font-bold text-slate-700">Nome:</strong> {patient.name}</p>
-            <p className="text-sm"><strong className="font-bold text-slate-700">Data de Nasc.:</strong> {patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : 'N/A'}</p>
+            <p className="text-sm"><strong className="font-bold text-slate-700">Data de Nasc.:</strong> {patient.birthDate || 'N/A'}</p>
             <p className="text-sm"><strong className="font-bold text-slate-700">Idade:</strong> {patient.age !== undefined ? `${patient.age} anos` : 'N/A'}</p>
             {patient.mainComplaint && (
                 <div className="mt-2">

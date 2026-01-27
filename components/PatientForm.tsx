@@ -26,9 +26,19 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
   });
 
   const calculateAge = (birthDate: string): number | undefined => {
-    if (!birthDate) return undefined;
+    if (!birthDate || birthDate.length < 10) return undefined;
+    const parts = birthDate.split('/');
+    if (parts.length !== 3) return undefined;
+    
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[2], 10);
+    
+    if (isNaN(day) || isNaN(month) || isNaN(year)) return undefined;
+
     const today = new Date();
-    const birth = new Date(birthDate);
+    const birth = new Date(year, month, day);
+    
     let age = today.getFullYear() - birth.getFullYear();
     const m = today.getMonth() - birth.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
@@ -37,13 +47,29 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
     return age >= 0 ? age : 0;
   };
 
+  const applyDateMask = (value: string) => {
+    let val = value.replace(/\D/g, ''); // remove non-digits
+    if (val.length > 8) val = val.slice(0, 8);
+    
+    let formatted = val;
+    if (val.length > 2) formatted = val.slice(0, 2) + '/' + val.slice(2);
+    if (val.length > 4) formatted = formatted.slice(0, 5) + '/' + formatted.slice(5);
+    
+    return formatted;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
+    let finalValue = value;
+    if (name === 'birthDate') {
+      finalValue = applyDateMask(value);
+    }
+
     setPatient(prev => {
-      const updated = { ...prev, [name]: value };
+      const updated = { ...prev, [name]: finalValue };
       if (name === 'birthDate') {
-        updated.age = calculateAge(value);
+        updated.age = calculateAge(finalValue);
       }
       return updated;
     });
@@ -51,7 +77,11 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
 
   const handleNewPatientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setNewPatientData(prev => ({ ...prev, [name]: value }));
+    let finalValue = value;
+    if (name === 'birthDate') {
+      finalValue = applyDateMask(value);
+    }
+    setNewPatientData(prev => ({ ...prev, [name]: finalValue }));
   };
 
   const filteredPatients = useMemo(() => {
@@ -93,7 +123,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
     setNewPatientData({ name: '', birthDate: '', email: '', phone: '', mainComplaint: '' });
   };
 
-  const isFormValid = patient.name.trim() !== '' && (patient.birthDate || '').trim() !== '';
+  const isFormValid = patient.name.trim() !== '' && (patient.birthDate || '').length === 10;
 
   return (
     <div className="animate-fade-in">
@@ -117,10 +147,12 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-600">Data de Nascimento</label>
+                <label className="block text-sm font-medium text-slate-600">Data de Nascimento (DD/MM/AAAA)</label>
                 <input 
-                  type="date" 
+                  type="tel" 
                   name="birthDate"
+                  placeholder="DD/MM/AAAA"
+                  inputMode="numeric"
                   required
                   className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
                   value={newPatientData.birthDate || ''}
@@ -210,11 +242,13 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-1">
-              <label htmlFor="birthDate" className="block text-sm font-medium text-slate-600">Data de Nascimento</label>
+              <label htmlFor="birthDate" className="block text-sm font-medium text-slate-600">Nascimento (DD/MM/AAAA)</label>
               <input
-                type="date"
+                type="tel"
                 id="birthDate"
                 name="birthDate"
+                placeholder="DD/MM/AAAA"
+                inputMode="numeric"
                 value={patient.birthDate || ''}
                 onChange={handleChange}
                 className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"

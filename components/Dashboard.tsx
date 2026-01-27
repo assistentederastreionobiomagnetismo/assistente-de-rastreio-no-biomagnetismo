@@ -31,18 +31,16 @@ const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const [view, setView] = useState<'main' | 'pairManagement' | 'patientManagement'>('main');
 
-  const isCurrentUserAdmin = currentUser?.username === 'Vbsjunior.Biomagnetismo';
+  const isCurrentUserAdmin = currentUser?.username.toLowerCase() === 'vbsjunior.biomagnetismo';
 
-  if (view === 'pairManagement') {
-    const managerMode = isCurrentUserAdmin ? 'admin' : 'therapist';
+  if (view === 'pairManagement' && isCurrentUserAdmin) {
     return (
         <PairListManager 
             biomagneticPairs={biomagneticPairs}
             setBiomagneticPairs={setBiomagneticPairs}
-            mode={managerMode}
-            title={managerMode === 'admin' ? "Gerenciamento de Pares (Admin)" : "Gerenciar Meus Pares"}
+            title="Gerenciamento de Pares (Admin)"
             onExit={() => setView('main')}
-            exitButtonText="Voltar para a Página de Cadastros"
+            exitButtonText="Voltar para o Painel Principal"
             currentUser={currentUser}
         />
     )
@@ -58,6 +56,9 @@ const Dashboard: React.FC<DashboardProps> = ({
       )
   }
 
+  // Define as colunas do grid: 2 para terapeuta comum, 4 para administrador
+  const gridCols = isCurrentUserAdmin ? 'md:grid-cols-4' : 'md:grid-cols-2';
+
   return (
     <div className="animate-fade-in max-w-4xl mx-auto">
       <div className="bg-white rounded-xl shadow-2xl overflow-hidden p-6 md:p-10">
@@ -66,7 +67,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             <p className="text-slate-500 mt-2 mb-8">Gerencie seus atendimentos e base de dados.</p>
         </div>
 
-        <div className={`grid grid-cols-1 md:grid-cols-${isCurrentUserAdmin ? '4' : '3'} gap-6 mb-12`}>
+        <div className={`grid grid-cols-1 ${gridCols} gap-6 mb-12`}>
             <button
               onClick={onStartNewSession}
               className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-teal-500 hover:text-teal-600 hover:bg-teal-50 transition-all transform hover:scale-105"
@@ -83,22 +84,24 @@ const Dashboard: React.FC<DashboardProps> = ({
               <span className="text-sm font-semibold text-center">Gerenciar Pacientes</span>
             </button>
             
-            <button
-              onClick={() => setView('pairManagement')}
-              className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-red-500 hover:text-red-600 hover:bg-red-50 transition-all transform hover:scale-105"
-            >
-              <MagnetIcon className="w-10 h-10 mb-2" />
-              <span className="text-sm font-semibold text-center">{isCurrentUserAdmin ? "Gerenciar Pares (Admin)" : "Meus Pares"}</span>
-            </button>
-
             {isCurrentUserAdmin && (
-              <button
-                onClick={onManageUsers}
-                className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-green-500 hover:text-green-600 hover:bg-green-50 transition-all transform hover:scale-105"
-              >
-                <CheckIcon className="w-10 h-10 mb-2" />
-                <span className="text-sm font-semibold text-center">Gerenciar Acessos</span>
-              </button>
+              <>
+                <button
+                  onClick={() => setView('pairManagement')}
+                  className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-red-500 hover:text-red-600 hover:bg-red-50 transition-all transform hover:scale-105"
+                >
+                  <MagnetIcon className="w-10 h-10 mb-2" />
+                  <span className="text-sm font-semibold text-center">Gerenciar Pares (Admin)</span>
+                </button>
+
+                <button
+                  onClick={onManageUsers}
+                  className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-green-500 hover:text-green-600 hover:bg-green-50 transition-all transform hover:scale-105"
+                >
+                  <CheckIcon className="w-10 h-10 mb-2" />
+                  <span className="text-sm font-semibold text-center">Gerenciar Acessos</span>
+                </button>
+              </>
             )}
         </div>
         

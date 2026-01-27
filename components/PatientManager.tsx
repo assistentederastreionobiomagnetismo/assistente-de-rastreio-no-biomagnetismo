@@ -24,6 +24,17 @@ const PatientManager: React.FC<PatientManagerProps> = ({ patients, setPatients, 
     );
   }, [patients, searchTerm]);
 
+  const applyDateMask = (value: string) => {
+    let val = value.replace(/\D/g, ''); // remove non-digits
+    if (val.length > 8) val = val.slice(0, 8);
+    
+    let formatted = val;
+    if (val.length > 2) formatted = val.slice(0, 2) + '/' + val.slice(2);
+    if (val.length > 4) formatted = formatted.slice(0, 5) + '/' + formatted.slice(5);
+    
+    return formatted;
+  };
+
   const openAddModal = () => {
     setEditingPatient(null);
     setFormData({ name: '', birthDate: '', email: '', phone: '', mainComplaint: '' });
@@ -73,13 +84,15 @@ const PatientManager: React.FC<PatientManagerProps> = ({ patients, setPatients, 
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-600">Data de Nascimento</label>
+                        <label className="block text-sm font-medium text-slate-600">Data de Nascimento (DD/MM/AAAA)</label>
                         <input 
-                            type="date" 
+                            type="tel" 
+                            placeholder="DD/MM/AAAA"
+                            inputMode="numeric"
                             required
                             className="mt-1 block w-full px-3 py-2 border rounded-md focus:ring-teal-500"
                             value={formData.birthDate || ''}
-                            onChange={e => setFormData({...formData, birthDate: e.target.value})}
+                            onChange={e => setFormData({...formData, birthDate: applyDateMask(e.target.value)})}
                         />
                     </div>
                     <div>
@@ -152,7 +165,7 @@ const PatientManager: React.FC<PatientManagerProps> = ({ patients, setPatients, 
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-slate-600">
-                    {p.birthDate ? new Date(p.birthDate).toLocaleDateString('pt-BR') : '-'}
+                    {p.birthDate || '-'}
                 </td>
                 <td className="px-6 py-4 text-sm text-slate-600">
                     <div>{p.phone || '-'}</div>
