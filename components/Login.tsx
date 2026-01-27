@@ -70,6 +70,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister, onRequestReset }
                   id="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  autoCapitalize="none"
+                  autoCorrect="off"
                   className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                   placeholder="Nome de usuário"
                   required
@@ -116,6 +118,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister, onRequestReset }
                   id="username-reset"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  autoCapitalize="none"
+                  autoCorrect="off"
                   className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                   placeholder="Nome de usuário cadastrado"
                   required

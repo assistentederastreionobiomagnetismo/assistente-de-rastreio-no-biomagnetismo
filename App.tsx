@@ -78,7 +78,7 @@ const App: React.FC = () => {
     const storedUsersRaw = localStorage.getItem(USERS_STORAGE_KEY);
     let usersList: User[] = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
     
-    const adminExists = usersList.some(u => u.username === 'Vbsjunior.Biomagnetismo');
+    const adminExists = usersList.some(u => u.username.toLowerCase() === 'vbsjunior.biomagnetismo');
     if (!adminExists) {
       usersList.push({
         username: 'Vbsjunior.Biomagnetismo',
@@ -88,7 +88,7 @@ const App: React.FC = () => {
       });
     } else {
       usersList = usersList.map(u => 
-        u.username === 'Vbsjunior.Biomagnetismo' ? { ...u, isApproved: true, approvalType: 'permanent', password: '@Va135482' } : u
+        u.username.toLowerCase() === 'vbsjunior.biomagnetismo' ? { ...u, isApproved: true, approvalType: 'permanent', password: '@Va135482' } : u
       );
     }
     
@@ -207,7 +207,8 @@ const App: React.FC = () => {
   };
 
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
-    const foundUser = allUsers.find(u => u.username === username && u.password === password);
+    // Busca insensível a maiúsculas/minúsculas para evitar problemas em teclados móveis
+    const foundUser = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     if (!foundUser) return { success: false, message: 'Usuário ou senha inválidos.' };
     
     if (!foundUser.isApproved) return { success: false, message: 'Seu cadastro está aguardando aprovação do Administrador do Aplicativo!' };
@@ -226,13 +227,13 @@ const App: React.FC = () => {
   };
 
   const handleRequestPasswordReset = (username: string, newPass: string): { success: boolean, message: string } => {
-    const userIndex = allUsers.findIndex(u => u.username === username);
+    const userIndex = allUsers.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
     if (userIndex === -1) {
         return { success: false, message: "Usuário não encontrado." };
     }
     
-    if (username === 'Vbsjunior.Biomagnetismo') {
-        return { success: false, message: "A senha do administrador não pode ser resetada por aqui." };
+    if (username.toLowerCase() === 'vbsjunior.biomagnetismo') {
+        return { success: false, message: "A senha do administrador não pode ser redefinida por aqui." };
     }
 
     const updatedUsers = [...allUsers];
