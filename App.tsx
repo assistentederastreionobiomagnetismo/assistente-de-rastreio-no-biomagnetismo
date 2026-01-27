@@ -168,18 +168,15 @@ const App: React.FC = () => {
         return;
       }
 
-      // NOVAS REGRAS DE EXIBIÇÃO:
       const threshold5Days = 5 * 24 * 60 * 60 * 1000;
       const threshold1Minute = 60 * 1000;
       
       let shouldShow = false;
       if (currentUser.approvalType === '5min') {
-        // Para o plano de 5 minutos, mostra apenas quando faltar 1 minuto
         if (diffMs <= threshold1Minute) {
           shouldShow = true;
         }
       } else {
-        // Para os demais planos, mostra apenas quando faltar 5 dias ou menos
         if (diffMs <= threshold5Days) {
           shouldShow = true;
         }
@@ -207,7 +204,6 @@ const App: React.FC = () => {
   };
 
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
-    // Busca insensível a maiúsculas/minúsculas para evitar problemas em teclados móveis
     const foundUser = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     if (!foundUser) return { success: false, message: 'Usuário ou senha inválidos.' };
     
@@ -224,6 +220,21 @@ const App: React.FC = () => {
     setCurrentUser(foundUser);
     setAppView('dashboard');
     return { success: true };
+  };
+
+  const handleImportUsers = (syncCode: string): boolean => {
+    try {
+        const decoded = atob(syncCode);
+        const importedData = JSON.parse(decoded);
+        if (Array.isArray(importedData)) {
+            // Merge ou Substituir? Para garantir multi-dispositivo, o ideal é substituir pelo banco do mestre
+            setAllUsers(importedData);
+            return true;
+        }
+    } catch (e) {
+        console.error("Erro ao importar código", e);
+    }
+    return false;
   };
 
   const handleRequestPasswordReset = (username: string, newPass: string): { success: boolean, message: string } => {
@@ -332,7 +343,7 @@ const App: React.FC = () => {
 
   if (!isAuthenticated) {
     if (authView === 'register') return <Register onRegister={handleRegister} onGoToLogin={() => setAuthView('login')} />;
-    return <Login onLogin={(u, p) => handleTherapistLogin(u, p)} onGoToRegister={() => setAuthView('register')} onRequestReset={handleRequestPasswordReset} />;
+    return <Login onLogin={(u, p) => handleTherapistLogin(u, p)} onGoToRegister={() => setAuthView('register')} onRequestReset={handleRequestPasswordReset} onImportSync={handleImportUsers} />;
   }
 
   return (

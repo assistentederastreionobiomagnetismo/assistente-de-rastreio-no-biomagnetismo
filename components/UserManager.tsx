@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { User, ApprovalPeriod } from '../types';
 import { TrashIcon, InfoIcon, CheckIcon } from './icons/Icons';
 
@@ -10,7 +10,8 @@ interface UserManagerProps {
 }
 
 const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) => {
-  
+  const [syncCode, setSyncCode] = useState<string | null>(null);
+
   const calculateExpiry = (period: ApprovalPeriod): string => {
     const now = new Date();
     switch (period) {
@@ -77,12 +78,54 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
     return new Date(isoStr).toLocaleString('pt-BR');
   };
 
+  const handleExportSync = () => {
+    const jsonStr = JSON.stringify(users);
+    const code = btoa(jsonStr); // Base64 encoding
+    setSyncCode(code);
+  };
+
+  const copySyncCode = () => {
+    if (syncCode) {
+        navigator.clipboard.writeText(syncCode);
+        alert("Código copiado! Envie este código para os outros terapeutas sincronizarem seus dispositivos.");
+    }
+  };
+
   return (
     <div className="animate-fade-in max-w-5xl mx-auto bg-white rounded-xl shadow-2xl p-6 md:p-10">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-slate-800">Gerenciar Acessos</h2>
-        <button onClick={onBack} className="text-teal-600 font-bold hover:underline">Voltar</button>
+        <div className="flex gap-4">
+            <button 
+                onClick={handleExportSync}
+                className="px-4 py-2 bg-sky-600 text-white rounded-md text-sm font-bold shadow-md hover:bg-sky-700 transition-colors"
+            >
+                Exportar Banco (Sincronizar)
+            </button>
+            <button onClick={onBack} className="text-teal-600 font-bold hover:underline">Voltar</button>
+        </div>
       </div>
+
+      {syncCode && (
+          <div className="mb-8 p-6 bg-sky-50 border-2 border-sky-200 rounded-xl animate-fade-in">
+            <h3 className="text-sky-800 font-bold mb-2">Código de Sincronização Gerado</h3>
+            <p className="text-xs text-sky-700 mb-4 leading-relaxed">
+                Este código contém todos os usuários e permissões atuais. <br/>
+                No novo dispositivo (celular/tablet/PC), vá na tela de login, clique em <b>"Sincronizar Dispositivo"</b> e cole este código.
+            </p>
+            <div className="flex flex-col gap-3">
+                <textarea 
+                    readOnly 
+                    value={syncCode}
+                    className="w-full p-3 bg-white border border-sky-300 rounded font-mono text-[10px] h-32 outline-none focus:ring-2 focus:ring-sky-500"
+                />
+                <div className="flex gap-2">
+                    <button onClick={copySyncCode} className="flex-1 py-2 bg-sky-600 text-white font-bold rounded-lg shadow hover:bg-sky-700 transition-all">Copiar Código</button>
+                    <button onClick={() => setSyncCode(null)} className="px-4 py-2 bg-slate-300 text-slate-700 font-bold rounded-lg hover:bg-slate-400">Fechar</button>
+                </div>
+            </div>
+          </div>
+      )}
 
       <div className="overflow-x-auto border border-slate-200 rounded-lg">
         <table className="min-w-full divide-y divide-slate-200">
@@ -180,9 +223,6 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
             )}
           </tbody>
         </table>
-      </div>
-      <div className="mt-6 p-4 bg-teal-50 rounded-lg border border-teal-100 text-xs text-teal-800">
-          <strong>Gestão de Acessos:</strong> O administrador permanente <b>Vbsjunior.Biomagnetismo</b> não expira. Para os demais terapeutas, utilize os botões de renovação acima. Usuários expirados não são deletados, permitindo a renovação rápida sem novo cadastro. Se houver uma solicitação de <b>Reset de Senha</b>, ela aparecerá na coluna de Solicitações para aprovação.
       </div>
     </div>
   );
