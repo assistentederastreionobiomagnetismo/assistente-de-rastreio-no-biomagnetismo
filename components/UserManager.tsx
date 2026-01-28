@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { User, ApprovalPeriod } from '../types';
-import { TrashIcon, CheckIcon, PlusIcon, ClipboardIcon, WhatsAppIcon, EnvelopeIcon } from './icons/Icons';
+import { TrashIcon, CheckIcon, PlusIcon, ClipboardIcon, WhatsAppIcon } from './icons/Icons';
 
 interface UserManagerProps {
   users: User[];
@@ -40,9 +40,9 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
   const applyPhoneMask = (value: string) => {
     return value
       .replace(/\D/g, '')
-      .replace(/(\位{2})(\位)/, '($1) $2')
-      .replace(/(\位{5})(\位)/, '$1-$2')
-      .replace(/(-\位{4})\位+?$/, '$1');
+      .replace(/(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{5})(\d)/, '$1-$2')
+      .replace(/(-\d{4})\d+?$/, '$1');
   };
 
   const handleCreateUser = (e: React.FormEvent) => {
@@ -84,7 +84,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
       period: '1month'
     });
     
-    alert('Terapeuta cadastrado! Agora gere o código e escolha como enviar.');
+    alert('Terapeuta cadastrado! Agora gere o código e envie via WhatsApp.');
   };
 
   const handleSetApproval = (username: string, period: ApprovalPeriod) => {
@@ -117,13 +117,6 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
     if (!lastCreatedUser?.whatsapp || !syncCode) return;
     const message = encodeURIComponent(getShareMessage());
     window.open(`https://wa.me/55${lastCreatedUser.whatsapp}?text=${message}`, '_blank');
-  };
-
-  const handleSendEmail = () => {
-    if (!lastCreatedUser?.email || !syncCode) return;
-    const subject = encodeURIComponent('Acesso ao Assistente de Biomagnetismo');
-    const body = encodeURIComponent(getShareMessage());
-    window.open(`mailto:${lastCreatedUser.email}?subject=${subject}&body=${body}`, '_blank');
   };
 
   const deleteUser = (username: string) => {
@@ -249,16 +242,9 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
                 <button 
                     onClick={handleSendWhatsApp}
                     disabled={!lastCreatedUser?.whatsapp}
-                    className="flex-1 md:flex-none py-3 px-6 bg-green-600 text-white font-black rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 disabled:bg-slate-300 shadow-lg transition-all text-xs"
+                    className="flex-1 md:flex-none py-3 px-6 bg-green-600 text-white font-black rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 disabled:bg-slate-300 shadow-lg transition-all text-sm transform active:scale-95"
                 >
-                    <WhatsAppIcon className="w-5 h-5" /> WhatsApp
-                </button>
-                <button 
-                    onClick={handleSendEmail}
-                    disabled={!lastCreatedUser?.email}
-                    className="flex-1 md:flex-none py-3 px-6 bg-slate-700 text-white font-black rounded-xl flex items-center justify-center gap-2 hover:bg-slate-800 disabled:bg-slate-300 shadow-lg transition-all text-xs"
-                >
-                    <EnvelopeIcon className="w-5 h-5" /> E-mail
+                    <WhatsAppIcon className="w-5 h-5" /> Enviar por WhatsApp
                 </button>
             </div>
           </div>
