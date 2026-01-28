@@ -107,17 +107,17 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
 
   const getShareMessage = () => {
     const appUrl = window.location.origin;
+    // Criamos um link que já carrega o código para sincronização automática
+    const autoSyncUrl = `${appUrl}?sync=${encodeURIComponent(syncCode || '')}`;
+    
     return `Olá! Seu acesso ao Assistente de Biomagnetismo foi liberado.\n\n` +
            `👤 *USUÁRIO:* ${lastCreatedUser?.username}\n` +
            `🔑 *SENHA PROVISÓRIA:* ${lastCreatedUser?.password}\n\n` +
-           `*PASSO A PASSO PARA ATIVAÇÃO:*\n` +
-           `1. *COPIE* apenas o código de sincronização que está abaixo (entre as aspas).\n` +
-           `2. *ABRA* o link do aplicativo no final desta mensagem.\n` +
-           `3. No app, clique em 'Sincronizar Dispositivo' e *COLE* o código.\n` +
-           `4. Após sincronizar, entre com seu usuário e senha.\n\n` +
-           `📌 *CÓDIGO DE SINCRONIZAÇÃO:*\n` +
+           `*COMO ATIVAR:* \n` +
+           `1. *COPIE* o código abaixo (toque e segure sobre ele):\n\n` +
            `\`\`\`${syncCode}\`\`\`\n\n` +
-           `🔗 *CLIQUE ABAIXO PARA ABRIR O APP:*\n${appUrl}`;
+           `2. *ABRA* o aplicativo no link abaixo e cole o código em 'Sincronizar Dispositivo'.\n\n` +
+           `🔗 *CLIQUE PARA ABRIR O APP:*\n${autoSyncUrl}`;
   };
 
   const handleSendWhatsApp = () => {

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ClipboardIcon } from './icons/Icons';
 
 interface LoginProps {
@@ -16,6 +16,21 @@ const Login: React.FC<LoginProps> = ({ onLogin, onImportSync }) => {
   const [syncCode, setSyncCode] = useState('');
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('login');
+
+  // Verifica se há um código de sincronização na URL ao carregar
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeFromUrl = urlParams.get('sync');
+    if (codeFromUrl) {
+      if (onImportSync(codeFromUrl)) {
+        alert('Dispositivo sincronizado automaticamente com sucesso! Agora você pode fazer o login.');
+        // Limpa a URL para evitar re-sincronização acidental
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else {
+        console.error("Código de sincronização automático inválido.");
+      }
+    }
+  }, [onImportSync]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
