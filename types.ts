@@ -40,6 +40,9 @@ export type ApprovalPeriod = '5min' | '1month' | '3months' | '6months' | '1year'
 export interface User {
   username: string;
   password: string; 
+  fullName?: string;
+  email?: string;
+  whatsapp?: string;
   isApproved?: boolean;
   approvalExpiry?: string; // ISO Date String
   approvalType?: ApprovalPeriod;

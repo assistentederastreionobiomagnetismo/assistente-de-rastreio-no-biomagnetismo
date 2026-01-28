@@ -80,6 +80,7 @@ const App: React.FC = () => {
       usersList.push({
         username: 'Vbsjunior.Biomagnetismo',
         password: '@Va135482',
+        fullName: 'Administrador Mestre',
         isApproved: true,
         approvalType: 'permanent'
       });
@@ -261,7 +262,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="bg-slate-100 min-h-screen text-slate-800 relative">
+    <div className="bg-slate-100 min-h-screen text-slate-800 relative notranslate" translate="no">
       {viewingHistoricalSession && (
           <SessionDetailModal session={viewingHistoricalSession} onClose={() => setViewingHistoricalSession(null)} />
       )}
@@ -273,7 +274,7 @@ const App: React.FC = () => {
       <div className="container mx-auto p-4 md:p-8">
         <header className="text-center mb-8 print:hidden">
           <h1 className="text-4xl font-bold text-teal-600">Assistente para Rastreios no Biomagnetismo</h1>
-          <p className="text-slate-500">Conectado como: <span className="font-bold">{currentUser?.username}</span></p>
+          <p className="text-slate-500">Conectado como: <span className="font-bold">{currentUser?.fullName || currentUser?.username}</span></p>
           {remainingTime && (
             <div className="mt-2 max-w-2xl mx-auto">
               <p className="text-red-600 font-bold animate-blink text-sm">Atenção! Seu acesso expira em {remainingTime}.</p>

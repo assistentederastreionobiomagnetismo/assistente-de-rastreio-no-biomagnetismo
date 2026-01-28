@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { User, ApprovalPeriod } from '../types';
-import { TrashIcon, CheckIcon, PlusIcon, ClipboardIcon } from './icons/Icons';
+import { TrashIcon, CheckIcon, PlusIcon, ClipboardIcon, WhatsAppIcon, EnvelopeIcon } from './icons/Icons';
 
 interface UserManagerProps {
   users: User[];
@@ -11,11 +11,17 @@ interface UserManagerProps {
 
 const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) => {
   const [syncCode, setSyncCode] = useState<string | null>(null);
+  const [lastCreatedUser, setLastCreatedUser] = useState<User | null>(null);
   
   // Novo Usuário Form State
-  const [newUsername, setNewUsername] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [newPeriod, setNewPeriod] = useState<ApprovalPeriod>('1month');
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    fullName: '',
+    email: '',
+    whatsapp: '',
+    period: '1month' as ApprovalPeriod
+  });
 
   const calculateExpiry = (period: ApprovalPeriod): string => {
     const now = new Date();
@@ -31,32 +37,54 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
     return now.toISOString();
   };
 
+  const applyPhoneMask = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\位{2})(\位)/, '($1) $2')
+      .replace(/(\位{5})(\位)/, '$1-$2')
+      .replace(/(-\位{4})\位+?$/, '$1');
+  };
+
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newUsername.trim() || !newPassword.trim()) return;
+    const { username, password, fullName, email, whatsapp, period } = formData;
 
-    if (users.some(u => u.username.toLowerCase() === newUsername.trim().toLowerCase())) {
+    if (!username.trim() || !password.trim() || !fullName.trim()) {
+      alert('Por favor, preencha ao menos o nome completo, usuário e senha.');
+      return;
+    }
+
+    if (users.some(u => u.username.toLowerCase() === username.trim().toLowerCase())) {
       alert('Este nome de usuário já existe no sistema.');
       return;
     }
 
     const newUser: User = {
-      username: newUsername.trim(),
-      password: newPassword.trim(),
+      username: username.trim(),
+      password: password.trim(),
+      fullName: fullName.trim(),
+      email: email.trim(),
+      whatsapp: whatsapp.replace(/\D/g, ''),
       isApproved: true,
-      approvalType: newPeriod,
-      approvalExpiry: calculateExpiry(newPeriod)
+      approvalType: period,
+      approvalExpiry: calculateExpiry(period)
     };
 
     const updatedUsers = [...users, newUser];
     setUsers(updatedUsers);
+    setLastCreatedUser(newUser);
     
     // Limpa campos
-    setNewUsername('');
-    setNewPassword('');
-    setNewPeriod('1month');
+    setFormData({
+      username: '',
+      password: '',
+      fullName: '',
+      email: '',
+      whatsapp: '',
+      period: '1month'
+    });
     
-    alert('Terapeuta cadastrado! Agora clique em "Gerar Código de Sincronização" e envie para o terapeuta.');
+    alert('Terapeuta cadastrado! Agora gere o código e escolha como enviar.');
   };
 
   const handleSetApproval = (username: string, period: ApprovalPeriod) => {
@@ -73,15 +101,33 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
 
   const handleExportSync = () => {
     const jsonStr = JSON.stringify(users);
-    setSyncCode(btoa(jsonStr));
-    alert('Código de sincronização gerado!');
+    const code = btoa(jsonStr);
+    setSyncCode(code);
+  };
+
+  const getShareMessage = () => {
+    return `Olá! Seu acesso ao Assistente de Biomagnetismo foi liberado.\n\n` +
+           `Seu Usuário: ${lastCreatedUser?.username}\n` +
+           `Sua Senha: ${lastCreatedUser?.password}\n\n` +
+           `CÓDIGO DE SINCRONIZAÇÃO:\n${syncCode}\n\n` +
+           `Para ativar, abra o aplicativo, clique em 'Sincronizar Dispositivo' e cole este código.`;
+  };
+
+  const handleSendWhatsApp = () => {
+    if (!lastCreatedUser?.whatsapp || !syncCode) return;
+    const message = encodeURIComponent(getShareMessage());
+    window.open(`https://wa.me/55${lastCreatedUser.whatsapp}?text=${message}`, '_blank');
+  };
+
+  const handleSendEmail = () => {
+    if (!lastCreatedUser?.email || !syncCode) return;
+    const subject = encodeURIComponent('Acesso ao Assistente de Biomagnetismo');
+    const body = encodeURIComponent(getShareMessage());
+    window.open(`mailto:${lastCreatedUser.email}?subject=${subject}&body=${body}`, '_blank');
   };
 
   const deleteUser = (username: string) => {
-    if (username === 'Vbsjunior.Biomagnetismo') {
-        alert("O administrador mestre não pode ser excluído.");
-        return;
-    }
+    if (username === 'Vbsjunior.Biomagnetismo') return;
     if (window.confirm(`Deseja remover o acesso de ${username}?`)) {
       setUsers(prev => prev.filter(u => u.username !== username));
     }
@@ -89,87 +135,139 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
 
   const formatDate = (isoStr?: string) => {
     if (!isoStr) return 'Vitalício';
-    return new Date(isoStr).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return new Date(isoStr).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
   return (
-    <div className="animate-fade-in max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10 border border-slate-200">
+    <div className="animate-fade-in max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10 border border-slate-200 notranslate" translate="no">
       <div className="flex justify-between items-center mb-10">
         <div>
-            <h2 className="text-3xl font-black text-slate-800">Controle de Acessos</h2>
-            <p className="text-slate-500 text-sm italic">Gestão centralizada de terapeutas e períodos de uso.</p>
+            <h2 className="text-3xl font-black text-slate-800">Controle de Terapeutas</h2>
+            <p className="text-slate-500 text-sm italic">Gestão de acessos, dados e compartilhamento.</p>
         </div>
-        <button onClick={onBack} className="px-6 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all border border-slate-200">Voltar ao Painel</button>
+        <button onClick={onBack} className="px-6 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all border border-slate-200">Voltar</button>
       </div>
 
-      {/* Formulário de Cadastro pelo Admin */}
+      {/* Formulário Estendido */}
       <div className="mb-12 p-8 bg-slate-50 border-2 border-slate-200 rounded-3xl shadow-sm">
         <h3 className="text-slate-800 font-black mb-6 flex items-center gap-2 text-xl">
-            <PlusIcon className="w-7 h-7 text-teal-600" /> Cadastrar Novo Terapeuta
+            <PlusIcon className="w-7 h-7 text-teal-600" /> Cadastro de Novo Terapeuta
         </h3>
-        <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-            <div>
-                <label className="block text-xs font-black text-slate-400 uppercase mb-2 tracking-widest">Nome de Usuário</label>
-                <input 
-                    type="text" 
-                    placeholder="joao.biomag" 
-                    value={newUsername} 
-                    onChange={e => setNewUsername(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 bg-white font-medium"
-                    required
-                />
+        <form onSubmit={handleCreateUser} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Nome Completo</label>
+                    <input 
+                        type="text" 
+                        placeholder="Nome Completo do Terapeuta" 
+                        value={formData.fullName} 
+                        onChange={e => setFormData({...formData, fullName: e.target.value})}
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 bg-white font-medium"
+                        required
+                    />
+                </div>
+                <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">E-mail</label>
+                    <input 
+                        type="email" 
+                        placeholder="email@exemplo.com" 
+                        value={formData.email} 
+                        onChange={e => setFormData({...formData, email: e.target.value})}
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 bg-white font-medium"
+                    />
+                </div>
+                <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">WhatsApp</label>
+                    <input 
+                        type="tel" 
+                        placeholder="(00) 00000-0000" 
+                        value={formData.whatsapp} 
+                        onChange={e => setFormData({...formData, whatsapp: applyPhoneMask(e.target.value)})}
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 bg-white font-medium"
+                    />
+                </div>
             </div>
-            <div>
-                <label className="block text-xs font-black text-slate-400 uppercase mb-2 tracking-widest">Senha de Acesso</label>
-                <input 
-                    type="text" 
-                    placeholder="Defina a senha" 
-                    value={newPassword} 
-                    onChange={e => setNewPassword(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 bg-white font-medium"
-                    required
-                />
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Usuário (Login)</label>
+                    <input 
+                        type="text" 
+                        placeholder="Ex: joao.biomag" 
+                        value={formData.username} 
+                        onChange={e => setFormData({...formData, username: e.target.value})}
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 bg-white font-medium"
+                        required
+                    />
+                </div>
+                <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Senha</label>
+                    <input 
+                        type="text" 
+                        placeholder="Senha provisória" 
+                        value={formData.password} 
+                        onChange={e => setFormData({...formData, password: e.target.value})}
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 bg-white font-medium"
+                        required
+                    />
+                </div>
+                <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Tempo de Acesso</label>
+                    <select 
+                        value={formData.period}
+                        onChange={e => setFormData({...formData, period: e.target.value as ApprovalPeriod})}
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 bg-white cursor-pointer font-bold text-slate-700"
+                    >
+                        <option value="5min">Teste (5 minutos)</option>
+                        <option value="1month">1 Mês</option>
+                        <option value="3months">3 Meses</option>
+                        <option value="6months">6 Meses</option>
+                        <option value="1year">1 Ano</option>
+                        <option value="permanent">Permanente (Vitalício)</option>
+                    </select>
+                </div>
+                <button type="submit" className="bg-teal-600 text-white font-black rounded-xl py-4 hover:bg-teal-700 transition-all shadow-lg uppercase text-sm tracking-widest">
+                    Salvar Terapeuta
+                </button>
             </div>
-            <div>
-                <label className="block text-xs font-black text-slate-400 uppercase mb-2 tracking-widest">Tempo de Acesso</label>
-                <select 
-                    value={newPeriod}
-                    onChange={e => setNewPeriod(e.target.value as ApprovalPeriod)}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 bg-white cursor-pointer font-bold text-slate-700"
-                >
-                    <option value="5min">Teste (5 minutos)</option>
-                    <option value="1month">1 Mês</option>
-                    <option value="3months">3 Meses</option>
-                    <option value="6months">6 Meses</option>
-                    <option value="1year">1 Ano</option>
-                    <option value="permanent">Permanente (Vitalício)</option>
-                </select>
-            </div>
-            <button type="submit" className="bg-teal-600 text-white font-black rounded-xl py-4 hover:bg-teal-700 transition-all shadow-lg transform active:scale-95 text-sm uppercase tracking-widest">
-                Confirmar Cadastro
-            </button>
         </form>
       </div>
 
-      <div className="mb-10 flex flex-col items-center border-b border-slate-100 pb-10">
+      <div className="mb-10 flex flex-col items-center">
         <button onClick={handleExportSync} className="px-12 py-5 bg-sky-600 text-white font-black rounded-2xl shadow-xl hover:bg-sky-700 transition-all flex items-center gap-3 transform hover:scale-[1.02]">
-            Gerar Código de Sincronização
+            GERAR CÓDIGO DE ACESSO
         </button>
-        <p className="text-[10px] text-slate-400 mt-4 font-black uppercase tracking-[0.2em] text-center max-w-sm">
-            Gere o código acima após qualquer alteração e envie para o terapeuta sincronizar o dispositivo dele.
-        </p>
       </div>
 
       {syncCode && (
-        <div className="mb-12 p-6 bg-sky-50 border-2 border-sky-200 rounded-2xl animate-fade-in shadow-inner">
-          <p className="text-xs text-sky-700 font-black mb-3 flex items-center gap-2 uppercase tracking-widest">
-            <CheckIcon className="w-4 h-4" /> Código de Sincronização Disponível
-          </p>
+        <div className="mb-12 p-8 bg-sky-50 border-2 border-sky-200 rounded-3xl animate-fade-in shadow-inner">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <p className="text-xs text-sky-700 font-black flex items-center gap-2 uppercase tracking-widest">
+                <CheckIcon className="w-5 h-5" /> Código Gerado para {lastCreatedUser?.fullName || 'o novo terapeuta'}
+            </p>
+            <div className="flex gap-3 w-full md:w-auto">
+                <button 
+                    onClick={handleSendWhatsApp}
+                    disabled={!lastCreatedUser?.whatsapp}
+                    className="flex-1 md:flex-none py-3 px-6 bg-green-600 text-white font-black rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 disabled:bg-slate-300 shadow-lg transition-all text-xs"
+                >
+                    <WhatsAppIcon className="w-5 h-5" /> WhatsApp
+                </button>
+                <button 
+                    onClick={handleSendEmail}
+                    disabled={!lastCreatedUser?.email}
+                    className="flex-1 md:flex-none py-3 px-6 bg-slate-700 text-white font-black rounded-xl flex items-center justify-center gap-2 hover:bg-slate-800 disabled:bg-slate-300 shadow-lg transition-all text-xs"
+                >
+                    <EnvelopeIcon className="w-5 h-5" /> E-mail
+                </button>
+            </div>
+          </div>
+          
           <div className="relative">
             <textarea 
                 readOnly 
                 value={syncCode} 
-                className="w-full p-4 bg-white border border-sky-200 rounded-xl font-mono text-[9px] h-32 mb-4 shadow-sm outline-none resize-none leading-relaxed" 
+                className="w-full p-5 bg-white border border-sky-200 rounded-2xl font-mono text-[9px] h-32 mb-4 shadow-sm outline-none resize-none leading-relaxed" 
             />
             <button 
                 onClick={() => { navigator.clipboard.writeText(syncCode); alert('Código copiado!'); }} 
@@ -179,22 +277,24 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
                 <ClipboardIcon className="w-5 h-5" />
             </button>
           </div>
+          
           <button 
-            onClick={() => { navigator.clipboard.writeText(syncCode); alert('Código copiado para a área de transferência!'); }} 
-            className="w-full py-4 bg-sky-600 text-white font-black rounded-xl flex justify-center items-center gap-3 hover:bg-sky-700 shadow-md transition-all uppercase text-sm tracking-widest"
+            onClick={() => { navigator.clipboard.writeText(syncCode); alert('Código copiado!'); }} 
+            className="w-full py-4 bg-sky-100 text-sky-700 font-black rounded-xl flex justify-center items-center gap-3 hover:bg-sky-200 transition-all uppercase text-xs tracking-widest border border-sky-200"
           >
-            Copiar para o WhatsApp / Área de Transferência
+            Copiar Código Manualmente
           </button>
         </div>
       )}
 
-      <div className="overflow-hidden border border-slate-200 rounded-3xl shadow-sm bg-slate-25">
+      {/* Lista de Terapeutas */}
+      <div className="overflow-hidden border border-slate-200 rounded-3xl shadow-sm">
         <table className="min-w-full divide-y divide-slate-200">
           <thead className="bg-slate-100">
             <tr>
-              <th className="px-6 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Terapeuta</th>
-              <th className="px-6 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Status / Expiração</th>
-              <th className="px-6 py-5 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Alterar Período</th>
+              <th className="px-6 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Terapeuta / Usuário</th>
+              <th className="px-6 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Contatos</th>
+              <th className="px-6 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Status / Expira</th>
               <th className="px-6 py-5 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Ações</th>
             </tr>
           </thead>
@@ -207,8 +307,15 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
                 <tr key={user.username} className={`hover:bg-slate-50 transition-colors ${isExpired ? 'bg-red-50' : ''}`}>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                        <span className="font-black text-slate-800 text-sm">{user.username}</span>
-                        {isAdmin && <span className="text-[9px] text-teal-600 font-black uppercase tracking-widest">Master Admin</span>}
+                        <span className="font-black text-slate-800 text-sm">{user.fullName || user.username}</span>
+                        <span className="text-[10px] text-slate-400 font-bold">@{user.username}</span>
+                        {isAdmin && <span className="text-[9px] text-teal-600 font-black uppercase tracking-widest mt-1">Master Admin</span>}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col text-[10px] gap-1">
+                        {user.email && <span className="text-slate-500">📧 {user.email}</span>}
+                        {user.whatsapp && <span className="text-slate-500">📱 {user.whatsapp}</span>}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -216,27 +323,20 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
                         <span className="text-teal-600 font-black text-[10px] uppercase tracking-widest">Vitalício</span>
                     ) : (
                         <div className="flex flex-col">
-                            <span className={`text-xs font-black uppercase tracking-tighter ${isExpired ? 'text-red-600 animate-pulse' : 'text-slate-600'}`}>
+                            <span className={`text-[10px] font-black uppercase tracking-tighter ${isExpired ? 'text-red-600 animate-pulse' : 'text-slate-600'}`}>
                                 {isExpired ? 'ACESSO EXPIRADO' : formatDate(user.approvalExpiry)}
                             </span>
-                            {!isExpired && (
-                                <span className="text-[10px] text-slate-400 font-bold uppercase">{user.approvalType === 'permanent' ? 'Vitalício' : user.approvalType}</span>
-                            )}
-                        </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    {!isAdmin && (
-                        <div className="flex justify-center flex-wrap gap-1.5 max-w-[200px] mx-auto">
-                            {(['1month', '6months', '1year', 'permanent'] as ApprovalPeriod[]).map(p => (
-                                <button 
-                                    key={p} 
-                                    onClick={() => handleSetApproval(user.username, p)} 
-                                    className={`px-3 py-1.5 text-[9px] font-black border-2 rounded-lg transition-all ${user.approvalType === p ? 'bg-teal-600 text-white border-teal-600 shadow-sm' : 'bg-white text-slate-400 border-slate-100 hover:border-teal-300 hover:text-teal-600'}`}
-                                >
-                                    {p === 'permanent' ? 'VIT' : p.replace('month', 'M').replace('year', 'A')}
-                                </button>
-                            ))}
+                            <div className="flex gap-1 mt-2">
+                                {(['1month', '6months', '1year', 'permanent'] as ApprovalPeriod[]).map(p => (
+                                    <button 
+                                        key={p} 
+                                        onClick={() => handleSetApproval(user.username, p)} 
+                                        className={`px-2 py-1 text-[8px] font-black border rounded transition-all ${user.approvalType === p ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-slate-300 hover:border-teal-300 hover:text-teal-600'}`}
+                                    >
+                                        {p === 'permanent' ? 'VIT' : p.replace('month', 'M').replace('year', 'A')}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     )}
                   </td>
@@ -244,10 +344,10 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
                     {!isAdmin && (
                         <button 
                             onClick={() => deleteUser(user.username)} 
-                            className="p-3 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all"
-                            title="Remover Terapeuta"
+                            className="p-3 text-slate-200 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all"
+                            title="Remover"
                         >
-                            <TrashIcon className="w-6 h-6" />
+                            <TrashIcon className="w-5 h-5" />
                         </button>
                     )}
                   </td>
