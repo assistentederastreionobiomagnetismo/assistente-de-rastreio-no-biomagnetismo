@@ -123,14 +123,11 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
     window.open(`https://wa.me/55${lastCreatedUser.whatsapp}?text=${message}`, '_blank');
   };
 
-  // Mensagem 2: Somente o Código
+  // Mensagem 2: Somente o Código (Puro, sem nada escrito)
   const handleSendOnlyCode = () => {
     if (!lastCreatedUser?.whatsapp || !syncCode) return;
-    const message = encodeURIComponent(
-      `*MENSAGEM 2 DE 2 - CÓDIGO DE ACESSO*\n\n` +
-      `Copiando o código abaixo:\n\n` +
-      `${syncCode}`
-    );
+    // Removido qualquer texto adicional para facilitar a cópia
+    const message = encodeURIComponent(syncCode);
     window.open(`https://wa.me/55${lastCreatedUser.whatsapp}?text=${message}`, '_blank');
   };
 
