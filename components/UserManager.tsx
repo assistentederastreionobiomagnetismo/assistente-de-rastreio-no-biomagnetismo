@@ -67,7 +67,8 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
       whatsapp: whatsapp.replace(/\D/g, ''),
       isApproved: true,
       approvalType: period,
-      approvalExpiry: calculateExpiry(period)
+      approvalExpiry: calculateExpiry(period),
+      requiresPasswordChange: true
     };
 
     const updatedUsers = [...users, newUser];
@@ -113,11 +114,12 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
       `*MENSAGEM 1 DE 2 - INSTRUÇÕES*\n\n` +
       `Olá ${lastCreatedUser.fullName}! Seu acesso ao Assistente de Biomagnetismo foi liberado.\n\n` +
       `👤 *USUÁRIO:* ${lastCreatedUser.username}\n` +
-      `🔑 *SENHA:* ${lastCreatedUser.password}\n\n` +
+      `🔑 *SENHA PROVISÓRIA:* ${lastCreatedUser.password}\n\n` +
       `*INSTRUÇÕES DE ACESSO:*\n` +
       `1. Abra o aplicativo pelo link abaixo.\n` +
       `2. Clique em 'Sincronizar Dispositivo'.\n` +
-      `3. Cole o código que enviarei na próxima mensagem.\n\n` +
+      `3. Cole o código que enviarei na próxima mensagem.\n` +
+      `4. Após o primeiro login, o sistema solicitará que você crie uma senha definitiva.\n\n` +
       `🔗 *LINK DO APP:*\n${appUrl}`
     );
     window.open(`https://wa.me/55${lastCreatedUser.whatsapp}?text=${message}`, '_blank');
@@ -126,7 +128,6 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
   // Mensagem 2: Somente o Código (Puro, sem nada escrito)
   const handleSendOnlyCode = () => {
     if (!lastCreatedUser?.whatsapp || !syncCode) return;
-    // Removido qualquer texto adicional para facilitar a cópia
     const message = encodeURIComponent(syncCode);
     window.open(`https://wa.me/55${lastCreatedUser.whatsapp}?text=${message}`, '_blank');
   };

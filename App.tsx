@@ -11,6 +11,7 @@ import SessionSummary from './components/SessionSummary';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import UserManager from './components/UserManager';
+import ChangePassword from './components/ChangePassword';
 import SessionDetailModal from './components/SessionDetailModal';
 import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon, BrainIcon, SuccessIcon, ReportIcon } from './components/icons/Icons';
 import { BIOMAGNETIC_PAIRS } from './constants';
@@ -27,7 +28,7 @@ enum Step {
   SUMMARY
 }
 
-type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager';
+type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager' | 'changePassword';
 const USERS_STORAGE_KEY = 'biomag_therapist_users';
 const PAIRS_STORAGE_KEY = 'biomag_master_pair_list';
 
@@ -173,8 +174,27 @@ const App: React.FC = () => {
 
     setIsAuthenticated(true);
     setCurrentUser(foundUser);
-    setAppView('dashboard');
+    
+    if (foundUser.requiresPasswordChange) {
+      setAppView('changePassword');
+    } else {
+      setAppView('dashboard');
+    }
+    
     return { success: true };
+  };
+
+  const handleUpdatePassword = (newPassword: string) => {
+    if (!currentUser) return;
+    
+    const updatedUsers = allUsers.map(u => 
+      u.username === currentUser.username ? { ...u, password: newPassword, requiresPasswordChange: false } : u
+    );
+    
+    setAllUsers(updatedUsers);
+    setCurrentUser(prev => prev ? { ...prev, password: newPassword, requiresPasswordChange: false } : null);
+    setAppView('dashboard');
+    alert('Senha alterada com sucesso! Use sua nova senha nos próximos acessos.');
   };
 
   const handleImportUsers = (syncCode: string): boolean => {
@@ -259,6 +279,10 @@ const App: React.FC = () => {
 
   if (!isAuthenticated) {
     return <Login onLogin={handleTherapistLogin} onRequestReset={handleRequestPasswordReset} onImportSync={handleImportUsers} />;
+  }
+
+  if (appView === 'changePassword') {
+    return <ChangePassword onUpdate={handleUpdatePassword} onLogout={handleLogout} />;
   }
 
   return (

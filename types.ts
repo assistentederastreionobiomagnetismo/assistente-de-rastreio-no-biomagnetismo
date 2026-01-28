@@ -48,6 +48,7 @@ export interface User {
   approvalType?: ApprovalPeriod;
   passwordResetPending?: boolean;
   pendingPassword?: string;
+  requiresPasswordChange?: boolean;
 }
 
 export interface ProtocolData {
