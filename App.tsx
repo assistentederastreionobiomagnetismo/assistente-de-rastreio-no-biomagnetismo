@@ -195,12 +195,16 @@ const App: React.FC = () => {
     return () => clearInterval(timer);
   }, [isAuthenticated, currentUser]);
 
-  const handleRegister = (username: string, password: string): boolean => {
+  const handleRegister = (username: string, password: string): { success: boolean, solicitationCode?: string } => {
     const userExists = allUsers.some(u => u.username.toLowerCase() === username.toLowerCase());
-    if (userExists) return false;
+    if (userExists) return { success: false };
+    
     const newUser: User = { username, password, isApproved: false };
     setAllUsers(prev => [...prev, newUser]);
-    return true;
+    
+    // Gera código para o Admin importar
+    const solicitationCode = btoa(JSON.stringify(newUser));
+    return { success: true, solicitationCode };
   };
 
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
@@ -227,7 +231,6 @@ const App: React.FC = () => {
         const decoded = atob(syncCode);
         const importedData = JSON.parse(decoded);
         if (Array.isArray(importedData)) {
-            // Merge ou Substituir? Para garantir multi-dispositivo, o ideal é substituir pelo banco do mestre
             setAllUsers(importedData);
             return true;
         }

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 
 interface RegisterProps {
-  onRegister: (username: string, password: string) => boolean;
+  onRegister: (username: string, password: string) => { success: boolean; solicitationCode?: string };
   onGoToLogin: () => void;
 }
 
@@ -12,6 +12,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onGoToLogin }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [solicitationCode, setSolicitationCode] = useState('');
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,15 +29,21 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onGoToLogin }) => {
         return;
     }
 
-    const success = onRegister(username.trim(), password.trim());
-    if (success) {
-        setSuccessMessage('Seu cadastro está aguardando aprovação do Administrador do Aplicativo - Por favor, tente logar mais tarde!');
+    const result = onRegister(username.trim(), password.trim());
+    if (result.success) {
+        setSuccessMessage('Cadastro criado com sucesso! Copie o código abaixo e envie para o Administrador aprovar seu acesso.');
+        if (result.solicitationCode) setSolicitationCode(result.solicitationCode);
         setUsername('');
         setPassword('');
         setConfirmPassword('');
     } else {
         setError('Este nome de usuário já está em uso.');
     }
+  };
+
+  const copyCode = () => {
+    navigator.clipboard.writeText(solicitationCode);
+    alert('Código copiado! Envie para o Administrador.');
   };
 
   return (
@@ -50,9 +57,31 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onGoToLogin }) => {
 
           {successMessage ? (
             <div className="text-center space-y-6">
-                <div className="p-4 border-2 border-red-500 text-red-600 font-bold text-lg animate-blink rounded-lg bg-white">
+                <div className="p-4 bg-green-50 border-2 border-teal-500 text-teal-800 font-medium rounded-lg">
                     {successMessage}
                 </div>
+                
+                {solicitationCode && (
+                    <div className="space-y-3">
+                        <p className="text-xs font-bold text-slate-500 uppercase">Seu Código de Solicitação:</p>
+                        <textarea 
+                            readOnly 
+                            value={solicitationCode}
+                            className="w-full p-2 bg-slate-50 border border-slate-300 rounded font-mono text-[10px] h-24 outline-none"
+                        />
+                        <button 
+                            onClick={copyCode}
+                            className="w-full py-2 bg-teal-600 text-white font-bold rounded shadow hover:bg-teal-700 transition-all"
+                        >
+                            Copiar Código
+                        </button>
+                    </div>
+                )}
+
+                <div className="p-4 border-2 border-red-500 text-red-600 font-bold text-sm animate-blink rounded-lg bg-white">
+                    Seu acesso só será liberado após o administrador adicionar seu código no sistema dele!
+                </div>
+                
                 <button
                     onClick={onGoToLogin}
                     className="w-full inline-flex items-center justify-center px-6 py-3 border border-teal-600 text-base font-medium rounded-md text-teal-600 bg-white hover:bg-teal-50 transition-colors"
@@ -114,7 +143,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onGoToLogin }) => {
                   type="submit"
                   className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors"
                 >
-                  Cadastrar
+                  Cadastrar e Gerar Código
                 </button>
               </div>
             </form>
