@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ClipboardIcon } from './icons/Icons';
+import { ClipboardIcon, WhatsAppIcon } from './icons/Icons';
 
 interface LoginProps {
   onLogin: (username: string, password: string) => { success: boolean; message?: string };
@@ -49,12 +49,14 @@ const Login: React.FC<LoginProps> = ({ onLogin, onImportSync }) => {
     }
   };
 
+  const whatsappLink = `https://wa.me/5562982458451?text=${encodeURIComponent("Olá! Gostaria de me cadastrar como usuário no aplicativo Assistente de Rastreios no Biomagnetismo.")}`;
+
   return (
     <div className="bg-slate-100 min-h-screen flex items-center justify-center p-4 notranslate" translate="no">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
         <div className="p-10">
           <header className="text-center mb-10">
-            <h1 className="text-3xl font-black text-teal-600 leading-tight">Assistente de Biomagnetismo</h1>
+            <h1 className="text-3xl font-black text-teal-600 leading-tight">Assistente de Rastreios no Biomagnetismo</h1>
             <p className="text-slate-400 mt-2 text-[10px] uppercase font-black tracking-[0.2em]">
                 {viewMode === 'login' ? 'Identificação do Terapeuta' : 'Sincronizar Dispositivo'}
             </p>
@@ -95,9 +97,20 @@ const Login: React.FC<LoginProps> = ({ onLogin, onImportSync }) => {
                 <button onClick={() => setViewMode('sync')} className="w-full py-4 border-2 border-dashed border-teal-200 text-teal-600 font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-teal-50 transition-all text-xs uppercase tracking-widest">
                     <ClipboardIcon className="w-5 h-5" /> Sincronizar Dispositivo
                 </button>
-                <p className="mt-6 text-[9px] text-slate-400 text-center font-bold uppercase leading-relaxed">
-                    Caso não tenha acesso, solicite ao administrador para cadastrar seu dispositivo.
-                </p>
+                
+                <div className="mt-8 text-center">
+                    <p className="text-[10px] text-slate-500 font-black uppercase leading-relaxed mb-4">
+                        CASO NÃO TENHA ACESSO, CLIQUE NO BOTÃO ABAIXO PARA FALAR COM O ADMINISTRADOR PARA CADASTRAR SEU DISPOSITIVO.
+                    </p>
+                    <a 
+                      href={whatsappLink}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-full py-4 bg-green-600 text-white font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-green-700 transition-all text-xs uppercase tracking-widest shadow-lg transform active:scale-95"
+                    >
+                        <WhatsAppIcon className="w-6 h-6" /> Falar com Administrador
+                    </a>
+                </div>
               </div>
             </div>
           )}
