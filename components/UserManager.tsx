@@ -84,7 +84,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
       period: '1month'
     });
     
-    alert('Terapeuta cadastrado! Agora gere o código e envie via WhatsApp.');
+    alert('Terapeuta cadastrado! Agora gere o código e envie as mensagens via WhatsApp.');
   };
 
   const handleSetApproval = (username: string, period: ApprovalPeriod) => {
@@ -105,24 +105,32 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
     setSyncCode(code);
   };
 
-  const getShareMessage = () => {
+  // Mensagem 1: Instruções e Link
+  const handleSendInstructions = () => {
+    if (!lastCreatedUser?.whatsapp || !syncCode) return;
     const appUrl = window.location.origin;
-    // Criamos um link que já carrega o código para sincronização automática
-    const autoSyncUrl = `${appUrl}?sync=${encodeURIComponent(syncCode || '')}`;
-    
-    return `Olá! Seu acesso ao Assistente de Biomagnetismo foi liberado.\n\n` +
-           `👤 *USUÁRIO:* ${lastCreatedUser?.username}\n` +
-           `🔑 *SENHA PROVISÓRIA:* ${lastCreatedUser?.password}\n\n` +
-           `*COMO ATIVAR:* \n` +
-           `1. *COPIE* o código abaixo (toque e segure sobre ele):\n\n` +
-           `\`\`\`${syncCode}\`\`\`\n\n` +
-           `2. *ABRA* o aplicativo no link abaixo e cole o código em 'Sincronizar Dispositivo'.\n\n` +
-           `🔗 *CLIQUE PARA ABRIR O APP:*\n${autoSyncUrl}`;
+    const message = encodeURIComponent(
+      `*MENSAGEM 1 DE 2 - INSTRUÇÕES*\n\n` +
+      `Olá ${lastCreatedUser.fullName}! Seu acesso ao Assistente de Biomagnetismo foi liberado.\n\n` +
+      `👤 *USUÁRIO:* ${lastCreatedUser.username}\n` +
+      `🔑 *SENHA:* ${lastCreatedUser.password}\n\n` +
+      `*INSTRUÇÕES DE ACESSO:*\n` +
+      `1. Abra o aplicativo pelo link abaixo.\n` +
+      `2. Clique em 'Sincronizar Dispositivo'.\n` +
+      `3. Cole o código que enviarei na próxima mensagem.\n\n` +
+      `🔗 *LINK DO APP:*\n${appUrl}`
+    );
+    window.open(`https://wa.me/55${lastCreatedUser.whatsapp}?text=${message}`, '_blank');
   };
 
-  const handleSendWhatsApp = () => {
+  // Mensagem 2: Somente o Código
+  const handleSendOnlyCode = () => {
     if (!lastCreatedUser?.whatsapp || !syncCode) return;
-    const message = encodeURIComponent(getShareMessage());
+    const message = encodeURIComponent(
+      `*MENSAGEM 2 DE 2 - CÓDIGO DE ACESSO*\n\n` +
+      `Copiando o código abaixo:\n\n` +
+      `${syncCode}`
+    );
     window.open(`https://wa.me/55${lastCreatedUser.whatsapp}?text=${message}`, '_blank');
   };
 
@@ -243,15 +251,22 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
         <div className="mb-12 p-8 bg-sky-50 border-2 border-sky-200 rounded-3xl animate-fade-in shadow-inner">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <p className="text-xs text-sky-700 font-black flex items-center gap-2 uppercase tracking-widest">
-                <CheckIcon className="w-5 h-5" /> Código Gerado para {lastCreatedUser?.fullName || 'o novo terapeuta'}
+                <CheckIcon className="w-5 h-5" /> Dados prontos para {lastCreatedUser?.fullName || 'o novo terapeuta'}
             </p>
-            <div className="flex gap-3 w-full md:w-auto">
+            <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
                 <button 
-                    onClick={handleSendWhatsApp}
+                    onClick={handleSendInstructions}
                     disabled={!lastCreatedUser?.whatsapp}
-                    className="flex-1 md:flex-none py-3 px-6 bg-green-600 text-white font-black rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 disabled:bg-slate-300 shadow-lg transition-all text-sm transform active:scale-95"
+                    className="flex-1 py-3 px-6 bg-green-600 text-white font-black rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 disabled:bg-slate-300 shadow-lg transition-all text-xs uppercase"
                 >
-                    <WhatsAppIcon className="w-5 h-5" /> Enviar por WhatsApp
+                    <WhatsAppIcon className="w-5 h-5" /> 1. Instruções + Link
+                </button>
+                <button 
+                    onClick={handleSendOnlyCode}
+                    disabled={!lastCreatedUser?.whatsapp}
+                    className="flex-1 py-3 px-6 bg-teal-600 text-white font-black rounded-xl flex items-center justify-center gap-2 hover:bg-teal-700 disabled:bg-slate-300 shadow-lg transition-all text-xs uppercase"
+                >
+                    <WhatsAppIcon className="w-5 h-5" /> 2. Somente Código
                 </button>
             </div>
           </div>
