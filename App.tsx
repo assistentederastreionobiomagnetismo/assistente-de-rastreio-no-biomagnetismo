@@ -9,7 +9,6 @@ import Emocional from './components/Emocional';
 import Treatment from './components/Treatment';
 import SessionSummary from './components/SessionSummary';
 import Login from './components/Login';
-import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import UserManager from './components/UserManager';
 import SessionDetailModal from './components/SessionDetailModal';
@@ -28,7 +27,6 @@ enum Step {
   SUMMARY
 }
 
-type AuthView = 'login' | 'register';
 type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager';
 const USERS_STORAGE_KEY = 'biomag_therapist_users';
 const PAIRS_STORAGE_KEY = 'biomag_master_pair_list';
@@ -65,7 +63,6 @@ const App: React.FC = () => {
   // Auth & View State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [authView, setAuthView] = useState<AuthView>('login');
   const [appView, setAppView] = useState<AppView>('dashboard');
   const [remainingTime, setRemainingTime] = useState<string | null>(null);
 
@@ -95,7 +92,7 @@ const App: React.FC = () => {
     setAllUsers(usersList);
   }, []);
 
-  // Persist Master Pairs (Shared base)
+  // Persist Master Pairs
   useEffect(() => {
     if (biomagneticPairs.length > 0) {
       localStorage.setItem(PAIRS_STORAGE_KEY, JSON.stringify(biomagneticPairs));
@@ -126,14 +123,6 @@ const App: React.FC = () => {
     }
   }, [currentUser]);
 
-  // Persist Patients
-  useEffect(() => {
-    if (currentUser && patients.length > 0) {
-      const patientsKey = `biomag_patients_${currentUser.username}`;
-      localStorage.setItem(patientsKey, JSON.stringify(patients));
-    }
-  }, [patients, currentUser]);
-
   // MONITORAMENTO DE EXPIRAÇÃO EM TEMPO REAL
   useEffect(() => {
     if (!isAuthenticated || !currentUser || currentUser.approvalType === 'permanent') {
@@ -141,82 +130,43 @@ const App: React.FC = () => {
       return;
     }
 
-    const getRemainingTimeText = (diffMs: number) => {
-      const seconds = Math.floor(diffMs / 1000);
-      if (seconds < 60) return `${seconds} segundos`;
-      
-      const minutes = Math.floor(seconds / 60);
-      if (minutes < 60) return `${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`;
-      
-      const hours = Math.floor(minutes / 60);
-      if (hours < 24) return `${hours} ${hours === 1 ? 'hora' : 'horas'}`;
-      
-      const days = Math.floor(hours / 24);
-      return `${days} ${days === 1 ? 'dia' : 'dias'}`;
-    };
-
     const checkExpiry = () => {
       if (!currentUser.approvalExpiry) return;
-      
       const now = new Date();
       const expiry = new Date(currentUser.approvalExpiry);
       const diffMs = expiry.getTime() - now.getTime();
 
       if (diffMs <= 0) {
-        alert("Seu período de acesso expirou. Entre em contato com o administrador.");
+        alert("Seu período de acesso expirou.");
         handleLogout();
         return;
       }
-
-      const threshold5Days = 5 * 24 * 60 * 60 * 1000;
-      const threshold1Minute = 60 * 1000;
       
-      let shouldShow = false;
-      if (currentUser.approvalType === '5min') {
-        if (diffMs <= threshold1Minute) {
-          shouldShow = true;
-        }
-      } else {
-        if (diffMs <= threshold5Days) {
-          shouldShow = true;
-        }
-      }
+      const seconds = Math.floor(diffMs / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
 
-      if (shouldShow) {
-        setRemainingTime(getRemainingTimeText(diffMs));
-      } else {
-        setRemainingTime(null);
-      }
+      if (days > 5) { setRemainingTime(null); return; }
+      if (days >= 1) { setRemainingTime(`${days} dia(s)`); return; }
+      if (hours >= 1) { setRemainingTime(`${hours} hora(s)`); return; }
+      setRemainingTime(`${minutes} minuto(s)`);
     };
 
-    const timer = setInterval(checkExpiry, 1000);
+    const timer = setInterval(checkExpiry, 10000);
     checkExpiry();
-
     return () => clearInterval(timer);
   }, [isAuthenticated, currentUser]);
-
-  const handleRegister = (username: string, password: string): { success: boolean, token?: string } => {
-    const userExists = allUsers.some(u => u.username.toLowerCase() === username.toLowerCase());
-    if (userExists) return { success: false };
-    
-    const newUser: User = { username, password, isApproved: false };
-    setAllUsers(prev => [...prev, newUser]);
-    
-    // Gera token de solicitação (apenas os dados básicos do usuário novo)
-    const token = btoa(JSON.stringify(newUser));
-    return { success: true, token };
-  };
 
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
     const foundUser = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     if (!foundUser) return { success: false, message: 'Usuário ou senha inválidos.' };
     
-    if (!foundUser.isApproved) return { success: false, message: 'Seu cadastro está aguardando aprovação do Administrador do Aplicativo!' };
+    if (!foundUser.isApproved) return { success: false, message: 'Cadastro aguardando ativação pelo administrador.' };
 
     if (foundUser.approvalExpiry && foundUser.approvalType !== 'permanent') {
-      const expiryDate = new Date(foundUser.approvalExpiry);
-      if (expiryDate < new Date()) {
-        return { success: false, message: 'Seu período de acesso expirou. Procure o administrador para renovação.' };
+      if (new Date(foundUser.approvalExpiry) < new Date()) {
+        return { success: false, message: 'Seu acesso expirou. Procure o administrador.' };
       }
     }
 
@@ -242,31 +192,17 @@ const App: React.FC = () => {
 
   const handleRequestPasswordReset = (username: string, newPass: string): { success: boolean, message: string } => {
     const userIndex = allUsers.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-    if (userIndex === -1) {
-        return { success: false, message: "Usuário não encontrado." };
-    }
-    
-    if (username.toLowerCase() === 'vbsjunior.biomagnetismo') {
-        return { success: false, message: "A senha do administrador não pode ser redefinida por aqui." };
-    }
+    if (userIndex === -1) return { success: false, message: "Usuário não encontrado." };
 
     const updatedUsers = [...allUsers];
-    updatedUsers[userIndex] = {
-        ...updatedUsers[userIndex],
-        passwordResetPending: true,
-        pendingPassword: newPass
-    };
-    
+    updatedUsers[userIndex] = { ...updatedUsers[userIndex], passwordResetPending: true, pendingPassword: newPass };
     setAllUsers(updatedUsers);
-    return { success: true, message: "Solicitação enviada com sucesso! Aguarde a aprovação do administrador." };
+    return { success: true, message: "Solicitação enviada! Aguarde a sincronização do administrador." };
   }
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setCurrentUser(null);
-    setPatients([]);
-    setSessions([]);
-    setAuthView('login');
     setAppView('dashboard');
     setRemainingTime(null);
   };
@@ -283,7 +219,6 @@ const App: React.FC = () => {
   const resetSessionState = () => {
       setCurrentStep(Step.PATIENT_INFO);
       setPatient({ name: '', mainComplaint: '' });
-      setPatient({ name: '', mainComplaint: '', birthDate: '', age: undefined, email: '', phone: '' });
       setProtocolData({ legResponse: '', sessionType: '' });
       setSelectedPairs([]);
       setPhenomena({ vascularAccidents: [], tumoralPhenomena: [], tumoralGenesis: [], traumas: [], portalPairs: [] });
@@ -321,33 +256,8 @@ const App: React.FC = () => {
     setAppView('dashboard');
   };
 
-  const renderWorkflow = () => {
-    switch (currentStep) {
-      case Step.PATIENT_INFO: return <PatientForm patient={patient} setPatient={setPatient} onNext={nextStep} patientsList={patients} setPatientsList={setPatients} />;
-      case Step.START_PROTOCOL: return <StartProtocol data={protocolData} setData={setProtocolData} onNext={nextStep} onBack={prevStep} patientName={patient.name} />;
-      case Step.SCANNING_LEVEL_I: return <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />;
-      case Step.SCANNING_LEVEL_II: return <Scanning levelTitle="Nível II" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />;
-      case Step.SCANNING_LEVEL_III: return <Scanning levelTitle="Nível III" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />;
-      case Step.PHENOMENA: return <Phenomena data={phenomena} setData={setPhenomena} onNext={nextStep} onBack={prevStep} />;
-      case Step.EMOTIONAL: return <Emocional 
-          selectedEmotions={selectedEmotions} setSelectedEmotions={setSelectedEmotions} 
-          selectedSensations={selectedSensations} setSelectedSensations={setSelectedSensations} 
-          emotionsNotes={emotionsNotes} setEmotionsNotes={setEmotionsNotes}
-          sensationsNotes={sensationsNotes} setSensationsNotes={setSensationsNotes}
-          onNext={nextStep} onBack={prevStep} />;
-      case Step.TREATMENT: return <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} onNext={nextStep} onBack={prevStep} />;
-      case Step.SUMMARY: return <SessionSummary 
-          patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} 
-          emotions={selectedEmotions} sensations={selectedSensations} 
-          emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes}
-          impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} onFinish={handleFinishSession} onBack={prevStep} />;
-      default: return null;
-    }
-  };
-
   if (!isAuthenticated) {
-    if (authView === 'register') return <Register onRegister={handleRegister} onGoToLogin={() => setAuthView('login')} />;
-    return <Login onLogin={(u, p) => handleTherapistLogin(u, p)} onGoToRegister={() => setAuthView('register')} onRequestReset={handleRequestPasswordReset} onImportSync={handleImportUsers} />;
+    return <Login onLogin={handleTherapistLogin} onRequestReset={handleRequestPasswordReset} onImportSync={handleImportUsers} />;
   }
 
   return (
@@ -364,12 +274,9 @@ const App: React.FC = () => {
         <header className="text-center mb-8 print:hidden">
           <h1 className="text-4xl font-bold text-teal-600">Assistente para Rastreios no Biomagnetismo</h1>
           <p className="text-slate-500">Conectado como: <span className="font-bold">{currentUser?.username}</span></p>
-          
           {remainingTime && (
             <div className="mt-2 max-w-2xl mx-auto">
-              <p className="text-red-600 font-bold animate-blink text-sm md:text-base leading-tight">
-                Atenção! Seu acesso ao aplicativo expira em {remainingTime}. Fale com o Administrador para renovar seu acesso!
-              </p>
+              <p className="text-red-600 font-bold animate-blink text-sm">Atenção! Seu acesso expira em {remainingTime}.</p>
             </div>
           )}
         </header>
@@ -421,7 +328,26 @@ const App: React.FC = () => {
                 </ol>
               </nav>
             </div>
-            <main className="p-6 md:p-10">{renderWorkflow()}</main>
+            <main className="p-6 md:p-10">
+              {currentStep === Step.PATIENT_INFO && <PatientForm patient={patient} setPatient={setPatient} onNext={nextStep} patientsList={patients} setPatientsList={setPatients} />}
+              {currentStep === Step.START_PROTOCOL && <StartProtocol data={protocolData} setData={setProtocolData} onNext={nextStep} onBack={prevStep} patientName={patient.name} />}
+              {currentStep === Step.SCANNING_LEVEL_I && <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />}
+              {currentStep === Step.SCANNING_LEVEL_II && <Scanning levelTitle="Nível II" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />}
+              {currentStep === Step.SCANNING_LEVEL_III && <Scanning levelTitle="Nível III" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />}
+              {currentStep === Step.PHENOMENA && <Phenomena data={phenomena} setData={setPhenomena} onNext={nextStep} onBack={prevStep} />}
+              {currentStep === Step.EMOTIONAL && <Emocional 
+                  selectedEmotions={selectedEmotions} setSelectedEmotions={setSelectedEmotions} 
+                  selectedSensations={selectedSensations} setSelectedSensations={setSelectedSensations} 
+                  emotionsNotes={emotionsNotes} setEmotionsNotes={setEmotionsNotes}
+                  sensationsNotes={sensationsNotes} setSensationsNotes={setSensationsNotes}
+                  onNext={nextStep} onBack={prevStep} />}
+              {currentStep === Step.TREATMENT && <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} onNext={nextStep} onBack={prevStep} />}
+              {currentStep === Step.SUMMARY && <SessionSummary 
+                  patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} 
+                  emotions={selectedEmotions} sensations={selectedSensations} 
+                  emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes}
+                  impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} onFinish={handleFinishSession} onBack={prevStep} />}
+            </main>
           </div>
         )}
       </div>

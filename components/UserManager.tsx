@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { User, ApprovalPeriod } from '../types';
-import { TrashIcon, InfoIcon, CheckIcon, PlusIcon, WhatsAppIcon, ClipboardIcon } from './icons/Icons';
+import { TrashIcon, CheckIcon, PlusIcon, ClipboardIcon } from './icons/Icons';
 
 interface UserManagerProps {
   users: User[];
@@ -11,8 +11,10 @@ interface UserManagerProps {
 
 const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) => {
   const [syncCode, setSyncCode] = useState<string | null>(null);
-  const [solicitationInput, setSolicitationInput] = useState('');
-  const [importError, setImportError] = useState('');
+  
+  // Novo Usuário Form
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
   const calculateExpiry = (period: ApprovalPeriod): string => {
     const now = new Date();
@@ -22,32 +24,32 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
       case '3months': now.setMonth(now.getMonth() + 3); break;
       case '6months': now.setMonth(now.getMonth() + 6); break;
       case '1year': now.setFullYear(now.getFullYear() + 1); break;
-      case 'permanent': return '';
       default: return '';
     }
     return now.toISOString();
   };
 
-  const handleImportSolicitation = () => {
-    setImportError('');
-    try {
-        const decoded = atob(solicitationInput.trim());
-        const newUser = JSON.parse(decoded) as User;
-        
-        if (!newUser.username || !newUser.password) throw new Error('Invalido');
+  const handleCreateUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUsername || !newPassword) return;
 
-        const alreadyExists = users.find(u => u.username.toLowerCase() === newUser.username.toLowerCase());
-        if (alreadyExists) {
-            setImportError('Usuário já cadastrado no sistema.');
-            return;
-        }
-
-        setUsers(prev => [...prev, { ...newUser, isApproved: false }]);
-        setSolicitationInput('');
-        alert(`Solicitação de ${newUser.username} importada! Agora aprove e gere a Chave de Liberação.`);
-    } catch (e) {
-        setImportError('Código de solicitação inválido.');
+    if (users.some(u => u.username.toLowerCase() === newUsername.toLowerCase())) {
+      alert('Usuário já existe.');
+      return;
     }
+
+    const newUser: User = {
+      username: newUsername.trim(),
+      password: newPassword.trim(),
+      isApproved: true, // Já cria aprovado por padrão
+      approvalType: '1month',
+      approvalExpiry: calculateExpiry('1month')
+    };
+
+    setUsers(prev => [...prev, newUser]);
+    setNewUsername('');
+    setNewPassword('');
+    alert('Terapeuta criado! Lembre-se de clicar em "Exportar Banco" para que ele possa sincronizar.');
   };
 
   const handleSetApproval = (username: string, period: ApprovalPeriod) => {
@@ -62,142 +64,102 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
     ));
   };
 
-  const handleSendReleaseKey = (user: User) => {
-    // A chave de liberação é o banco de dados completo atualizado (para garantir que ele veja o status approved)
-    const releaseCode = btoa(JSON.stringify(users));
-    const message = `Olá ${user.username}! Seu acesso foi liberado. Aqui está sua Chave de Ativação:\n\n${releaseCode}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-  };
-
-  const copyReleaseKey = () => {
-    const code = btoa(JSON.stringify(users));
-    navigator.clipboard.writeText(code);
-    alert('Chave de Liberação copiada!');
+  const handleExportSync = () => {
+    const jsonStr = JSON.stringify(users);
+    setSyncCode(btoa(jsonStr));
   };
 
   const deleteUser = (username: string) => {
-    if (username === 'Vbsjunior.Biomagnetismo') {
-      alert("Não é possível excluir o Administrador Permanente.");
-      return;
-    }
-    if (window.confirm(`Deseja realmente excluir o usuário ${username}?`)) {
+    if (username === 'Vbsjunior.Biomagnetismo') return;
+    if (window.confirm(`Excluir ${username}?`)) {
       setUsers(prev => prev.filter(u => u.username !== username));
     }
   };
 
-  const isExpired = (user: User) => {
-    if (!user.isApproved || !user.approvalExpiry || user.approvalType === 'permanent') return false;
-    return new Date(user.approvalExpiry) < new Date();
-  };
-
   return (
     <div className="animate-fade-in max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10 border border-slate-200">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-        <div>
-            <h2 className="text-3xl font-black text-slate-800">Gerenciar Acessos</h2>
-            <p className="text-slate-500 text-sm">Aprove novos terapeutas e defina prazos de uso.</p>
-        </div>
-        <button onClick={onBack} className="px-6 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all">Voltar ao Painel</button>
+      <div className="flex justify-between items-center mb-10">
+        <h2 className="text-3xl font-black text-slate-800">Gerenciar Acessos</h2>
+        <button onClick={onBack} className="text-teal-600 font-bold hover:underline">Voltar</button>
       </div>
 
-      {/* Seção de Importar Solicitação */}
-      <div className="mb-12 p-8 bg-teal-50 border-2 border-teal-200 rounded-3xl shadow-sm">
-        <h3 className="text-teal-800 font-black mb-4 flex items-center gap-2 text-lg">
-            <PlusIcon className="w-6 h-6" /> Importar Chave de Terapeuta
+      {/* Formulário de Cadastro pelo Admin */}
+      <div className="mb-12 p-6 bg-slate-50 border-2 border-slate-200 rounded-2xl shadow-sm">
+        <h3 className="text-slate-800 font-black mb-4 flex items-center gap-2">
+            <PlusIcon className="w-5 h-5" /> Cadastrar Novo Terapeuta
         </h3>
-        <div className="flex flex-col md:flex-row gap-4">
+        <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input 
                 type="text" 
-                value={solicitationInput}
-                onChange={e => setSolicitationInput(e.target.value)}
-                placeholder="Cole a Chave de Solicitação aqui..."
-                className="flex-1 px-4 py-3 bg-white border border-teal-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 font-mono text-xs shadow-inner"
+                placeholder="Nome de Usuário" 
+                value={newUsername} 
+                onChange={e => setNewUsername(e.target.value)}
+                className="px-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-teal-500"
+                required
             />
-            <button 
-                onClick={handleImportSolicitation}
-                className="px-8 py-3 bg-teal-600 text-white font-black rounded-xl hover:bg-teal-700 shadow-md transition-all whitespace-nowrap"
-            >
-                Adicionar Terapeuta
+            <input 
+                type="password" 
+                placeholder="Senha" 
+                value={newPassword} 
+                onChange={e => setNewPassword(e.target.value)}
+                className="px-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-teal-500"
+                required
+            />
+            <button type="submit" className="bg-teal-600 text-white font-bold rounded-xl py-2 hover:bg-teal-700 transition-all">
+                Criar Conta
             </button>
-        </div>
-        {importError && <p className="mt-3 text-red-600 font-bold text-xs">{importError}</p>}
+        </form>
       </div>
 
-      <div className="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-slate-25">
+      <div className="mb-8 flex justify-center">
+        <button onClick={handleExportSync} className="px-10 py-3 bg-sky-600 text-white font-black rounded-xl shadow-lg hover:bg-sky-700 transition-all">
+            Exportar Banco de Dados (Sincronizar)
+        </button>
+      </div>
+
+      {syncCode && (
+        <div className="mb-8 p-6 bg-sky-50 border-2 border-sky-200 rounded-2xl animate-fade-in">
+          <p className="text-xs text-sky-700 font-bold mb-2">Envie este código para o terapeuta usar em "Sincronizar Dispositivo":</p>
+          <textarea readOnly value={syncCode} className="w-full p-4 bg-white border rounded-xl font-mono text-[10px] h-24 mb-3" />
+          <button onClick={() => { navigator.clipboard.writeText(syncCode); alert('Copiado!'); }} className="w-full py-2 bg-sky-600 text-white font-bold rounded-lg flex justify-center items-center gap-2">
+            <ClipboardIcon className="w-5 h-5" /> Copiar Código
+          </button>
+        </div>
+      )}
+
+      <div className="overflow-x-auto border rounded-xl">
         <table className="min-w-full divide-y divide-slate-200">
-          <thead className="bg-slate-100">
+          <thead className="bg-slate-50">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Terapeuta</th>
-              <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Acesso</th>
-              <th className="px-6 py-4 text-center text-xs font-black text-slate-500 uppercase tracking-widest">Definir Período</th>
-              <th className="px-6 py-4 text-center text-xs font-black text-slate-500 uppercase tracking-widest">Liberação</th>
-              <th className="px-6 py-4 text-center text-xs font-black text-slate-500 uppercase tracking-widest">Remover</th>
+              <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase">Usuário</th>
+              <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase">Status</th>
+              <th className="px-6 py-4 text-center text-xs font-black text-slate-500 uppercase">Renovar</th>
+              <th className="px-6 py-4 text-center text-xs font-black text-slate-500 uppercase">Ação</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-slate-200">
             {users.map(user => {
               const isAdmin = user.username === 'Vbsjunior.Biomagnetismo';
-              const expired = isExpired(user);
               return (
-                <tr key={user.username} className={`hover:bg-slate-50 transition-colors ${expired ? 'bg-red-25' : ''}`}>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                        <span className="font-black text-slate-800">{user.username}</span>
-                        {isAdmin && <span className="text-[10px] text-teal-600 font-bold">MASTER ADMIN</span>}
-                    </div>
+                <tr key={user.username} className="hover:bg-slate-50">
+                  <td className="px-6 py-4 font-bold text-slate-800">{user.username}</td>
+                  <td className="px-6 py-4 text-xs font-bold uppercase">
+                    {isAdmin ? <span className="text-teal-600">Admin</span> : user.isApproved ? <span className="text-green-600">Ativo</span> : <span className="text-red-400">Pendente</span>}
                   </td>
-                  <td className="px-6 py-4">
-                    {isAdmin ? (
-                        <span className="text-teal-600 font-black text-xs">VITALÍCIO</span>
-                    ) : user.isApproved ? (
-                        <div className="flex flex-col">
-                            <span className={`text-xs font-black ${expired ? 'text-red-600 animate-blink' : 'text-green-600'}`}>
-                                {expired ? 'EXPIRADO' : 'ATIVO'}
-                            </span>
-                            <span className="text-[10px] text-slate-400 font-bold">{user.approvalType}</span>
-                        </div>
-                    ) : (
-                        <span className="text-red-400 italic font-bold text-xs">PENDENTE</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-center">
                     {!isAdmin && (
-                        <div className="flex flex-wrap justify-center gap-1.5">
-                            {['5min', '1month', '3months', '6months', '1year'].map(p => (
-                                <button 
-                                    key={p} 
-                                    onClick={() => handleSetApproval(user.username, p as ApprovalPeriod)}
-                                    className={`px-2 py-1 text-[9px] font-black rounded border transition-all ${user.approvalType === p ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-slate-500 border-slate-200 hover:border-teal-400'}`}
-                                >
-                                    {p.toUpperCase()}
+                        <div className="flex justify-center gap-1">
+                            {['1month', '6months', '1year'].map(p => (
+                                <button key={p} onClick={() => handleSetApproval(user.username, p as ApprovalPeriod)} className="px-2 py-1 text-[9px] font-black border rounded hover:bg-teal-50">
+                                    {p.replace('month', 'M').replace('year', 'A')}
                                 </button>
                             ))}
                         </div>
                     )}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {!isAdmin && user.isApproved && (
-                        <div className="flex justify-center gap-2">
-                            <button 
-                                onClick={() => handleSendReleaseKey(user)}
-                                className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors shadow-sm"
-                                title="Enviar Liberação via WhatsApp"
-                            >
-                                <WhatsAppIcon className="w-5 h-5" />
-                            </button>
-                            <button 
-                                onClick={copyReleaseKey}
-                                className="p-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 transition-colors shadow-sm"
-                                title="Copiar Chave de Liberação"
-                            >
-                                <ClipboardIcon className="w-5 h-5" />
-                            </button>
-                        </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-center">
                     {!isAdmin && (
-                        <button onClick={() => deleteUser(user.username)} className="p-2 text-red-300 hover:text-red-600 transition-colors">
+                        <button onClick={() => deleteUser(user.username)} className="text-red-400 hover:text-red-600">
                             <TrashIcon className="w-5 h-5" />
                         </button>
                     )}
