@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { User, ApprovalPeriod } from '../types';
-import { TrashIcon, InfoIcon, CheckIcon, PlusIcon } from './icons/Icons';
+import { TrashIcon, InfoIcon, CheckIcon } from './icons/Icons';
 
 interface UserManagerProps {
   users: User[];
@@ -11,8 +11,6 @@ interface UserManagerProps {
 
 const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) => {
   const [syncCode, setSyncCode] = useState<string | null>(null);
-  const [solicitationCodeInput, setSolicitationCodeInput] = useState('');
-  const [solicitationError, setSolicitationError] = useState('');
 
   const calculateExpiry = (period: ApprovalPeriod): string => {
     const now = new Date();
@@ -52,30 +50,6 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
         }
         return u;
     }));
-  };
-
-  const handleImportSolicitation = () => {
-    setSolicitationError('');
-    try {
-        const decoded = atob(solicitationCodeInput.trim());
-        const newUser = JSON.parse(decoded) as User;
-        
-        if (!newUser.username || !newUser.password) {
-            throw new Error('Código inválido');
-        }
-
-        const alreadyExists = users.some(u => u.username.toLowerCase() === newUser.username.toLowerCase());
-        if (alreadyExists) {
-            setSolicitationError('Este usuário já existe na sua lista.');
-            return;
-        }
-
-        setUsers(prev => [...prev, { ...newUser, isApproved: false }]);
-        setSolicitationCodeInput('');
-        alert(`Usuário ${newUser.username} adicionado com sucesso! Agora defina o tempo de acesso.`);
-    } catch (e) {
-        setSolicitationError('O código informado é inválido ou está corrompido.');
-    }
   };
 
   const handleRevoke = (username: string) => {
@@ -126,36 +100,10 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
                 onClick={handleExportSync}
                 className="px-4 py-2 bg-sky-600 text-white rounded-md text-sm font-bold shadow-md hover:bg-sky-700 transition-colors"
             >
-                Exportar Banco Completo
+                Exportar Banco (Sincronizar)
             </button>
             <button onClick={onBack} className="text-teal-600 font-bold hover:underline">Voltar</button>
         </div>
-      </div>
-
-      {/* Seção de Importação de Solicitação Individual */}
-      <div className="mb-10 p-6 bg-teal-50 border-2 border-teal-200 rounded-xl">
-        <h3 className="text-teal-800 font-bold mb-2 flex items-center gap-2">
-            <PlusIcon className="w-5 h-5" /> Importar Nova Solicitação de Cadastro
-        </h3>
-        <p className="text-xs text-teal-700 mb-4">
-            Cole abaixo o código enviado pelo terapeuta que acabou de se cadastrar em outro dispositivo.
-        </p>
-        <div className="flex flex-col md:flex-row gap-3">
-            <input 
-                type="text"
-                value={solicitationCodeInput}
-                onChange={(e) => setSolicitationCodeInput(e.target.value)}
-                placeholder="Cole o código de solicitação aqui..."
-                className="flex-1 px-4 py-2 border border-teal-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-teal-500"
-            />
-            <button 
-                onClick={handleImportSolicitation}
-                className="px-6 py-2 bg-teal-600 text-white font-bold rounded-lg shadow hover:bg-teal-700 transition-all"
-            >
-                Adicionar Usuário
-            </button>
-        </div>
-        {solicitationError && <p className="mt-2 text-xs text-red-600 font-bold">{solicitationError}</p>}
       </div>
 
       {syncCode && (
@@ -172,7 +120,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
                     className="w-full p-3 bg-white border border-sky-300 rounded font-mono text-[10px] h-32 outline-none focus:ring-2 focus:ring-sky-500"
                 />
                 <div className="flex gap-2">
-                    <button onClick={copySyncCode} className="flex-1 py-2 bg-sky-600 text-white font-bold rounded-lg shadow hover:bg-sky-700 transition-all">Copiar Código</button>
+                    <button onClick={copySyncCode} className="flex-1 py-2 bg-sky-600 text-white font-bold rounded-lg shadow hover:bg-teal-700 transition-all">Copiar Código</button>
                     <button onClick={() => setSyncCode(null)} className="px-4 py-2 bg-slate-300 text-slate-700 font-bold rounded-lg hover:bg-slate-400">Fechar</button>
                 </div>
             </div>

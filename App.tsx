@@ -195,16 +195,13 @@ const App: React.FC = () => {
     return () => clearInterval(timer);
   }, [isAuthenticated, currentUser]);
 
-  const handleRegister = (username: string, password: string): { success: boolean, solicitationCode?: string } => {
+  const handleRegister = (username: string, password: string): boolean => {
     const userExists = allUsers.some(u => u.username.toLowerCase() === username.toLowerCase());
-    if (userExists) return { success: false };
+    if (userExists) return false;
     
     const newUser: User = { username, password, isApproved: false };
     setAllUsers(prev => [...prev, newUser]);
-    
-    // Gera código para o Admin importar
-    const solicitationCode = btoa(JSON.stringify(newUser));
-    return { success: true, solicitationCode };
+    return true;
   };
 
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
