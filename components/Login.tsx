@@ -8,100 +8,106 @@ interface LoginProps {
   onImportSync: (code: string) => boolean;
 }
 
-type ViewMode = 'login' | 'forgotPassword' | 'sync';
+type ViewMode = 'login' | 'sync';
 
-const Login: React.FC<LoginProps> = ({ onLogin, onRequestReset, onImportSync }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, onImportSync }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
   const [syncCode, setSyncCode] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('login');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     const result = onLogin(username.trim(), password.trim());
-    if (!result.success) setError(result.message || 'Dados inválidos.');
+    if (!result.success) setError(result.message || 'Dados de acesso incorretos.');
   };
 
   const handleSync = (e: React.FormEvent) => {
     e.preventDefault();
     if (onImportSync(syncCode.trim())) {
-        alert('Banco sincronizado! Agora faça login com os dados fornecidos pelo administrador.');
+        alert('Dispositivo sincronizado! O banco de dados foi atualizado. Agora faça seu login.');
         setViewMode('login');
     } else {
-        alert('Código inválido.');
+        alert('Código de sincronização inválido ou expirado.');
     }
   };
 
   return (
-    <div className="bg-slate-100 min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
-        <div className="p-8">
+    <div className="bg-slate-100 min-h-screen flex items-center justify-center p-4 notranslate" translate="no">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+        <div className="p-10">
           <header className="text-center mb-10">
-            <h1 className="text-3xl font-black text-teal-600">Biomagnetismo Assistant</h1>
-            <p className="text-slate-400 mt-2 text-xs uppercase font-bold tracking-widest">
-                {viewMode === 'login' ? 'Acesso ao Sistema' : viewMode === 'sync' ? 'Sincronizar Dispositivo' : 'Recuperar Acesso'}
+            <h1 className="text-3xl font-black text-teal-600 leading-tight">Assistente de Biomagnetismo</h1>
+            <p className="text-slate-400 mt-2 text-[10px] uppercase font-black tracking-[0.2em]">
+                {viewMode === 'login' ? 'Identificação do Terapeuta' : 'Sincronizar Dispositivo'}
             </p>
           </header>
 
           {viewMode === 'login' && (
-            <div className="space-y-6">
-              <form onSubmit={handleLogin} className="space-y-4">
-                {error && <div className="p-3 bg-red-50 text-red-600 rounded-xl text-xs font-bold">{error}</div>}
-                <input
-                    type="text"
-                    placeholder="Usuário"
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    className="w-full px-5 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-teal-500"
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Senha"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full px-5 py-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-teal-500"
-                    required
-                />
-                <button type="submit" className="w-full py-4 bg-teal-600 text-white font-black rounded-xl shadow-lg hover:bg-teal-700 transition-all">
-                  Entrar
+            <div className="space-y-8">
+              <form onSubmit={handleLogin} className="space-y-5">
+                {error && <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-xs font-black border border-red-100 animate-shake">{error}</div>}
+                <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Usuário</label>
+                    <input
+                        type="text"
+                        placeholder="Seu nome de usuário"
+                        value={username}
+                        onChange={e => setUsername(e.target.value)}
+                        className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium transition-all"
+                        required
+                    />
+                </div>
+                <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Senha</label>
+                    <input
+                        type="password"
+                        placeholder="Sua senha de acesso"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium transition-all"
+                        required
+                    />
+                </div>
+                <button type="submit" className="w-full py-5 bg-teal-600 text-white font-black rounded-2xl shadow-xl hover:bg-teal-700 transition-all transform active:scale-95 uppercase tracking-widest text-sm">
+                  Entrar no Painel
                 </button>
               </form>
-              <div className="flex flex-col gap-3">
-                <button onClick={() => setViewMode('sync')} className="w-full py-3 border-2 border-dashed border-teal-200 text-teal-600 font-bold rounded-xl flex items-center justify-center gap-2">
+              
+              <div className="pt-6 border-t border-slate-100">
+                <button onClick={() => setViewMode('sync')} className="w-full py-4 border-2 border-dashed border-teal-200 text-teal-600 font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-teal-50 transition-all text-xs uppercase tracking-widest">
                     <ClipboardIcon className="w-5 h-5" /> Sincronizar Dispositivo
                 </button>
-                <div className="text-center">
-                    <button onClick={() => setViewMode('forgotPassword')} className="text-xs text-slate-400 font-bold hover:text-slate-600">Esqueci minha senha</button>
-                </div>
+                <p className="mt-6 text-[9px] text-slate-400 text-center font-bold uppercase leading-relaxed">
+                    Caso não tenha acesso, solicite ao administrador para cadastrar seu dispositivo.
+                </p>
               </div>
             </div>
           )}
 
           {viewMode === 'sync' && (
-            <form onSubmit={handleSync} className="space-y-6">
-                <p className="text-xs text-slate-500 italic text-center">Cole o código fornecido pelo administrador:</p>
+            <form onSubmit={handleSync} className="space-y-6 animate-fade-in">
+                <div className="p-5 bg-teal-50 border border-teal-100 rounded-2xl">
+                    <p className="text-[11px] text-teal-800 font-bold leading-relaxed text-center italic">
+                        Insira o código enviado pelo administrador para liberar seu acesso e atualizar os dados do dispositivo.
+                    </p>
+                </div>
                 <textarea
                     value={syncCode}
                     onChange={e => setSyncCode(e.target.value)}
-                    className="w-full p-4 bg-slate-50 border rounded-xl font-mono text-[10px] h-32 outline-none focus:ring-2 focus:ring-teal-500"
-                    placeholder="Cole o código aqui..."
+                    className="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-[10px] h-40 outline-none focus:ring-2 focus:ring-teal-500 shadow-inner resize-none leading-relaxed"
+                    placeholder="Cole o código criptografado aqui..."
                     required
                 />
-                <button type="submit" className="w-full py-4 bg-teal-600 text-white font-black rounded-xl">Ativar Dispositivo</button>
-                <button onClick={() => setViewMode('login')} className="w-full text-sm font-bold text-slate-400">Voltar</button>
+                <button type="submit" className="w-full py-5 bg-teal-600 text-white font-black rounded-2xl shadow-xl hover:bg-teal-700 transition-all transform active:scale-95 uppercase tracking-widest text-sm">
+                    Sincronizar Agora
+                </button>
+                <button onClick={() => setViewMode('login')} className="w-full text-xs font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors">
+                    Voltar para o Login
+                </button>
             </form>
-          )}
-
-          {viewMode === 'forgotPassword' && (
-            <div className="space-y-6 text-center">
-                <p className="text-sm text-slate-600">Para recuperar seu acesso, entre em contato com o administrador do sistema.</p>
-                <button onClick={() => setViewMode('login')} className="w-full py-3 bg-slate-200 text-slate-600 font-bold rounded-xl">Voltar ao Login</button>
-            </div>
           )}
         </div>
       </div>
