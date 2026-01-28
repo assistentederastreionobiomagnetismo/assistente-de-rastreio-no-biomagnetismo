@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { User, ApprovalPeriod } from '../types';
-import { TrashIcon, InfoIcon, CheckIcon } from './icons/Icons';
+import { TrashIcon, InfoIcon, CheckIcon, PlusIcon, WhatsAppIcon, ClipboardIcon } from './icons/Icons';
 
 interface UserManagerProps {
   users: User[];
@@ -11,6 +11,8 @@ interface UserManagerProps {
 
 const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) => {
   const [syncCode, setSyncCode] = useState<string | null>(null);
+  const [solicitationInput, setSolicitationInput] = useState('');
+  const [importError, setImportError] = useState('');
 
   const calculateExpiry = (period: ApprovalPeriod): string => {
     const now = new Date();
@@ -26,6 +28,28 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
     return now.toISOString();
   };
 
+  const handleImportSolicitation = () => {
+    setImportError('');
+    try {
+        const decoded = atob(solicitationInput.trim());
+        const newUser = JSON.parse(decoded) as User;
+        
+        if (!newUser.username || !newUser.password) throw new Error('Invalido');
+
+        const alreadyExists = users.find(u => u.username.toLowerCase() === newUser.username.toLowerCase());
+        if (alreadyExists) {
+            setImportError('Usuário já cadastrado no sistema.');
+            return;
+        }
+
+        setUsers(prev => [...prev, { ...newUser, isApproved: false }]);
+        setSolicitationInput('');
+        alert(`Solicitação de ${newUser.username} importada! Agora aprove e gere a Chave de Liberação.`);
+    } catch (e) {
+        setImportError('Código de solicitação inválido.');
+    }
+  };
+
   const handleSetApproval = (username: string, period: ApprovalPeriod) => {
     const expiry = calculateExpiry(period);
     setUsers(prev => prev.map(u => 
@@ -38,24 +62,17 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
     ));
   };
 
-  const handleApproveNewPassword = (username: string) => {
-    setUsers(prev => prev.map(u => {
-        if (u.username === username && u.passwordResetPending && u.pendingPassword) {
-            return {
-                ...u,
-                password: u.pendingPassword,
-                passwordResetPending: false,
-                pendingPassword: undefined
-            };
-        }
-        return u;
-    }));
+  const handleSendReleaseKey = (user: User) => {
+    // A chave de liberação é o banco de dados completo atualizado (para garantir que ele veja o status approved)
+    const releaseCode = btoa(JSON.stringify(users));
+    const message = `Olá ${user.username}! Seu acesso foi liberado. Aqui está sua Chave de Ativação:\n\n${releaseCode}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   };
 
-  const handleRevoke = (username: string) => {
-    setUsers(prev => prev.map(u => 
-      u.username === username ? { ...u, isApproved: false, approvalExpiry: undefined, approvalType: undefined } : u
-    ));
+  const copyReleaseKey = () => {
+    const code = btoa(JSON.stringify(users));
+    navigator.clipboard.writeText(code);
+    alert('Chave de Liberação copiada!');
   };
 
   const deleteUser = (username: string) => {
@@ -73,154 +90,121 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
     return new Date(user.approvalExpiry) < new Date();
   };
 
-  const formatDate = (isoStr?: string) => {
-    if (!isoStr) return 'N/A';
-    return new Date(isoStr).toLocaleString('pt-BR');
-  };
-
-  const handleExportSync = () => {
-    const jsonStr = JSON.stringify(users);
-    const code = btoa(jsonStr); // Base64 encoding
-    setSyncCode(code);
-  };
-
-  const copySyncCode = () => {
-    if (syncCode) {
-        navigator.clipboard.writeText(syncCode);
-        alert("Código copiado! Envie este código para os outros terapeutas sincronizarem seus dispositivos.");
-    }
-  };
-
   return (
-    <div className="animate-fade-in max-w-5xl mx-auto bg-white rounded-xl shadow-2xl p-6 md:p-10">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-slate-800">Gerenciar Acessos</h2>
-        <div className="flex gap-4">
-            <button 
-                onClick={handleExportSync}
-                className="px-4 py-2 bg-sky-600 text-white rounded-md text-sm font-bold shadow-md hover:bg-sky-700 transition-colors"
-            >
-                Exportar Banco (Sincronizar)
-            </button>
-            <button onClick={onBack} className="text-teal-600 font-bold hover:underline">Voltar</button>
+    <div className="animate-fade-in max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10 border border-slate-200">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+        <div>
+            <h2 className="text-3xl font-black text-slate-800">Gerenciar Acessos</h2>
+            <p className="text-slate-500 text-sm">Aprove novos terapeutas e defina prazos de uso.</p>
         </div>
+        <button onClick={onBack} className="px-6 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all">Voltar ao Painel</button>
       </div>
 
-      {syncCode && (
-          <div className="mb-8 p-6 bg-sky-50 border-2 border-sky-200 rounded-xl animate-fade-in">
-            <h3 className="text-sky-800 font-bold mb-2">Código de Sincronização Gerado</h3>
-            <p className="text-xs text-sky-700 mb-4 leading-relaxed">
-                Este código contém todos os usuários e permissões atuais. <br/>
-                No novo dispositivo (celular/tablet/PC), vá na tela de login, clique em <b>"Sincronizar Dispositivo"</b> e cole este código.
-            </p>
-            <div className="flex flex-col gap-3">
-                <textarea 
-                    readOnly 
-                    value={syncCode}
-                    className="w-full p-3 bg-white border border-sky-300 rounded font-mono text-[10px] h-32 outline-none focus:ring-2 focus:ring-sky-500"
-                />
-                <div className="flex gap-2">
-                    <button onClick={copySyncCode} className="flex-1 py-2 bg-sky-600 text-white font-bold rounded-lg shadow hover:bg-teal-700 transition-all">Copiar Código</button>
-                    <button onClick={() => setSyncCode(null)} className="px-4 py-2 bg-slate-300 text-slate-700 font-bold rounded-lg hover:bg-slate-400">Fechar</button>
-                </div>
-            </div>
-          </div>
-      )}
+      {/* Seção de Importar Solicitação */}
+      <div className="mb-12 p-8 bg-teal-50 border-2 border-teal-200 rounded-3xl shadow-sm">
+        <h3 className="text-teal-800 font-black mb-4 flex items-center gap-2 text-lg">
+            <PlusIcon className="w-6 h-6" /> Importar Chave de Terapeuta
+        </h3>
+        <div className="flex flex-col md:flex-row gap-4">
+            <input 
+                type="text" 
+                value={solicitationInput}
+                onChange={e => setSolicitationInput(e.target.value)}
+                placeholder="Cole a Chave de Solicitação aqui..."
+                className="flex-1 px-4 py-3 bg-white border border-teal-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 font-mono text-xs shadow-inner"
+            />
+            <button 
+                onClick={handleImportSolicitation}
+                className="px-8 py-3 bg-teal-600 text-white font-black rounded-xl hover:bg-teal-700 shadow-md transition-all whitespace-nowrap"
+            >
+                Adicionar Terapeuta
+            </button>
+        </div>
+        {importError && <p className="mt-3 text-red-600 font-bold text-xs">{importError}</p>}
+      </div>
 
-      <div className="overflow-x-auto border border-slate-200 rounded-lg">
+      <div className="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm bg-slate-25">
         <table className="min-w-full divide-y divide-slate-200">
-          <thead className="bg-slate-50">
+          <thead className="bg-slate-100">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Usuário</th>
-              <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Status / Expiração</th>
-              <th className="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase">Renovar Período</th>
-              <th className="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase">Solicitações</th>
-              <th className="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase">Ações</th>
+              <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Terapeuta</th>
+              <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Acesso</th>
+              <th className="px-6 py-4 text-center text-xs font-black text-slate-500 uppercase tracking-widest">Definir Período</th>
+              <th className="px-6 py-4 text-center text-xs font-black text-slate-500 uppercase tracking-widest">Liberação</th>
+              <th className="px-6 py-4 text-center text-xs font-black text-slate-500 uppercase tracking-widest">Remover</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-slate-200">
-            {users.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">Nenhum usuário cadastrado.</td>
-              </tr>
-            ) : (
-              users.map(user => {
-                const expired = isExpired(user);
-                const isAdmin = user.username === 'Vbsjunior.Biomagnetismo';
-                return (
-                  <tr key={user.username} className={`hover:bg-slate-50 ${expired ? 'bg-red-50' : ''}`}>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-slate-900">{user.username}</span>
-                        {isAdmin && <span className="text-[10px] text-teal-600 font-bold uppercase">Administrador Permanente</span>}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {isAdmin ? (
-                        <span className="text-teal-600 font-bold flex items-center gap-1"><CheckIcon className="w-4 h-4"/> Acesso Vitalício</span>
-                      ) : user.isApproved ? (
+            {users.map(user => {
+              const isAdmin = user.username === 'Vbsjunior.Biomagnetismo';
+              const expired = isExpired(user);
+              return (
+                <tr key={user.username} className={`hover:bg-slate-50 transition-colors ${expired ? 'bg-red-25' : ''}`}>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                        <span className="font-black text-slate-800">{user.username}</span>
+                        {isAdmin && <span className="text-[10px] text-teal-600 font-bold">MASTER ADMIN</span>}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {isAdmin ? (
+                        <span className="text-teal-600 font-black text-xs">VITALÍCIO</span>
+                    ) : user.isApproved ? (
                         <div className="flex flex-col">
-                          {expired ? (
-                            <span className="font-bold text-red-600 uppercase animate-blink">Acesso Expirado</span>
-                          ) : (
-                            <span className="font-bold text-teal-600">Ativo até {formatDate(user.approvalExpiry)}</span>
-                          )}
-                          <span className="text-[10px] text-slate-400 uppercase">{user.approvalType}</span>
+                            <span className={`text-xs font-black ${expired ? 'text-red-600 animate-blink' : 'text-green-600'}`}>
+                                {expired ? 'EXPIRADO' : 'ATIVO'}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-bold">{user.approvalType}</span>
                         </div>
-                      ) : (
-                        <span className="text-red-400 italic font-bold">Aguardando Aprovação</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      {!isAdmin && (
-                        <div className="flex flex-wrap justify-center gap-2">
-                            <button onClick={() => handleSetApproval(user.username, '5min')} className="px-2 py-1 bg-white border border-slate-200 hover:bg-teal-50 text-[10px] font-bold rounded shadow-sm transition-colors">5 MIN</button>
-                            <button onClick={() => handleSetApproval(user.username, '1month')} className="px-2 py-1 bg-white border border-slate-200 hover:bg-teal-50 text-[10px] font-bold rounded shadow-sm transition-colors">1 MÊS</button>
-                            <button onClick={() => handleSetApproval(user.username, '3months')} className="px-2 py-1 bg-white border border-slate-200 hover:bg-teal-50 text-[10px] font-bold rounded shadow-sm transition-colors">3 MESES</button>
-                            <button onClick={() => handleSetApproval(user.username, '6months')} className="px-2 py-1 bg-white border border-slate-200 hover:bg-teal-50 text-[10px] font-bold rounded shadow-sm transition-colors">6 MESES</button>
-                            <button onClick={() => handleSetApproval(user.username, '1year')} className="px-2 py-1 bg-white border border-slate-200 hover:bg-teal-50 text-[10px] font-bold rounded shadow-sm transition-colors">1 ANO</button>
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                        {user.passwordResetPending && (
-                            <div className="flex flex-col items-center gap-1">
-                                <span className="text-[10px] font-bold text-orange-600 uppercase animate-pulse">Reset de Senha</span>
+                    ) : (
+                        <span className="text-red-400 italic font-bold text-xs">PENDENTE</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    {!isAdmin && (
+                        <div className="flex flex-wrap justify-center gap-1.5">
+                            {['5min', '1month', '3months', '6months', '1year'].map(p => (
                                 <button 
-                                    onClick={() => handleApproveNewPassword(user.username)}
-                                    className="px-2 py-1 bg-orange-500 text-white text-[10px] font-bold rounded shadow-sm hover:bg-orange-600 transition-colors"
+                                    key={p} 
+                                    onClick={() => handleSetApproval(user.username, p as ApprovalPeriod)}
+                                    className={`px-2 py-1 text-[9px] font-black rounded border transition-all ${user.approvalType === p ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-slate-500 border-slate-200 hover:border-teal-400'}`}
                                 >
-                                    APROVAR
+                                    {p.toUpperCase()}
                                 </button>
-                            </div>
-                        )}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex justify-center gap-3">
-                        {!isAdmin && user.isApproved && !expired && (
-                          <button 
-                            onClick={() => handleRevoke(user.username)}
-                            className="p-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors"
-                            title="Revogar Acesso"
-                          >
-                            <InfoIcon className="w-5 h-5" />
-                          </button>
-                        )}
-                        {!isAdmin && (
-                          <button 
-                            onClick={() => deleteUser(user.username)}
-                            className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                            title="Excluir"
-                          >
+                            ))}
+                        </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {!isAdmin && user.isApproved && (
+                        <div className="flex justify-center gap-2">
+                            <button 
+                                onClick={() => handleSendReleaseKey(user)}
+                                className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors shadow-sm"
+                                title="Enviar Liberação via WhatsApp"
+                            >
+                                <WhatsAppIcon className="w-5 h-5" />
+                            </button>
+                            <button 
+                                onClick={copyReleaseKey}
+                                className="p-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 transition-colors shadow-sm"
+                                title="Copiar Chave de Liberação"
+                            >
+                                <ClipboardIcon className="w-5 h-5" />
+                            </button>
+                        </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {!isAdmin && (
+                        <button onClick={() => deleteUser(user.username)} className="p-2 text-red-300 hover:text-red-600 transition-colors">
                             <TrashIcon className="w-5 h-5" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
+                        </button>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>

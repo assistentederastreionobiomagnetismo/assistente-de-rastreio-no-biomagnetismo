@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { ClipboardIcon } from './icons/Icons';
 
 interface LoginProps {
   onLogin: (username: string, password: string) => { success: boolean; message?: string };
@@ -8,13 +9,13 @@ interface LoginProps {
   onImportSync: (code: string) => boolean;
 }
 
-type ViewMode = 'login' | 'forgotPassword' | 'sync';
+type ViewMode = 'login' | 'forgotPassword' | 'activate';
 
 const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister, onRequestReset, onImportSync }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [syncCode, setSyncCode] = useState('');
+  const [activationKey, setActivationKey] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('login');
@@ -22,10 +23,23 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister, onRequestReset, 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    // Sanitização para evitar erros de teclado mobile (espaços acidentais)
     const result = onLogin(username.trim(), password.trim());
     if (!result.success) {
       setError(result.message || 'Usuário ou senha inválidos.');
+    }
+  };
+
+  const handleActivation = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    const ok = onImportSync(activationKey.trim());
+    if (ok) {
+        setSuccess('Dispositivo ativado com sucesso! Você já pode entrar com seus dados.');
+        setActivationKey('');
+        setTimeout(() => setViewMode('login'), 2500);
+    } else {
+        setError('Chave de liberação inválida.');
     }
   };
 
@@ -33,12 +47,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister, onRequestReset, 
     e.preventDefault();
     setError('');
     setSuccess('');
-    
     if (newPassword.length < 6) {
         setError('A nova senha deve ter pelo menos 6 caracteres.');
         return;
     }
-
     const result = onRequestReset(username.trim(), newPassword.trim());
     if (result.success) {
         setSuccess(result.message);
@@ -48,201 +60,136 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGoToRegister, onRequestReset, 
     }
   };
 
-  const handleSyncImport = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    const ok = onImportSync(syncCode.trim());
-    if (ok) {
-        setSuccess('Dispositivo sincronizado com sucesso! Agora você pode fazer login.');
-        setTimeout(() => setViewMode('login'), 2000);
-    } else {
-        setError('Código de sincronização inválido.');
-    }
-  };
-
-  const isApprovalError = error.includes('aguardando aprovação');
-
   return (
-    <div className="bg-slate-100 min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div className="bg-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
         <div className="p-8">
-          <header className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-teal-600">Assistente para Rastreios no Biomagnetismo</h1>
-            <p className="text-slate-500 mt-2">
-              {viewMode === 'login' ? 'Acesso ao Sistema' : 
-               viewMode === 'forgotPassword' ? 'Redefinir Senha' : 
-               'Sincronizar Dispositivo'}
+          <header className="text-center mb-10">
+            <h1 className="text-3xl font-black text-teal-600 leading-tight">Biomagnetismo Assistant</h1>
+            <p className="text-slate-400 mt-2 font-bold uppercase text-[10px] tracking-[0.2em]">
+              {viewMode === 'login' ? 'Área de Acesso' : 
+               viewMode === 'activate' ? 'Ativação de Conta' : 
+               'Recuperação de Acesso'}
             </p>
           </header>
 
           {viewMode === 'login' && (
-            <form onSubmit={handleLogin} className="space-y-6">
-              {error && (
-                <div className={`px-4 py-3 rounded relative border ${isApprovalError ? 'bg-white border-red-500 text-red-600 font-bold text-center animate-blink' : 'bg-red-100 border-red-400 text-red-700'}`} role="alert">
-                  <span className="block sm:inline">{error}</span>
+            <div className="space-y-8">
+              <form onSubmit={handleLogin} className="space-y-5">
+                {error && <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-bold animate-fade-in">{error}</div>}
+                {success && <div className="p-4 bg-green-50 border border-green-100 text-green-700 rounded-xl text-sm font-bold animate-fade-in">{success}</div>}
+                
+                <div>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Seu Usuário</label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 transition-all font-medium text-slate-700 shadow-inner"
+                    placeholder="usuário"
+                    required
+                  />
                 </div>
-              )}
-              {success && <div className="bg-green-100 text-green-700 p-3 rounded mb-4 text-sm font-bold">{success}</div>}
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-slate-600">Usuário</label>
-                <input
-                  type="text"
-                  id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                  placeholder="Seu usuário"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-slate-600">Senha</label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                  placeholder="Sua senha"
-                  required
-                />
-              </div>
-              <div>
+                
+                <div>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Sua Senha</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 transition-all font-medium text-slate-700 shadow-inner"
+                    placeholder="senha"
+                    required
+                  />
+                </div>
+
                 <button
                   type="submit"
-                  className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-bold rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors"
+                  className="w-full py-4 bg-teal-600 text-white font-black rounded-2xl shadow-lg hover:bg-teal-700 transition-all transform hover:scale-[1.02] active:scale-95"
                 >
-                  Entrar
+                  Entrar no Sistema
                 </button>
+              </form>
+
+              <div className="flex flex-col gap-4">
+                <button 
+                    onClick={() => setViewMode('activate')}
+                    className="w-full py-4 border-2 border-dashed border-teal-200 text-teal-600 font-black rounded-2xl hover:bg-teal-50 transition-all flex items-center justify-center gap-2"
+                >
+                    <ClipboardIcon className="w-5 h-5" /> Ativar Conta / Liberar Acesso
+                </button>
+                
+                <div className="flex justify-between items-center px-2">
+                    <button onClick={onGoToRegister} className="text-xs font-black text-teal-600 uppercase tracking-tight hover:underline">Criar Nova Conta</button>
+                    <button onClick={() => setViewMode('forgotPassword')} className="text-xs font-bold text-slate-400 uppercase tracking-tight hover:text-slate-600">Esqueci Senha</button>
+                </div>
               </div>
+            </div>
+          )}
+
+          {viewMode === 'activate' && (
+            <form onSubmit={handleActivation} className="space-y-6 animate-fade-in">
+                <div className="p-5 bg-teal-50 border border-teal-100 rounded-2xl text-xs text-teal-800 leading-relaxed font-medium">
+                    Se o administrador liberou seu acesso, cole a <b>Chave de Liberação</b> abaixo para sincronizar seu dispositivo imediatamente.
+                </div>
+                {error && <div className="p-3 bg-red-50 text-red-600 rounded-xl text-xs font-bold">{error}</div>}
+                {success && <div className="p-3 bg-green-50 text-green-700 rounded-xl text-xs font-bold">{success}</div>}
+                
+                <div>
+                    <label className="block text-xs font-black text-slate-400 uppercase mb-2">Chave de Liberação</label>
+                    <textarea
+                        value={activationKey}
+                        onChange={e => setActivationKey(e.target.value)}
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-[10px] h-32 outline-none focus:ring-2 focus:ring-teal-500 shadow-inner resize-none"
+                        placeholder="Cole aqui o código longo recebido..."
+                        required
+                    />
+                </div>
+
+                <button type="submit" className="w-full py-4 bg-teal-600 text-white font-black rounded-2xl shadow-lg hover:bg-teal-700 transition-all">
+                    Ativar Dispositivo
+                </button>
+                
+                <button onClick={() => setViewMode('login')} className="w-full text-sm font-bold text-slate-400">Voltar ao Login</button>
             </form>
           )}
 
           {viewMode === 'forgotPassword' && (
-            <form onSubmit={handleResetRequest} className="space-y-6">
-              {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                  <span className="block sm:inline">{error}</span>
+            <form onSubmit={handleResetRequest} className="space-y-6 animate-fade-in">
+                <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-500 leading-relaxed">
+                    Sua solicitação será enviada localmente. O administrador precisa aprovar o reset para que a nova senha funcione após a próxima sincronização.
                 </div>
-              )}
-              {success && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                  <span className="block sm:inline">{success}</span>
+                {error && <div className="p-3 bg-red-50 text-red-600 rounded-xl text-xs font-bold">{error}</div>}
+                {success && <div className="p-3 bg-green-50 text-green-700 rounded-xl text-xs font-bold">{success}</div>}
+                
+                <div>
+                    <label className="block text-xs font-black text-slate-400 uppercase mb-2">Usuário</label>
+                    <input
+                        type="text"
+                        value={username}
+                        onChange={e => setUsername(e.target.value)}
+                        className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500"
+                        required
+                    />
                 </div>
-              )}
-              <p className="text-xs text-slate-500 italic">Sua solicitação de nova senha deverá ser aprovada pelo administrador.</p>
-              <div>
-                <label htmlFor="username-reset" className="block text-sm font-medium text-slate-600">Usuário</label>
-                <input
-                  type="text"
-                  id="username-reset"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                  placeholder="Nome de usuário cadastrado"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="new-password" className="block text-sm font-medium text-slate-600">Nova Senha Desejada</label>
-                <input
-                  type="password"
-                  id="new-password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                  placeholder="Mínimo 6 caracteres"
-                  required
-                />
-              </div>
-              <div>
-                <button
-                  type="submit"
-                  className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-bold rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors"
-                >
-                  Solicitar Alteração
-                </button>
-              </div>
-            </form>
-          )}
+                
+                <div>
+                    <label className="block text-xs font-black text-slate-400 uppercase mb-2">Nova Senha</label>
+                    <input
+                        type="password"
+                        value={newPassword}
+                        onChange={e => setNewPassword(e.target.value)}
+                        className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500"
+                        required
+                    />
+                </div>
 
-          {viewMode === 'sync' && (
-            <form onSubmit={handleSyncImport} className="space-y-6">
-              {error && <div className="bg-red-100 text-red-700 p-3 rounded text-sm">{error}</div>}
-              {success && <div className="bg-green-100 text-green-700 p-3 rounded text-sm">{success}</div>}
-              <div className="p-4 bg-teal-50 border border-teal-100 rounded-lg text-xs text-teal-800 leading-relaxed">
-                  <strong>Como sincronizar:</strong> Peça ao administrador para gerar um "Código de Sincronização" no computador dele. Cole o código abaixo para que este dispositivo reconheça as contas cadastradas.
-              </div>
-              <div>
-                <label htmlFor="sync-code" className="block text-sm font-medium text-slate-600">Código de Sincronização</label>
-                <textarea
-                  id="sync-code"
-                  value={syncCode}
-                  onChange={(e) => setSyncCode(e.target.value)}
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm font-mono text-[10px]"
-                  placeholder="Cole o código aqui..."
-                  rows={6}
-                  required
-                />
-              </div>
-              <div>
-                <button
-                  type="submit"
-                  className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-bold rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 transition-colors"
-                >
-                  Importar Dados
-                </button>
-              </div>
+                <button type="submit" className="w-full py-4 bg-teal-600 text-white font-black rounded-2xl shadow-lg">Solicitar Alteração</button>
+                <button onClick={() => setViewMode('login')} className="w-full text-sm font-bold text-slate-400">Voltar ao Login</button>
             </form>
           )}
-          
-          <div className="mt-8 flex flex-col items-center gap-4">
-            <div className="flex flex-wrap justify-between w-full gap-2">
-                <button onClick={onGoToRegister} className="text-sm font-bold text-teal-600 hover:underline">Criar conta</button>
-                <button
-                  onClick={() => {
-                    if (viewMode === 'login') setViewMode('sync');
-                    else setViewMode('login');
-                    setError('');
-                    setSuccess('');
-                  }}
-                  className="text-sm font-bold text-sky-600 hover:underline"
-                >
-                  {viewMode === 'sync' ? 'Voltar para Login' : 'Sincronizar Dispositivo'}
-                </button>
-            </div>
-            {viewMode === 'login' && (
-                <button
-                  onClick={() => {
-                    setViewMode('forgotPassword');
-                    setError('');
-                    setSuccess('');
-                  }}
-                  className="text-xs font-medium text-slate-400 hover:text-teal-600"
-                >
-                  Esqueci minha senha
-                </button>
-            )}
-            {viewMode !== 'login' && viewMode !== 'sync' && (
-                 <button onClick={() => setViewMode('login')} className="text-sm font-medium text-slate-500">Voltar para Login</button>
-            )}
-          </div>
         </div>
       </div>
     </div>

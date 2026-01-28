@@ -195,13 +195,16 @@ const App: React.FC = () => {
     return () => clearInterval(timer);
   }, [isAuthenticated, currentUser]);
 
-  const handleRegister = (username: string, password: string): boolean => {
+  const handleRegister = (username: string, password: string): { success: boolean, token?: string } => {
     const userExists = allUsers.some(u => u.username.toLowerCase() === username.toLowerCase());
-    if (userExists) return false;
+    if (userExists) return { success: false };
     
     const newUser: User = { username, password, isApproved: false };
     setAllUsers(prev => [...prev, newUser]);
-    return true;
+    
+    // Gera token de solicitação (apenas os dados básicos do usuário novo)
+    const token = btoa(JSON.stringify(newUser));
+    return { success: true, token };
   };
 
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
@@ -280,6 +283,7 @@ const App: React.FC = () => {
   const resetSessionState = () => {
       setCurrentStep(Step.PATIENT_INFO);
       setPatient({ name: '', mainComplaint: '' });
+      setPatient({ name: '', mainComplaint: '', birthDate: '', age: undefined, email: '', phone: '' });
       setProtocolData({ legResponse: '', sessionType: '' });
       setSelectedPairs([]);
       setPhenomena({ vascularAccidents: [], tumoralPhenomena: [], tumoralGenesis: [], traumas: [], portalPairs: [] });
