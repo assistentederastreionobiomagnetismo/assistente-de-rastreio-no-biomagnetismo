@@ -32,6 +32,7 @@ type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager' | 'changePassword
 const USERS_STORAGE_KEY = 'biomag_therapist_users';
 const PAIRS_STORAGE_KEY = 'biomag_master_pair_list';
 const LAST_SYNC_KEY = 'biomag_last_db_sync_date';
+const NEEDS_SYNC_FLAG = 'biomag_admin_needs_sync';
 
 const App: React.FC = () => {
   // Session Active State
@@ -71,12 +72,7 @@ const App: React.FC = () => {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [lastSyncDate, setLastSyncDate] = useState<string>(localStorage.getItem(LAST_SYNC_KEY) || '');
   const [viewingHistoricalSession, setViewingHistoricalSession] = useState<Session | null>(null);
-
-  // Auth & View State
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [appView, setAppView] = useState<AppView>('dashboard');
-  const [remainingTime, setRemainingTime] = useState<string | null>(null);
+  const [adminNeedsSync, setAdminNeedsSync] = useState<boolean>(localStorage.getItem(NEEDS_SYNC_FLAG) === 'true');
 
   // Load Global master data
   useEffect(() => {
@@ -133,7 +129,7 @@ const App: React.FC = () => {
     }
   }, [currentUser]);
 
-  // Persist Bound Data (Saves only when the corresponding list changes for the current user)
+  // Persist Bound Data
   useEffect(() => {
     if (currentUser && isAuthenticated) {
         const patientsKey = `biomag_patients_${currentUser.username}`;
@@ -154,12 +150,15 @@ const App: React.FC = () => {
         const importedData = JSON.parse(decoded);
         
         if (typeof importedData === 'object' && !Array.isArray(importedData)) {
+            // Importar Usuários
             if (importedData.users) setAllUsers(importedData.users);
+            
+            // Importar Pares (Apenas se houver no pacote)
             if (importedData.pairs) {
                 setBiomagneticPairs(importedData.pairs);
-                const now = new Date().toLocaleString('pt-BR');
-                setLastSyncDate(now);
-                localStorage.setItem(LAST_SYNC_KEY, now);
+                const syncInfo = importedData.timestamp ? `Atualizada em ${new Date(importedData.timestamp).toLocaleString('pt-BR')}` : `Sincronizada em ${new Date().toLocaleString('pt-BR')}`;
+                setLastSyncDate(syncInfo);
+                localStorage.setItem(LAST_SYNC_KEY, syncInfo);
             }
             return true;
         } 
@@ -171,6 +170,17 @@ const App: React.FC = () => {
         console.error("Erro ao importar código de sincronização", e);
     }
     return false;
+  };
+
+  const handleUpdatePairs = (newPairs: BiomagneticPair[]) => {
+      setBiomagneticPairs(newPairs);
+      setAdminNeedsSync(true);
+      localStorage.setItem(NEEDS_SYNC_FLAG, 'true');
+  };
+
+  const handleClearSyncFlag = () => {
+      setAdminNeedsSync(false);
+      localStorage.setItem(NEEDS_SYNC_FLAG, 'false');
   };
 
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
@@ -203,7 +213,6 @@ const App: React.FC = () => {
     setIsAuthenticated(false);
     setCurrentUser(null);
     setAppView('dashboard');
-    // State cleanup to ensure total isolation on logout
     setSessions([]);
     setPatients([]);
     setPatient({ name: '', mainComplaint: '' });
@@ -280,7 +289,7 @@ const App: React.FC = () => {
         <header className="text-center mb-8 print:hidden">
           <h1 className="text-4xl font-bold text-teal-600">Assistente para Rastreios no Biomagnetismo</h1>
           <p className="text-slate-500">Terapeuta: <span className="font-bold">{currentUser?.fullName || currentUser?.username}</span></p>
-          {lastSyncDate && <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Base de Dados atualizada em: {lastSyncDate}</p>}
+          {lastSyncDate && <p className="text-[10px] text-teal-600 font-bold uppercase mt-1">Biblioteca de Pares: {lastSyncDate}</p>}
         </header>
         
         {appView === 'dashboard' && (
@@ -291,10 +300,11 @@ const App: React.FC = () => {
             patients={patients}
             setPatients={setPatients}
             biomagneticPairs={biomagneticPairs}
-            setBiomagneticPairs={setBiomagneticPairs}
+            setBiomagneticPairs={handleUpdatePairs}
             onManageUsers={() => setAppView('userManager')}
             onViewSessionDetail={(s) => setViewingHistoricalSession(s)}
             lastSyncDate={lastSyncDate}
+            adminNeedsSync={adminNeedsSync}
           />
         )}
         
@@ -304,11 +314,13 @@ const App: React.FC = () => {
             setUsers={setAllUsers} 
             biomagneticPairs={biomagneticPairs}
             onBack={() => setAppView('dashboard')} 
+            onSyncExported={handleClearSyncFlag}
           />
         )}
         
         {appView === 'sessionWorkflow' && (
           <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden relative">
+            {/* Nav Steps... */}
             <div className="p-4 md:p-6 border-b border-slate-200 overflow-x-auto print:hidden">
               <nav aria-label="Progress">
                 <ol role="list" className="flex items-center min-w-[800px]">
