@@ -5,11 +5,13 @@ import { PhenomenaData } from '../types';
 interface PhenomenaProps {
   data: PhenomenaData;
   setData: React.Dispatch<React.SetStateAction<PhenomenaData>>;
+  notes: string;
+  setNotes: (notes: string) => void;
   onNext: () => void;
   onBack: () => void;
 }
 
-const Phenomena: React.FC<PhenomenaProps> = ({ data, setData, onNext, onBack }) => {
+const Phenomena: React.FC<PhenomenaProps> = ({ data, setData, notes, setNotes, onNext, onBack }) => {
   
   const toggleItem = (category: keyof PhenomenaData, item: string) => {
     setData(prev => {
@@ -36,8 +38,8 @@ const Phenomena: React.FC<PhenomenaProps> = ({ data, setData, onNext, onBack }) 
   ];
 
   const tumoralPhenomena = [
-    { name: "EXSUDADOS", formula: "B ou F ou P", desc: "Elementos extravasados em um processo inflamatório – externo – Muco / Líquido / Inflamação" },
-    { name: "INFILTRADOS", formula: "V + V", desc: "Elementos extravasados em um processo inflamatório – interno (pulmão, ossos, coração) – Pus / Inflamação" },
+    { name: "EXSUDADOS", formula: "B ou F ou P", desc: "Elements extravasados em um processo inflamatório – externo – Muco / Líquido / Inflamação" },
+    { name: "INFILTRADOS", formula: "V + V", desc: "Elements extravasados em um processo inflamatório – interno (pulmão, ossos, coração) – Pus / Inflamação" },
     { name: "CISTOS, QUISTOS OU PÓLIPOS", formula: "V + B ou F", desc: "Seguem sendo líquidos (bolsas de água hipogênicas – densidade baixa)" },
     { name: "ABCESSOS", formula: "B + B", desc: "98% confundido com Câncer (bolsa de pus – alta densidade – hiperecogênicas). Diafragmas, pregas inguinais." },
     { name: "DISPLASIA", formula: "B + B + V", desc: "Ex. Celulite – Aumento exagerado do tamanho celular sem perder sua morfologia e função." },
@@ -216,7 +218,7 @@ const Phenomena: React.FC<PhenomenaProps> = ({ data, setData, onNext, onBack }) 
         </div>
       </div>
 
-      {/* PARES PORTAIS - POSICIONADO AO FINAL */}
+      {/* PARES PORTAIS */}
       <div className="bg-white border rounded-xl shadow-md overflow-hidden">
         <div className="bg-teal-600 p-4 text-white text-center">
           <h3 className="text-xl font-bold uppercase tracking-widest">Pares Portais</h3>
@@ -224,7 +226,6 @@ const Phenomena: React.FC<PhenomenaProps> = ({ data, setData, onNext, onBack }) 
         
         <div className="p-4 bg-white">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
-            {/* Headers Desktop */}
             <div className="hidden md:grid grid-cols-2 text-center mb-2 font-bold text-sm">
                 <div className="bg-cyan-100 text-cyan-800 py-2 border rounded-tl-lg">Ponto</div>
                 <div className="bg-purple-100 text-purple-800 py-2 border rounded-tr-lg">Local no corpo</div>
@@ -236,7 +237,6 @@ const Phenomena: React.FC<PhenomenaProps> = ({ data, setData, onNext, onBack }) 
 
             {portalPairsList.map((item, idx) => (
               <React.Fragment key={idx}>
-                {/* Par 1 */}
                 <div className="grid grid-cols-2 text-left items-stretch group">
                   <div className="border bg-slate-50 p-2 flex items-center justify-start hover:bg-cyan-50 transition-colors">
                     <label className="flex items-center cursor-pointer w-full">
@@ -253,7 +253,6 @@ const Phenomena: React.FC<PhenomenaProps> = ({ data, setData, onNext, onBack }) 
                     {item.l1}
                   </div>
                 </div>
-                {/* Par 2 */}
                 <div className="grid grid-cols-2 text-left items-stretch group">
                   <div className="border bg-slate-50 p-2 flex items-center justify-start hover:bg-cyan-50 transition-colors">
                     <label className="flex items-center cursor-pointer w-full">
@@ -274,7 +273,6 @@ const Phenomena: React.FC<PhenomenaProps> = ({ data, setData, onNext, onBack }) 
             ))}
           </div>
 
-          {/* Comando Verbal Box */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-4 items-center gap-6">
             <div className="md:col-span-1 bg-purple-500 rounded-xl p-6 text-center shadow-lg border-2 border-purple-400">
               <span className="text-lg font-bold text-white uppercase tracking-wider block">Comando Verbal</span>
@@ -289,6 +287,19 @@ const Phenomena: React.FC<PhenomenaProps> = ({ data, setData, onNext, onBack }) 
             </div>
           </div>
         </div>
+      </div>
+
+      {/* OBSERVAÇÕES DE FENÔMENOS */}
+      <div className="max-w-4xl mx-auto">
+        <label htmlFor="phenomenaNotes" className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-tight">Observações de Fenômenos</label>
+        <textarea 
+          id="phenomenaNotes"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Anote aqui algo relevante sobre os fenômenos..."
+          rows={3}
+          className="w-full p-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none shadow-sm"
+        ></textarea>
       </div>
 
       <div className="flex justify-between pt-8">

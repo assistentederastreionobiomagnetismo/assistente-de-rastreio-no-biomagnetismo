@@ -68,6 +68,11 @@ export interface Session {
     sensationsNotes?: string;
     impactionTime?: string;
     notes: string;
+    protocolNotes?: string;
+    levelINotes?: string;
+    levelIINotes?: string;
+    levelIIINotes?: string;
+    phenomenaNotes?: string;
     startTime: Date | null;
     endTime: Date | null;
 }

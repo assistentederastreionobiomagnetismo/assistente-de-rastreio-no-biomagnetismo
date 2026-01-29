@@ -8,12 +8,14 @@ interface ScanningProps {
   levelTitle: string;
   selectedPairs: BiomagneticPair[];
   setSelectedPairs: React.Dispatch<React.SetStateAction<BiomagneticPair[]>>;
+  notes: string;
+  setNotes: (notes: string) => void;
   biomagneticPairs: BiomagneticPair[];
   onNext: () => void;
   onBack: () => void;
 }
 
-const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelectedPairs, onNext, onBack, biomagneticPairs }) => {
+const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelectedPairs, notes, setNotes, onNext, onBack, biomagneticPairs }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [infoModalPair, setInfoModalPair] = useState<BiomagneticPair | null>(null);
 
@@ -101,9 +103,9 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
           </div>
         </div>
 
-        <div>
+        <div className="flex flex-col">
             <h3 className="text-lg font-semibold text-slate-600 mb-4">Pares Selecionados ({selectedPairs.length})</h3>
-            <div className={`h-[${levelTitle === "Nível III" ? '432px' : '384px'}] overflow-y-auto border rounded-lg p-2 bg-white`}>
+            <div className={`flex-1 min-h-[300px] overflow-y-auto border rounded-lg p-2 bg-white mb-4 shadow-inner`}>
                 {selectedPairs.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-slate-400">
                         <p>Nenhum par selecionado.</p>
@@ -120,6 +122,17 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
                     ))}
                     </ul>
                 )}
+            </div>
+            
+            <div className="mt-auto">
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-2 tracking-tight">Observações - {levelTitle}</label>
+              <textarea 
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder={`Anotações relevantes para o ${levelTitle}...`}
+                rows={3}
+                className="w-full p-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none shadow-sm"
+              ></textarea>
             </div>
         </div>
       </div>

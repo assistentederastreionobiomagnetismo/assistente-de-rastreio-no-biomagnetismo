@@ -12,6 +12,11 @@ interface SessionSummaryProps {
   sensations?: string[];
   emotionsNotes?: string;
   sensationsNotes?: string;
+  protocolNotes?: string;
+  levelINotes?: string;
+  levelIINotes?: string;
+  levelIIINotes?: string;
+  phenomenaNotes?: string;
   impactionTime?: string;
   notes: string;
   startTime: Date | null;
@@ -30,6 +35,11 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
     sensations, 
     emotionsNotes,
     sensationsNotes,
+    protocolNotes,
+    levelINotes,
+    levelIINotes,
+    levelIIINotes,
+    phenomenaNotes,
     impactionTime, 
     notes, 
     startTime, 
@@ -108,6 +118,9 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
             <p className="text-sm"><strong className="font-bold text-slate-700">Data da Sessão:</strong> {startTime ? new Date(startTime).toLocaleDateString('pt-BR') : 'N/A'}</p>
             <p className="text-sm"><strong className="font-bold text-slate-700">Horário de Início:</strong> {startTime ? new Date(startTime).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) : 'N/A'}</p>
             <p className="text-sm"><strong className="font-bold text-slate-700">Duração Total:</strong> {formatDuration(startTime, endTime)}</p>
+            {protocolData?.legResponse && (
+                <p className="text-sm"><strong className="font-bold text-slate-700">Sim do Paciente:</strong> {protocolData.legResponse}</p>
+            )}
             {impactionTime && (
                 <div className="mt-2 p-2 bg-teal-50 rounded border border-teal-100">
                     <p className="text-sm font-bold text-teal-800">Tempo de Impactação Recomendado:</p>
@@ -116,6 +129,45 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
             )}
           </div>
         </div>
+
+        {/* NOTAS DE ETAPAS */}
+        {(protocolNotes || levelINotes || levelIINotes || levelIIINotes || phenomenaNotes) && (
+          <div className="pb-6 border-b border-slate-200">
+            <h3 className="text-lg font-bold text-teal-700 mb-4">Observações por Etapa</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {protocolNotes && (
+                <div className="p-3 bg-slate-50 rounded border border-slate-200 text-sm">
+                  <strong className="text-xs uppercase text-slate-500 block mb-1">Preparação / Protocolo</strong>
+                  <p className="italic">{protocolNotes}</p>
+                </div>
+              )}
+              {levelINotes && (
+                <div className="p-3 bg-slate-50 rounded border border-slate-200 text-sm">
+                  <strong className="text-xs uppercase text-slate-500 block mb-1">Rastreio Nível I</strong>
+                  <p className="italic">{levelINotes}</p>
+                </div>
+              )}
+              {levelIINotes && (
+                <div className="p-3 bg-slate-50 rounded border border-slate-200 text-sm">
+                  <strong className="text-xs uppercase text-slate-500 block mb-1">Rastreio Nível II</strong>
+                  <p className="italic">{levelIINotes}</p>
+                </div>
+              )}
+              {levelIIINotes && (
+                <div className="p-3 bg-slate-50 rounded border border-slate-200 text-sm">
+                  <strong className="text-xs uppercase text-slate-500 block mb-1">Rastreio Nível III</strong>
+                  <p className="italic">{levelIIINotes}</p>
+                </div>
+              )}
+              {phenomenaNotes && (
+                <div className="p-3 bg-slate-50 rounded border border-slate-200 text-sm">
+                  <strong className="text-xs uppercase text-slate-500 block mb-1">Fenômenos Bioenergéticos</strong>
+                  <p className="italic">{phenomenaNotes}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="pb-6 border-b border-slate-200">
           <h3 className="text-lg font-bold text-teal-700 mb-4">Pares Biomagnéticos Identificados ({pairs.length})</h3>
@@ -212,13 +264,13 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
         )}
 
         <div className="pb-6">
-          <h3 className="text-lg font-bold text-teal-700 mb-4">Observações e Recomendações</h3>
+          <h3 className="text-lg font-bold text-teal-700 mb-4">Considerações Finais</h3>
           {notes ? (
             <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 text-slate-700 text-sm italic whitespace-pre-wrap leading-relaxed">
                 {notes}
             </div>
           ) : (
-            <p className="text-slate-400 italic text-sm">Nenhuma observação adicional registrada.</p>
+            <p className="text-slate-400 italic text-sm">Nenhuma consideração adicional registrada.</p>
           )}
         </div>
 

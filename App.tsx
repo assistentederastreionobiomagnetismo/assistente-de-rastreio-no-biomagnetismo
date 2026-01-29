@@ -51,6 +51,14 @@ const App: React.FC = () => {
   const [sensationsNotes, setSensationsNotes] = useState<string>('');
   const [impactionTime, setImpactionTime] = useState<string>('');
   const [sessionNotes, setSessionNotes] = useState<string>('');
+  
+  // Novas observações por etapa
+  const [protocolNotes, setProtocolNotes] = useState<string>('');
+  const [levelINotes, setLevelINotes] = useState<string>('');
+  const [levelIINotes, setLevelIINotes] = useState<string>('');
+  const [levelIIINotes, setLevelIIINotes] = useState<string>('');
+  const [phenomenaNotes, setPhenomenaNotes] = useState<string>('');
+
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const [sessionEndTime, setSessionEndTime] = useState<Date | null>(null);
 
@@ -249,6 +257,11 @@ const App: React.FC = () => {
       setSensationsNotes('');
       setImpactionTime('');
       setSessionNotes('');
+      setProtocolNotes('');
+      setLevelINotes('');
+      setLevelIINotes('');
+      setLevelIIINotes('');
+      setPhenomenaNotes('');
       setSessionStartTime(null);
       setSessionEndTime(null);
   };
@@ -266,6 +279,11 @@ const App: React.FC = () => {
         sensationsNotes,
         impactionTime,
         notes: sessionNotes,
+        protocolNotes,
+        levelINotes,
+        levelIINotes,
+        levelIIINotes,
+        phenomenaNotes,
         startTime: sessionStartTime,
         endTime: sessionEndTime
     };
@@ -364,11 +382,11 @@ const App: React.FC = () => {
               )}
 
               {currentStep === Step.PATIENT_INFO && <PatientForm patient={patient} setPatient={setPatient} onNext={nextStep} patientsList={patients} setPatientsList={setPatients} />}
-              {currentStep === Step.START_PROTOCOL && <StartProtocol data={protocolData} setData={setProtocolData} onNext={nextStep} onBack={prevStep} patientName={patient.name} />}
-              {currentStep === Step.SCANNING_LEVEL_I && <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />}
-              {currentStep === Step.SCANNING_LEVEL_II && <Scanning levelTitle="Nível II" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />}
-              {currentStep === Step.SCANNING_LEVEL_III && <Scanning levelTitle="Nível III" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />}
-              {currentStep === Step.PHENOMENA && <Phenomena data={phenomena} setData={setPhenomena} onNext={nextStep} onBack={prevStep} />}
+              {currentStep === Step.START_PROTOCOL && <StartProtocol data={protocolData} setData={setProtocolData} notes={protocolNotes} setNotes={setProtocolNotes} onNext={nextStep} onBack={prevStep} patientName={patient.name} />}
+              {currentStep === Step.SCANNING_LEVEL_I && <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelINotes} setNotes={setLevelINotes} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />}
+              {currentStep === Step.SCANNING_LEVEL_II && <Scanning levelTitle="Nível II" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIINotes} setNotes={setLevelIINotes} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />}
+              {currentStep === Step.SCANNING_LEVEL_III && <Scanning levelTitle="Nível III" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIIINotes} setNotes={setLevelIIINotes} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />}
+              {currentStep === Step.PHENOMENA && <Phenomena data={phenomena} setData={setPhenomena} notes={phenomenaNotes} setNotes={setPhenomenaNotes} onNext={nextStep} onBack={prevStep} />}
               {currentStep === Step.EMOTIONAL && <Emocional 
                   selectedEmotions={selectedEmotions} setSelectedEmotions={setSelectedEmotions} 
                   selectedSensations={selectedSensations} setSelectedSensations={setSelectedSensations} 
@@ -380,6 +398,7 @@ const App: React.FC = () => {
                   patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} 
                   emotions={selectedEmotions} sensations={selectedSensations} 
                   emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes}
+                  protocolNotes={protocolNotes} levelINotes={levelINotes} levelIINotes={levelIINotes} levelIIINotes={levelIIINotes} phenomenaNotes={phenomenaNotes}
                   impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} onFinish={handleFinishSession} onBack={prevStep} />}
             </main>
           </div>

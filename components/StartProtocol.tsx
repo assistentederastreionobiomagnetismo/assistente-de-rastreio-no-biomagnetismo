@@ -5,12 +5,14 @@ import { ProtocolData } from '../types';
 interface StartProtocolProps {
   data: ProtocolData;
   setData: React.Dispatch<React.SetStateAction<ProtocolData>>;
+  notes: string;
+  setNotes: (notes: string) => void;
   onNext: () => void;
   onBack: () => void;
   patientName?: string;
 }
 
-const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, onNext, onBack, patientName }) => {
+const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, setNotes, onNext, onBack, patientName }) => {
   const isDistancia = data.sessionType === 'distancia';
 
   const handleLegResponseChange = (val: 'Encurtado' | 'Estendido' | 'Normal') => {
@@ -164,6 +166,19 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, onNext, on
           </div>
 
         </div>
+      </div>
+
+      {/* OBSERVAÇÕES DA PREPARAÇÃO */}
+      <div className="max-w-4xl mx-auto">
+        <label htmlFor="protocolNotes" className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-tight">Observações da Preparação</label>
+        <textarea 
+          id="protocolNotes"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Anote aqui algo relevante durante a preparação..."
+          rows={3}
+          className="w-full p-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none shadow-sm"
+        ></textarea>
       </div>
 
       {/* QUADRO DE LEMBRETES TÉCNICOS */}
