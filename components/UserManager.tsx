@@ -34,13 +34,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         const code = btoa(binary);
         
         setSyncCode(code);
-        
-        // Alerta sobre tamanho da base se necessário
-        if (code.length > 50000) {
-            console.warn("Base de dados grande detectada:", code.length, "caracteres.");
-        }
-        
-        alert('Código de Sincronização Master gerado com sucesso! Este código contém TODOS os usuários e TODA a biblioteca de pares atualizada.');
+        alert('CÓDIGO MASTER GERADO! Se você editou pares neste aparelho, COPIE este código e cole-o no botão "Sincronizar Dispositivo" de seus outros aparelhos ou envie para seus terapeutas.');
     } catch(e) {
         console.error("Erro na geração do código:", e);
         alert('Erro ao gerar código. Verifique se existem imagens excessivamente grandes na base de pares.');
@@ -72,8 +66,8 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         </div>
         <h3 className="text-sky-900 font-black text-lg mb-2 uppercase tracking-tight">Sincronização Master do Aplicativo</h3>
         <p className="text-sm text-sky-700 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Sempre que você realizar inclusões ou alterações significativas nos <strong>Pares Biomagnéticos</strong>, utilize o botão abaixo para gerar um novo código. 
-            Este código deve ser enviado aos terapeutas para que suas bases locais sejam atualizadas com as novas informações.
+            Como este aplicativo funciona de forma offline e privada, as alterações que você faz na <strong>Base de Pares</strong> ficam salvas apenas neste aparelho. 
+            Para levar as alterações para outro celular ou computador, gere o código abaixo e use-o para sincronizar o outro dispositivo.
         </p>
         
         <button 
@@ -81,14 +75,14 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
             disabled={isGenerating}
             className="px-12 py-5 bg-sky-600 text-white font-black rounded-2xl shadow-xl hover:bg-sky-700 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center gap-3 mx-auto disabled:bg-slate-300"
         >
-            {isGenerating ? 'PROCESSANDO BASE DE DADOS...' : 'GERAR CÓDIGO DE ATUALIZAÇÃO GLOBAL'}
+            {isGenerating ? 'PROCESSANDO BASE DE DADOS...' : 'GERAR CÓDIGO PARA TRANSFERÊNCIA GLOBAL'}
         </button>
         
         {syncCode && (
             <div className="mt-10 animate-fade-in">
                 <div className="bg-white p-6 rounded-2xl shadow-inner border border-sky-100">
                     <div className="flex justify-between items-center mb-3">
-                        <span className="text-[10px] font-black text-sky-600 uppercase tracking-widest">Código de Sincronização Pronto</span>
+                        <span className="text-[10px] font-black text-sky-600 uppercase tracking-widest">Código de Transferência Pronto</span>
                         <span className="text-[9px] text-slate-400 font-mono">Size: {(syncCode.length / 1024).toFixed(1)} KB</span>
                     </div>
                     <textarea 
@@ -98,7 +92,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                     />
                     <div className="flex flex-col md:flex-row gap-4">
                         <button 
-                            onClick={() => { navigator.clipboard.writeText(syncCode); alert('Código copiado para a área de transferência!'); }} 
+                            onClick={() => { navigator.clipboard.writeText(syncCode); alert('Código copiado! Agora cole-o no outro dispositivo.'); }} 
                             className="flex-1 py-4 bg-white text-sky-600 border-2 border-sky-100 font-black rounded-xl hover:bg-sky-50 transition-all flex justify-center items-center gap-2 uppercase text-xs tracking-widest"
                         >
                             <ClipboardIcon className="w-5 h-5" /> Copiar Código
@@ -109,7 +103,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                             rel="noopener noreferrer"
                             className="flex-1 py-4 bg-green-600 text-white font-black rounded-xl hover:bg-green-700 transition-all flex justify-center items-center gap-2 uppercase text-xs tracking-widest shadow-lg"
                         >
-                            <WhatsAppIcon className="w-5 h-5" /> Enviar via WhatsApp
+                            <WhatsAppIcon className="w-5 h-5" /> Enviar p/ outro aparelho
                         </a>
                     </div>
                 </div>

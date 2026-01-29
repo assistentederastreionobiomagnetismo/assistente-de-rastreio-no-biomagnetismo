@@ -13,7 +13,8 @@ import Dashboard from './components/Dashboard';
 import UserManager from './components/UserManager';
 import ChangePassword from './components/ChangePassword';
 import SessionDetailModal from './components/SessionDetailModal';
-import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon, BrainIcon, SuccessIcon, ReportIcon } from './components/icons/Icons';
+// Added CheckIcon to the imports below to fix "Cannot find name 'CheckIcon'" error
+import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon, BrainIcon, SuccessIcon, ReportIcon, CheckIcon } from './components/icons/Icons';
 import { BIOMAGNETIC_PAIRS } from './constants';
 
 enum Step {
@@ -163,16 +164,28 @@ const App: React.FC = () => {
 
   const handleImportUsers = (syncCode: string): boolean => {
     try {
-        const decoded = decodeURIComponent(escape(atob(syncCode)));
+        // Suporte para decodificação UTF-8 segura
+        const binaryString = atob(syncCode.trim());
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        const decoded = new TextDecoder().decode(bytes);
         const importedData = JSON.parse(decoded);
         
         if (typeof importedData === 'object' && !Array.isArray(importedData)) {
             if (importedData.users) setAllUsers(importedData.users);
             if (importedData.pairs) {
+                // Atualiza a base de pares local com a base vinda do código (Global)
                 setBiomagneticPairs(importedData.pairs);
-                const now = new Date().toLocaleString('pt-BR');
-                setLastSyncDate(now);
-                localStorage.setItem(LAST_SYNC_KEY, now);
+                
+                // Registra a data da sincronia
+                const syncTime = importedData.timestamp ? new Date(importedData.timestamp).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR');
+                setLastSyncDate(syncTime);
+                localStorage.setItem(LAST_SYNC_KEY, syncTime);
+                
+                // Força persistência imediata
+                localStorage.setItem(PAIRS_STORAGE_KEY, JSON.stringify(importedData.pairs));
             }
             return true;
         } 
@@ -282,8 +295,15 @@ const App: React.FC = () => {
       <div className="container mx-auto p-4 md:p-8">
         <header className="text-center mb-8 print:hidden">
           <h1 className="text-4xl font-bold text-teal-600">Assistente para Rastreios no Biomagnetismo</h1>
-          <p className="text-slate-500">Terapeuta: <span className="font-bold">{currentUser?.fullName || currentUser?.username}</span></p>
-          {lastSyncDate && <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Base de Dados Atualizada: {lastSyncDate}</p>}
+          <div className="flex flex-col items-center mt-2">
+            <p className="text-slate-500">Terapeuta: <span className="font-bold">{currentUser?.fullName || currentUser?.username}</span></p>
+            {lastSyncDate && (
+                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-white border border-teal-100 rounded-full shadow-sm">
+                    <CheckIcon className="w-3 h-3 text-teal-600" />
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Última Sincronia da Base: {lastSyncDate}</span>
+                </div>
+            )}
+          </div>
         </header>
         
         {appView === 'dashboard' && (
