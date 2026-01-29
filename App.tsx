@@ -402,7 +402,7 @@ const App: React.FC = () => {
                   emotionsNotes={emotionsNotes} setEmotionsNotes={setEmotionsNotes}
                   sensationsNotes={sensationsNotes} setSensationsNotes={setSensationsNotes}
                   onNext={nextStep} onBack={prevStep} />}
-              {currentStep === Step.TREATMENT && <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} onNext={nextStep} onBack={prevStep} />}
+              {currentStep === Step.TREATMENT && <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} onNext={nextStep} onBack={prevStep} sessionType={protocolData.sessionType} />}
               {currentStep === Step.SUMMARY && <SessionSummary 
                   patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} 
                   emotions={selectedEmotions} sensations={selectedSensations} 

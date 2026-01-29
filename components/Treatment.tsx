@@ -8,9 +8,12 @@ interface TreatmentProps {
   setNotes: (notes: string) => void;
   onNext: () => void;
   onBack: () => void;
+  sessionType?: string;
 }
 
-const Treatment: React.FC<TreatmentProps> = ({ impactionTime, setImpactionTime, notes, setNotes, onNext, onBack }) => {
+const Treatment: React.FC<TreatmentProps> = ({ impactionTime, setImpactionTime, notes, setNotes, onNext, onBack, sessionType }) => {
+  const isDistancia = sessionType === 'distancia';
+
   return (
     <div className="animate-fade-in space-y-8 pb-10">
       <div className="text-center border-b pb-4">
@@ -64,6 +67,19 @@ const Treatment: React.FC<TreatmentProps> = ({ impactionTime, setImpactionTime, 
             </div>
           </div>
 
+        </div>
+      </div>
+
+      {/* AVISO DE DESCONEXÃO DA ANTENA */}
+      <div className={`max-w-4xl mx-auto p-6 rounded-2xl border-2 transition-all shadow-lg ${isDistancia ? 'bg-red-50 border-red-500 animate-pulse' : 'bg-orange-50 border-orange-400'}`}>
+        <div className="flex items-start gap-4">
+          <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white text-2xl font-black ${isDistancia ? 'bg-red-600' : 'bg-orange-500'}`}>!</div>
+          <div>
+            <h3 className={`text-lg font-black uppercase tracking-tight mb-1 ${isDistancia ? 'text-red-700' : 'text-orange-700'}`}>Atenção!</h3>
+            <p className={`text-base font-bold leading-tight ${isDistancia ? 'text-red-900' : 'text-orange-900'}`}>
+              Se o atendimento foi realizado à distância, mediante uso de antena, não esquecer de desconectar a antena no encerramento da sessão.
+            </p>
+          </div>
         </div>
       </div>
 
