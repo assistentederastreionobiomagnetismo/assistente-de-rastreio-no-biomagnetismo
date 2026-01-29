@@ -17,12 +17,13 @@ export interface PairDetail {
 }
 
 export interface BiomagneticPair {
-  name:string;
+  name: string;
   point1: string;
   point2: string;
   description?: string;
   imageUrl?: string;
   isCustom?: boolean;
+  isDefinitive?: boolean; // Novo campo para base global
   order?: number;
   details?: PairDetail[];
 }
