@@ -32,10 +32,9 @@ type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager' | 'changePassword
 const USERS_STORAGE_KEY = 'biomag_therapist_users';
 const PAIRS_STORAGE_KEY = 'biomag_master_pair_list';
 const LAST_SYNC_KEY = 'biomag_last_db_sync_date';
-const NEEDS_SYNC_FLAG = 'biomag_admin_needs_sync';
 
 const App: React.FC = () => {
-  // Session Active State
+  // Session State
   const [currentStep, setCurrentStep] = useState<Step>(Step.PATIENT_INFO);
   const [patient, setPatient] = useState<Patient>({ name: '', mainComplaint: '' });
   const [protocolData, setProtocolData] = useState<ProtocolData>({ legResponse: '', antennaResponse: '', sessionType: '' });
@@ -72,9 +71,13 @@ const App: React.FC = () => {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [lastSyncDate, setLastSyncDate] = useState<string>(localStorage.getItem(LAST_SYNC_KEY) || '');
   const [viewingHistoricalSession, setViewingHistoricalSession] = useState<Session | null>(null);
-  const [adminNeedsSync, setAdminNeedsSync] = useState<boolean>(localStorage.getItem(NEEDS_SYNC_FLAG) === 'true');
 
-  // Load Global master data
+  // Auth & View State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [appView, setAppView] = useState<AppView>('dashboard');
+
+  // Load master data
   useEffect(() => {
     const storedPairsRaw = localStorage.getItem(PAIRS_STORAGE_KEY);
     if (storedPairsRaw) setBiomagneticPairs(JSON.parse(storedPairsRaw));
@@ -109,7 +112,7 @@ const App: React.FC = () => {
     }
   }, [allUsers]);
 
-  // Handle Load/Switch User Context (Patients & Sessions)
+  // Load/Switch User Context
   useEffect(() => {
     if (currentUser) {
       const sessionsKey = `biomag_sessions_${currentUser.username}`;
@@ -123,76 +126,42 @@ const App: React.FC = () => {
           endTime: s.endTime ? new Date(s.endTime) : null
       })) : []);
       setPatients(storedPatients ? JSON.parse(storedPatients) : []);
-    } else {
-      setSessions([]);
-      setPatients([]);
     }
   }, [currentUser]);
 
   // Persist Bound Data
   useEffect(() => {
     if (currentUser && isAuthenticated) {
-        const patientsKey = `biomag_patients_${currentUser.username}`;
-        localStorage.setItem(patientsKey, JSON.stringify(patients));
+        localStorage.setItem(`biomag_patients_${currentUser.username}`, JSON.stringify(patients));
+        localStorage.setItem(`biomag_sessions_${currentUser.username}`, JSON.stringify(sessions));
     }
-  }, [patients, currentUser, isAuthenticated]);
-
-  useEffect(() => {
-    if (currentUser && isAuthenticated) {
-        const sessionsKey = `biomag_sessions_${currentUser.username}`;
-        localStorage.setItem(sessionsKey, JSON.stringify(sessions));
-    }
-  }, [sessions, currentUser, isAuthenticated]);
+  }, [patients, sessions, currentUser, isAuthenticated]);
 
   const handleImportUsers = (syncCode: string): boolean => {
     try {
-        const decoded = atob(syncCode);
+        const decoded = decodeURIComponent(escape(atob(syncCode)));
         const importedData = JSON.parse(decoded);
         
         if (typeof importedData === 'object' && !Array.isArray(importedData)) {
-            // Importar Usuários
             if (importedData.users) setAllUsers(importedData.users);
-            
-            // Importar Pares (Apenas se houver no pacote)
             if (importedData.pairs) {
                 setBiomagneticPairs(importedData.pairs);
-                const syncInfo = importedData.timestamp ? `Atualizada em ${new Date(importedData.timestamp).toLocaleString('pt-BR')}` : `Sincronizada em ${new Date().toLocaleString('pt-BR')}`;
-                setLastSyncDate(syncInfo);
-                localStorage.setItem(LAST_SYNC_KEY, syncInfo);
+                const now = new Date().toLocaleString('pt-BR');
+                setLastSyncDate(now);
+                localStorage.setItem(LAST_SYNC_KEY, now);
             }
             return true;
         } 
-        else if (Array.isArray(importedData)) {
-            setAllUsers(importedData);
-            return true;
-        }
     } catch (e) {
         console.error("Erro ao importar código de sincronização", e);
     }
     return false;
   };
 
-  const handleUpdatePairs = (newPairs: BiomagneticPair[]) => {
-      setBiomagneticPairs(newPairs);
-      setAdminNeedsSync(true);
-      localStorage.setItem(NEEDS_SYNC_FLAG, 'true');
-  };
-
-  const handleClearSyncFlag = () => {
-      setAdminNeedsSync(false);
-      localStorage.setItem(NEEDS_SYNC_FLAG, 'false');
-  };
-
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
     const foundUser = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     if (!foundUser) return { success: false, message: 'Usuário ou senha inválidos.' };
     if (!foundUser.isApproved) return { success: false, message: 'Cadastro aguardando ativação pelo administrador.' };
-
-    if (foundUser.approvalExpiry && foundUser.approvalType !== 'permanent') {
-      if (new Date(foundUser.approvalExpiry) < new Date()) {
-        return { success: false, message: 'Seu acesso expirou. Procure o administrador.' };
-      }
-    }
 
     setIsAuthenticated(true);
     setCurrentUser(foundUser);
@@ -206,7 +175,6 @@ const App: React.FC = () => {
     setAllUsers(updatedUsers);
     setCurrentUser(prev => prev ? { ...prev, password: newPassword, requiresPasswordChange: false } : null);
     setAppView('dashboard');
-    alert('Senha alterada com sucesso!');
   };
 
   const handleLogout = () => {
@@ -215,19 +183,6 @@ const App: React.FC = () => {
     setAppView('dashboard');
     setSessions([]);
     setPatients([]);
-    setPatient({ name: '', mainComplaint: '' });
-    setSelectedPairs([]);
-    setCurrentStep(Step.PATIENT_INFO);
-  };
-
-  const jumpToStep = (step: Step) => {
-    if (step === Step.SUMMARY && currentStep < Step.TREATMENT) return;
-    setCurrentStep(step);
-  };
-
-  const nextStep = () => {
-    if (currentStep === Step.TREATMENT && !sessionEndTime) setSessionEndTime(new Date());
-    if (currentStep < Step.SUMMARY) setCurrentStep(currentStep + 1);
   };
 
   const handleFinishSession = () => {
@@ -251,29 +206,12 @@ const App: React.FC = () => {
         startTime: sessionStartTime,
         endTime: sessionEndTime
     };
-    
     setSessions(prev => [newSession, ...prev]);
-    
-    // Reset session form
+    setAppView('dashboard');
+    // Reset session
     setCurrentStep(Step.PATIENT_INFO);
     setPatient({ name: '', mainComplaint: '' });
     setSelectedPairs([]);
-    setProtocolData({ legResponse: '', antennaResponse: '', sessionType: '' });
-    setPhenomena({ vascularAccidents: [], tumoralPhenomena: [], tumoralGenesis: [], traumas: [], portalPairs: [] });
-    setSelectedEmotions([]);
-    setSelectedSensations([]);
-    setEmotionsNotes('');
-    setSensationsNotes('');
-    setImpactionTime('');
-    setSessionNotes('');
-    setProtocolNotes('');
-    setLevelINotes('');
-    setLevelIINotes('');
-    setLevelIIINotes('');
-    setPhenomenaNotes('');
-    setSessionStartTime(null);
-    setSessionEndTime(null);
-    setAppView('dashboard');
   };
 
   if (!isAuthenticated) return <Login onLogin={handleTherapistLogin} onRequestReset={() => ({success: false, message: ''})} onImportSync={handleImportUsers} />;
@@ -289,7 +227,7 @@ const App: React.FC = () => {
         <header className="text-center mb-8 print:hidden">
           <h1 className="text-4xl font-bold text-teal-600">Assistente para Rastreios no Biomagnetismo</h1>
           <p className="text-slate-500">Terapeuta: <span className="font-bold">{currentUser?.fullName || currentUser?.username}</span></p>
-          {lastSyncDate && <p className="text-[10px] text-teal-600 font-bold uppercase mt-1">Biblioteca de Pares: {lastSyncDate}</p>}
+          {lastSyncDate && <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Base Atualizada: {lastSyncDate}</p>}
         </header>
         
         {appView === 'dashboard' && (
@@ -300,11 +238,10 @@ const App: React.FC = () => {
             patients={patients}
             setPatients={setPatients}
             biomagneticPairs={biomagneticPairs}
-            setBiomagneticPairs={handleUpdatePairs}
+            setBiomagneticPairs={setBiomagneticPairs}
             onManageUsers={() => setAppView('userManager')}
             onViewSessionDetail={(s) => setViewingHistoricalSession(s)}
             lastSyncDate={lastSyncDate}
-            adminNeedsSync={adminNeedsSync}
           />
         )}
         
@@ -314,13 +251,11 @@ const App: React.FC = () => {
             setUsers={setAllUsers} 
             biomagneticPairs={biomagneticPairs}
             onBack={() => setAppView('dashboard')} 
-            onSyncExported={handleClearSyncFlag}
           />
         )}
         
         {appView === 'sessionWorkflow' && (
           <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden relative">
-            {/* Nav Steps... */}
             <div className="p-4 md:p-6 border-b border-slate-200 overflow-x-auto print:hidden">
               <nav aria-label="Progress">
                 <ol role="list" className="flex items-center min-w-[800px]">
@@ -336,7 +271,7 @@ const App: React.FC = () => {
                     { name: 'Relatório', icon: <ReportIcon />, step: Step.SUMMARY }
                   ].map((s, idx) => (
                     <li key={s.name} className={`relative ${idx !== 8 ? 'flex-1' : ''}`}>
-                      <button onClick={() => jumpToStep(s.step)} className="flex flex-col items-center text-sm w-full group">
+                      <button onClick={() => setCurrentStep(s.step)} className="flex flex-col items-center text-sm w-full group">
                         <span className={`flex h-10 w-10 items-center justify-center rounded-full z-10 transition-all duration-300 transform group-hover:scale-110 ${currentStep >= s.step ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-500'} ${currentStep === s.step ? 'ring-4 ring-teal-100 scale-110' : ''}`}>
                           {React.cloneElement(s.icon as React.ReactElement<any>, { className: "w-6 h-6" })}
                         </span>
@@ -349,14 +284,14 @@ const App: React.FC = () => {
               </nav>
             </div>
             <main className="p-6 md:p-10">
-              {currentStep === Step.PATIENT_INFO && <PatientForm patient={patient} setPatient={setPatient} onNext={nextStep} patientsList={patients} setPatientsList={setPatients} />}
-              {currentStep === Step.START_PROTOCOL && <StartProtocol data={protocolData} setData={setProtocolData} notes={protocolNotes} setNotes={setProtocolNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PATIENT_INFO)} patientName={patient.name} />}
-              {currentStep === Step.SCANNING_LEVEL_I && <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelINotes} setNotes={setLevelINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.START_PROTOCOL)} biomagneticPairs={biomagneticPairs} />}
-              {currentStep === Step.SCANNING_LEVEL_II && <Scanning levelTitle="Nível II" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIINotes} setNotes={setLevelIINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_I)} biomagneticPairs={biomagneticPairs} />}
-              {currentStep === Step.SCANNING_LEVEL_III && <Scanning levelTitle="Nível III" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIIINotes} setNotes={setLevelIIINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_II)} biomagneticPairs={biomagneticPairs} />}
-              {currentStep === Step.PHENOMENA && <Phenomena data={phenomena} setData={setPhenomena} notes={phenomenaNotes} setNotes={setPhenomenaNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_III)} />}
-              {currentStep === Step.EMOTIONAL && <Emocional selectedEmotions={selectedEmotions} setSelectedEmotions={setSelectedEmotions} selectedSensations={selectedSensations} setSelectedSensations={setSelectedSensations} emotionsNotes={emotionsNotes} setEmotionsNotes={setEmotionsNotes} sensationsNotes={sensationsNotes} setSensationsNotes={setSensationsNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PHENOMENA)} />}
-              {currentStep === Step.TREATMENT && <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.EMOTIONAL)} sessionType={protocolData.sessionType} />}
+              {currentStep === Step.PATIENT_INFO && <PatientForm patient={patient} setPatient={setPatient} onNext={() => setCurrentStep(Step.START_PROTOCOL)} patientsList={patients} setPatientsList={setPatients} />}
+              {currentStep === Step.START_PROTOCOL && <StartProtocol data={protocolData} setData={setProtocolData} notes={protocolNotes} setNotes={setProtocolNotes} onNext={() => setCurrentStep(Step.SCANNING_LEVEL_I)} onBack={() => setCurrentStep(Step.PATIENT_INFO)} patientName={patient.name} />}
+              {currentStep === Step.SCANNING_LEVEL_I && <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelINotes} setNotes={setLevelINotes} onNext={() => setCurrentStep(Step.SCANNING_LEVEL_II)} onBack={() => setCurrentStep(Step.START_PROTOCOL)} biomagneticPairs={biomagneticPairs} />}
+              {currentStep === Step.SCANNING_LEVEL_II && <Scanning levelTitle="Nível II" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIINotes} setNotes={setLevelIINotes} onNext={() => setCurrentStep(Step.SCANNING_LEVEL_III)} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_I)} biomagneticPairs={biomagneticPairs} />}
+              {currentStep === Step.SCANNING_LEVEL_III && <Scanning levelTitle="Nível III" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIIINotes} setNotes={setLevelIIINotes} onNext={() => setCurrentStep(Step.PHENOMENA)} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_II)} biomagneticPairs={biomagneticPairs} />}
+              {currentStep === Step.PHENOMENA && <Phenomena data={phenomena} setData={setPhenomena} notes={phenomenaNotes} setNotes={setPhenomenaNotes} onNext={() => setCurrentStep(Step.EMOTIONAL)} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_III)} />}
+              {currentStep === Step.EMOTIONAL && <Emocional selectedEmotions={selectedEmotions} setSelectedEmotions={setSelectedEmotions} selectedSensations={selectedSensations} setSelectedSensations={setSelectedSensations} emotionsNotes={emotionsNotes} setEmotionsNotes={setEmotionsNotes} sensationsNotes={sensationsNotes} setSensationsNotes={setSensationsNotes} onNext={() => setCurrentStep(Step.TREATMENT)} onBack={() => setCurrentStep(Step.PHENOMENA)} />}
+              {currentStep === Step.TREATMENT && <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} onNext={() => { setSessionEndTime(new Date()); setCurrentStep(Step.SUMMARY); }} onBack={() => setCurrentStep(Step.EMOTIONAL)} sessionType={protocolData.sessionType} />}
               {currentStep === Step.SUMMARY && <SessionSummary patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} emotions={selectedEmotions} sensations={selectedSensations} emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes} protocolNotes={protocolNotes} levelINotes={levelINotes} levelIINotes={levelIINotes} levelIIINotes={levelIIINotes} phenomenaNotes={phenomenaNotes} impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} onFinish={handleFinishSession} onBack={() => setCurrentStep(Step.TREATMENT)} />}
             </main>
           </div>
