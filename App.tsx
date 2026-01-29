@@ -209,12 +209,20 @@ const App: React.FC = () => {
     try {
         const decoded = atob(syncCode);
         const importedData = JSON.parse(decoded);
-        if (Array.isArray(importedData)) {
+        
+        // Verifica se é o novo formato (Objeto com users e pairs)
+        if (typeof importedData === 'object' && !Array.isArray(importedData)) {
+            if (importedData.users) setAllUsers(importedData.users);
+            if (importedData.pairs) setBiomagneticPairs(importedData.pairs);
+            return true;
+        } 
+        // Suporte ao formato antigo (Apenas Array de usuários)
+        else if (Array.isArray(importedData)) {
             setAllUsers(importedData);
             return true;
         }
     } catch (e) {
-        console.error("Erro ao importar código", e);
+        console.error("Erro ao importar código de sincronização", e);
     }
     return false;
   };
@@ -246,11 +254,7 @@ const App: React.FC = () => {
   };
 
   const jumpToStep = (step: Step) => {
-    // Permite navegar livremente até o passo de Finalização (TREATMENT)
-    // O passo SUMMARY (Relatório) requer que o fluxo de tratamento seja concluído formalmente via botão "Próximo"
-    // para registrar o horário de término corretamente, a menos que o usuário já tenha chegado lá uma vez.
     if (step === Step.SUMMARY && currentStep < Step.TREATMENT) return;
-    
     setCurrentStep(step);
   };
 
@@ -348,7 +352,12 @@ const App: React.FC = () => {
         )}
         
         {appView === 'userManager' && (
-          <UserManager users={allUsers} setUsers={setAllUsers} onBack={() => setAppView('dashboard')} />
+          <UserManager 
+            users={allUsers} 
+            setUsers={setAllUsers} 
+            biomagneticPairs={biomagneticPairs}
+            onBack={() => setAppView('dashboard')} 
+          />
         )}
         
         {appView === 'sessionWorkflow' && (
@@ -385,7 +394,6 @@ const App: React.FC = () => {
               </nav>
             </div>
             <main className="p-6 md:p-10">
-              {/* BARRA DE STATUS PERSISTENTE */}
               {currentStep > Step.START_PROTOCOL && (protocolData.legResponse || protocolData.antennaResponse) && (
                 <div className="mb-6 p-4 bg-teal-50 border-l-4 border-teal-500 rounded-r shadow-md animate-fade-in print:hidden">
                   <div className="flex flex-col md:flex-row gap-x-8 gap-y-3">

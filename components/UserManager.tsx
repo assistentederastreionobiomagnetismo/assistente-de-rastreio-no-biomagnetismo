@@ -1,15 +1,16 @@
 
 import React, { useState } from 'react';
-import { User, ApprovalPeriod } from '../types';
+import { User, ApprovalPeriod, BiomagneticPair } from '../types';
 import { TrashIcon, CheckIcon, PlusIcon, ClipboardIcon, WhatsAppIcon } from './icons/Icons';
 
 interface UserManagerProps {
   users: User[];
   setUsers: React.Dispatch<React.SetStateAction<User[]>>;
+  biomagneticPairs: BiomagneticPair[];
   onBack: () => void;
 }
 
-const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) => {
+const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticPairs, onBack }) => {
   const [syncCode, setSyncCode] = useState<string | null>(null);
   const [lastCreatedUser, setLastCreatedUser] = useState<User | null>(null);
   
@@ -101,12 +102,16 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
   };
 
   const handleExportSync = () => {
-    const jsonStr = JSON.stringify(users);
-    const code = btoa(jsonStr);
+    // Cria um pacote contendo tanto os usuários quanto os pares biomagnéticos
+    const syncPackage = {
+        users: users,
+        pairs: biomagneticPairs
+    };
+    const jsonStr = JSON.stringify(syncPackage);
+    const code = btoa(unescape(encodeURIComponent(jsonStr))); // btoa com suporte a caracteres latinos
     setSyncCode(code);
   };
 
-  // Mensagem 1: Instruções e Link
   const handleSendInstructions = () => {
     if (!lastCreatedUser?.whatsapp || !syncCode) return;
     const appUrl = window.location.origin;
@@ -125,7 +130,6 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
     window.open(`https://wa.me/55${lastCreatedUser.whatsapp}?text=${message}`, '_blank');
   };
 
-  // Mensagem 2: Somente o Código (Puro, sem nada escrito)
   const handleSendOnlyCode = () => {
     if (!lastCreatedUser?.whatsapp || !syncCode) return;
     const message = encodeURIComponent(syncCode);
@@ -154,7 +158,6 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
         <button onClick={onBack} className="px-6 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all border border-slate-200">Voltar</button>
       </div>
 
-      {/* Formulário Estendido */}
       <div className="mb-12 p-8 bg-slate-50 border-2 border-slate-200 rounded-3xl shadow-sm">
         <h3 className="text-slate-800 font-black mb-6 flex items-center gap-2 text-xl">
             <PlusIcon className="w-7 h-7 text-teal-600" /> Cadastro de Novo Terapeuta
@@ -241,8 +244,9 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, onBack }) =>
 
       <div className="mb-10 flex flex-col items-center">
         <button onClick={handleExportSync} className="px-12 py-5 bg-sky-600 text-white font-black rounded-2xl shadow-xl hover:bg-sky-700 transition-all flex items-center gap-3 transform hover:scale-[1.02]">
-            GERAR CÓDIGO DE ACESSO
+            GERAR CÓDIGO DE ACESSO (Usuários + Pares)
         </button>
+        <p className="mt-2 text-xs text-slate-400 italic">O código acima contém todas as alterações feitas nos pares e permissões de usuários.</p>
       </div>
 
       {syncCode && (
