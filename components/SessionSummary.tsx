@@ -121,6 +121,9 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
             {protocolData?.legResponse && (
                 <p className="text-sm"><strong className="font-bold text-slate-700">Sim do Paciente:</strong> {protocolData.legResponse}</p>
             )}
+            {protocolData?.sessionType === 'distancia' && protocolData?.antennaResponse && (
+                <p className="text-sm"><strong className="font-bold text-indigo-700">Sim da Antena:</strong> {protocolData.antennaResponse}</p>
+            )}
             {impactionTime && (
                 <div className="mt-2 p-2 bg-teal-50 rounded border border-teal-100">
                     <p className="text-sm font-bold text-teal-800">Tempo de Impactação Recomendado:</p>

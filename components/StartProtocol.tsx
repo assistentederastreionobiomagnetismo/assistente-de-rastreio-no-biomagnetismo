@@ -19,6 +19,12 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
     setData(prev => ({ ...prev, legResponse: val }));
   };
 
+  const handleAntennaResponseChange = (val: 'Encurtado' | 'Estendido' | 'Normal') => {
+    setData(prev => ({ ...prev, antennaResponse: val }));
+  };
+
+  const isNextDisabled = !data.sessionType || !data.legResponse || (isDistancia && !data.antennaResponse);
+
   return (
     <div className="animate-fade-in space-y-8 pb-10">
       <div className="text-center border-b pb-6">
@@ -36,7 +42,7 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
         {/* Botões Chamativos */}
         <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-6 print:hidden">
           <button
-            onClick={() => setData({ ...data, sessionType: 'presencial' })}
+            onClick={() => setData({ ...data, sessionType: 'presencial', antennaResponse: '' })}
             className={`group relative flex flex-col items-center justify-center w-full sm:w-64 py-4 px-6 rounded-2xl border-4 transition-all duration-300 transform hover:scale-105 ${data.sessionType === 'presencial' ? 'bg-teal-600 text-white border-teal-400 shadow-[0_10px_20px_rgba(13,148,136,0.3)]' : 'bg-white text-slate-500 border-slate-100 hover:border-teal-200 shadow-lg'}`}
           >
             <span className="text-lg font-black uppercase tracking-wider">Sessão Presencial</span>
@@ -105,9 +111,36 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
           {isDistancia && (
             <div className="flex gap-4 p-5 bg-indigo-50 border-2 border-indigo-100 rounded-xl animate-fade-in ring-4 ring-indigo-50">
               <span className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">3</span>
-              <div>
+              <div className="flex-1">
                 <p className="font-bold text-indigo-900 mb-2 uppercase text-xs tracking-widest">Protocolo de Conexão (Antena):</p>
-                <p className="text-indigo-900 leading-relaxed">
+                
+                <div className="flex flex-wrap items-center gap-6 p-3 bg-white rounded-lg border border-indigo-200 mb-3 shadow-sm">
+                  <span className="text-xs font-black text-indigo-700 uppercase tracking-tight">Sim da Antena:</span>
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input 
+                      type="radio" 
+                      name="antennaResponse" 
+                      value="Encurtado"
+                      checked={data.antennaResponse === 'Encurtado'}
+                      onChange={() => handleAntennaResponseChange('Encurtado')}
+                      className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                    />
+                    <span className={`text-xs font-bold transition-colors ${data.antennaResponse === 'Encurtado' ? 'text-indigo-800' : 'text-slate-500 group-hover:text-slate-700'}`}>Encurtado</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input 
+                      type="radio" 
+                      name="antennaResponse" 
+                      value="Estendido"
+                      checked={data.antennaResponse === 'Estendido'}
+                      onChange={() => handleAntennaResponseChange('Estendido')}
+                      className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                    />
+                    <span className={`text-xs font-bold transition-colors ${data.antennaResponse === 'Estendido' ? 'text-indigo-800' : 'text-slate-500 group-hover:text-slate-700'}`}>Estendido</span>
+                  </label>
+                </div>
+
+                <p className="text-indigo-900 leading-relaxed text-sm">
                   <strong>Pedir permissão:</strong> Organismo, você aceita ser antena para <span className="bg-indigo-200 px-2 py-0.5 rounded font-black text-indigo-900">{patientName || 'O PACIENTE'}</span>? 
                   Se a antena responder sim, dar o comando: <br />
                   <span className="italic font-medium text-indigo-700 block my-2">"Declaro então que, a partir de agora, você é o(a) {patientName || 'O PACIENTE'}!"</span>
@@ -181,39 +214,6 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
         ></textarea>
       </div>
 
-      {/* QUADRO DE LEMBRETES TÉCNICOS */}
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="border-2 border-slate-200 rounded-2xl p-6 bg-white shadow-md space-y-4">
-          <h4 className="font-black text-slate-800 border-b-2 border-teal-500 pb-2 text-xs uppercase tracking-widest flex items-center gap-2">
-            <span className="w-2 h-2 bg-teal-500 rounded-full"></span> Lembretes Técnicos
-          </h4>
-          <ul className="text-xs space-y-2 font-bold">
-            <li className="flex items-center gap-2 text-slate-700">➤ <span className="text-slate-900">NEGATIVO:</span> <span className="px-2 py-0.5 bg-black text-white rounded">Preto</span></li>
-            <li className="flex items-center gap-2 text-slate-700">➤ <span className="text-slate-900">POSITIVO:</span> <span className="px-2 py-0.5 bg-red-600 text-white rounded">Vermelho</span></li>
-          </ul>
-          <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Os três planos corporais:</p>
-            <ul className="text-xs space-y-1 ml-2 font-bold text-slate-700">
-              <li>• Sagital</li>
-              <li>• Medial</li>
-              <li>• Antero Posterior</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="border-2 border-slate-200 rounded-2xl p-6 bg-white shadow-md space-y-4">
-          <div className="space-y-2">
-            <p className="text-xs text-slate-800 leading-tight"><span className="font-black text-teal-700 uppercase text-[10px]">Bipolar:</span> Dois ímãs juntos, negativo e positivo – usar quando o ponto e a ressonância for no mesmo local. <span className="italic text-slate-500">Ex: baço/baço, estômago/estômago, pineal/pineal...</span></p>
-          </div>
-          <div className="space-y-2 border-t border-slate-100 pt-3">
-            <p className="text-xs text-slate-800 leading-tight"><span className="font-black text-teal-700 uppercase text-[10px]">Bilateral:</span> Usar quando a regra for um ímã de cada lado – direito e esquerdo. <span className="italic text-slate-500">Ex: olho/olho, rim/rim, joelho/joelho...</span></p>
-          </div>
-          <div className="space-y-2 border-t border-slate-100 pt-3">
-            <p className="text-xs text-slate-800 leading-tight font-bold"><span className="font-black text-red-600 uppercase text-[10px]">Par Trauma:</span> <span className="underline decoration-red-500 decoration-2">Negativo no Trauma</span> e o positivo no rim do mesmo lado.</p>
-          </div>
-        </div>
-      </div>
-
       <div className="flex justify-between pt-8 max-w-4xl mx-auto border-t">
         <button
           onClick={onBack}
@@ -223,7 +223,7 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
         </button>
         <button
           onClick={onNext}
-          disabled={!data.sessionType || !data.legResponse}
+          disabled={isNextDisabled}
           className="inline-flex items-center px-12 py-3 border border-transparent text-base font-black rounded-xl shadow-lg text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95"
         >
           Próximo: Rastreio

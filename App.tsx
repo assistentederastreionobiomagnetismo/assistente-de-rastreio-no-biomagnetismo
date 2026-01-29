@@ -36,7 +36,7 @@ const App: React.FC = () => {
   // Session State
   const [currentStep, setCurrentStep] = useState<Step>(Step.PATIENT_INFO);
   const [patient, setPatient] = useState<Patient>({ name: '', mainComplaint: '' });
-  const [protocolData, setProtocolData] = useState<ProtocolData>({ legResponse: '', sessionType: '' });
+  const [protocolData, setProtocolData] = useState<ProtocolData>({ legResponse: '', antennaResponse: '', sessionType: '' });
   const [selectedPairs, setSelectedPairs] = useState<BiomagneticPair[]>([]);
   const [phenomena, setPhenomena] = useState<PhenomenaData>({
     vascularAccidents: [],
@@ -248,7 +248,7 @@ const App: React.FC = () => {
   const resetSessionState = () => {
       setCurrentStep(Step.PATIENT_INFO);
       setPatient({ name: '', mainComplaint: '' });
-      setProtocolData({ legResponse: '', sessionType: '' });
+      setProtocolData({ legResponse: '', antennaResponse: '', sessionType: '' });
       setSelectedPairs([]);
       setPhenomena({ vascularAccidents: [], tumoralPhenomena: [], tumoralGenesis: [], traumas: [], portalPairs: [] });
       setSelectedEmotions([]);
@@ -375,9 +375,16 @@ const App: React.FC = () => {
               {/* STATUS HEADER - PERSISTENTE APÓS O PROTOCOLO INICIAL */}
               {currentStep > Step.START_PROTOCOL && protocolData.legResponse && (
                 <div className="mb-6 p-3 bg-teal-50 border-l-4 border-teal-500 rounded-r shadow-sm animate-fade-in print:hidden">
-                  <p className="text-teal-800 font-black text-sm uppercase tracking-tight">
-                    Sim do paciente: <span className="bg-teal-600 text-white px-2 py-0.5 rounded ml-1">{protocolData.legResponse}</span>
-                  </p>
+                  <div className="flex flex-col md:flex-row gap-x-8 gap-y-2">
+                    <p className="text-teal-800 font-black text-sm uppercase tracking-tight">
+                      Sim do paciente: <span className="bg-teal-600 text-white px-2 py-0.5 rounded ml-1">{protocolData.legResponse}</span>
+                    </p>
+                    {protocolData.sessionType === 'distancia' && protocolData.antennaResponse && (
+                      <p className="text-indigo-800 font-black text-sm uppercase tracking-tight border-l-0 md:border-l-2 md:pl-8 border-teal-200">
+                        Sim da antena: <span className="bg-indigo-600 text-white px-2 py-0.5 rounded ml-1">{protocolData.antennaResponse}</span>
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
 

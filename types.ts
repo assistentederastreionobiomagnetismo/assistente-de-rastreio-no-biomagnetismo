@@ -53,6 +53,7 @@ export interface User {
 
 export interface ProtocolData {
   legResponse: 'Estendido' | 'Encurtado' | 'Normal' | '';
+  antennaResponse: 'Estendido' | 'Encurtado' | 'Normal' | '';
   sessionType: 'presencial' | 'distancia' | '';
 }
 
