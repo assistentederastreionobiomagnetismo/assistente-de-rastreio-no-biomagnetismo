@@ -354,6 +354,15 @@ const App: React.FC = () => {
               </nav>
             </div>
             <main className="p-6 md:p-10">
+              {/* STATUS HEADER - PERSISTENTE APÓS O PROTOCOLO INICIAL */}
+              {currentStep > Step.START_PROTOCOL && protocolData.legResponse && (
+                <div className="mb-6 p-3 bg-teal-50 border-l-4 border-teal-500 rounded-r shadow-sm animate-fade-in print:hidden">
+                  <p className="text-teal-800 font-black text-sm uppercase tracking-tight">
+                    Sim do paciente: <span className="bg-teal-600 text-white px-2 py-0.5 rounded ml-1">{protocolData.legResponse}</span>
+                  </p>
+                </div>
+              )}
+
               {currentStep === Step.PATIENT_INFO && <PatientForm patient={patient} setPatient={setPatient} onNext={nextStep} patientsList={patients} setPatientsList={setPatients} />}
               {currentStep === Step.START_PROTOCOL && <StartProtocol data={protocolData} setData={setProtocolData} onNext={nextStep} onBack={prevStep} patientName={patient.name} />}
               {currentStep === Step.SCANNING_LEVEL_I && <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} onNext={nextStep} onBack={prevStep} biomagneticPairs={biomagneticPairs} />}

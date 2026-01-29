@@ -13,6 +13,10 @@ interface StartProtocolProps {
 const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, onNext, onBack, patientName }) => {
   const isDistancia = data.sessionType === 'distancia';
 
+  const handleLegResponseChange = (val: 'Encurtado' | 'Estendido' | 'Normal') => {
+    setData(prev => ({ ...prev, legResponse: val }));
+  };
+
   return (
     <div className="animate-fade-in space-y-8 pb-10">
       <div className="text-center border-b pb-6">
@@ -54,11 +58,38 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, onNext, on
       <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
         <div className="p-8 space-y-6 text-sm text-slate-700 leading-relaxed">
           
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-start">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">1</span>
-            <p>
-              Polarizar os 3 planos corporais (terapeuta e paciente) e em seguida fazer o risco no pé direito, transferindo para o pé esquerdo para obter o SIM. Obtido o sim, anote na ficha se é estendido ou encurtado.
-            </p>
+            <div className="flex-1">
+              <p className="mb-3">
+                Polarizar os 3 planos corporais (terapeuta e paciente) e em seguida fazer o risco no pé direito, transferindo para o pé esquerdo para obter o SIM.
+              </p>
+              <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <span className="text-sm font-black text-teal-700 uppercase tracking-tight">Sim do paciente:</span>
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input 
+                    type="radio" 
+                    name="legResponse" 
+                    value="Encurtado"
+                    checked={data.legResponse === 'Encurtado'}
+                    onChange={() => handleLegResponseChange('Encurtado')}
+                    className="w-5 h-5 text-teal-600 focus:ring-teal-500 border-slate-300"
+                  />
+                  <span className={`text-sm font-bold transition-colors ${data.legResponse === 'Encurtado' ? 'text-teal-700' : 'text-slate-500 group-hover:text-slate-700'}`}>Encurtado</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input 
+                    type="radio" 
+                    name="legResponse" 
+                    value="Estendido"
+                    checked={data.legResponse === 'Estendido'}
+                    onChange={() => handleLegResponseChange('Estendido')}
+                    className="w-5 h-5 text-teal-600 focus:ring-teal-500 border-slate-300"
+                  />
+                  <span className={`text-sm font-bold transition-colors ${data.legResponse === 'Estendido' ? 'text-teal-700' : 'text-slate-500 group-hover:text-slate-700'}`}>Estendido</span>
+                </label>
+              </div>
+            </div>
           </div>
 
           <div className="flex gap-4">
@@ -116,7 +147,7 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, onNext, on
           <div className="flex gap-4">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '8' : '7'}</span>
             <p>
-              Organismo, comando que você me passe todos os pontos que suportam informações, presença, frequência, ressonância, reservatório, pontos de sobrevivências, toxinas, venenos, mucoproteínas tóxicas, lesões, doenças, desconfortos, produtos e subprodutos de qualquer patógeno e qualquer de suas versões, distorções de PH, disfunção de glândulas que tenha ligação ou causa a(s) sua(s) queixa(s) do dia.
+              Organismo, comando que você me passe todos os pontos que suportam informações, presença, frequência, ressonância, reservatório, pontos de sobrevivências, toxinas, venenos, mucoproteínas tóxicas, lesões, doenças, desconfortos, produtos e subprodutos de qualquer patógeno e qualquer de suas versions, distorções de PH, disfunção de glândulas que tenha ligação ou causa a(s) sua(s) queixa(s) do dia.
             </p>
           </div>
 
@@ -177,7 +208,7 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, onNext, on
         </button>
         <button
           onClick={onNext}
-          disabled={!data.sessionType}
+          disabled={!data.sessionType || !data.legResponse}
           className="inline-flex items-center px-12 py-3 border border-transparent text-base font-black rounded-xl shadow-lg text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95"
         >
           Próximo: Rastreio
