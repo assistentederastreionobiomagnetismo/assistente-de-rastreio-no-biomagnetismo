@@ -123,7 +123,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
     setNewPatientData({ name: '', birthDate: '', email: '', phone: '', mainComplaint: '' });
   };
 
-  const isFormValid = patient.name.trim() !== '' && (patient.birthDate || '').length === 10;
+  const isFormValid = patient.name.trim() !== '' && (patient.birthDate || '').length === 10 && patient.mainComplaint.trim() !== '';
 
   return (
     <div className="animate-fade-in">
@@ -289,15 +289,16 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
         </div>
 
         <div>
-          <label htmlFor="mainComplaint" className="block text-sm font-medium text-slate-600">Queixa Principal (Opcional)</label>
+          <label htmlFor="mainComplaint" className="block text-sm font-medium text-slate-600 font-bold text-teal-700">Queixas do dia (Obrigatório pelo menos uma)</label>
           <textarea
             id="mainComplaint"
             name="mainComplaint"
             value={patient.mainComplaint}
             onChange={handleChange}
             rows={4}
-            className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-            placeholder="Descreva o motivo da consulta atual..."
+            className={`mt-1 block w-full px-3 py-2 bg-white border ${patient.mainComplaint.trim() === '' ? 'border-red-300 focus:ring-red-500' : 'border-slate-300 focus:ring-teal-500'} rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:border-teal-500 sm:text-sm`}
+            placeholder="Descreva as queixas e sintomas para o atendimento de hoje..."
+            required
           />
         </div>
 

@@ -108,7 +108,7 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
             <p className="text-sm"><strong className="font-bold text-slate-700">Idade:</strong> {patient.age !== undefined ? `${patient.age} anos` : 'N/A'}</p>
             {patient.mainComplaint && (
                 <div className="mt-2">
-                    <strong className="text-sm font-bold text-slate-700 block">Queixa Principal:</strong>
+                    <strong className="text-sm font-bold text-slate-700 block">Queixas do dia:</strong>
                     <p className="text-sm text-slate-600 italic bg-slate-50 p-2 rounded border border-slate-100 mt-1">{patient.mainComplaint}</p>
                 </div>
             )}

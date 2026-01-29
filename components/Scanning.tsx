@@ -75,7 +75,7 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
             </div>
           )}
 
-          <div className="h-96 overflow-y-auto border rounded-lg p-2 bg-slate-50">
+          <div className="h-96 overflow-y-auto border rounded-lg p-2 bg-slate-50 shadow-inner">
             <ul className="divide-y divide-slate-200">
               {filteredPairs.map(pair => (
                 <li key={pair.name} className="flex items-center justify-between p-3 hover:bg-slate-100 rounded-md">
@@ -105,7 +105,7 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
 
         <div className="flex flex-col">
             <h3 className="text-lg font-semibold text-slate-600 mb-4">Pares Selecionados ({selectedPairs.length})</h3>
-            <div className={`flex-1 min-h-[300px] overflow-y-auto border rounded-lg p-2 bg-white mb-4 shadow-inner`}>
+            <div className="h-96 overflow-y-auto border rounded-lg p-2 bg-white mb-4 shadow-inner">
                 {selectedPairs.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-slate-400">
                         <p>Nenhum par selecionado.</p>
@@ -113,11 +113,20 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
                 ) : (
                     <ul className="divide-y divide-slate-200">
                     {selectedPairs.map(pair => (
-                        <li key={pair.name} className="flex items-center justify-between p-3">
-                            <span className="text-sm font-medium text-slate-900">{pair.name}</span>
-                            <button onClick={() => removePairFromSession(pair.name)} className="p-1 text-red-500 hover:text-red-700 transition-colors" title="Remover Par">
-                                <TrashIcon className="w-5 h-5"/>
-                            </button>
+                        <li key={pair.name} className="flex items-center justify-between p-3 hover:bg-slate-50 transition-colors">
+                            <span className="text-sm font-medium text-slate-900 flex-1 truncate pr-2">{pair.name}</span>
+                            <div className="flex items-center space-x-2 flex-shrink-0">
+                                <button 
+                                  onClick={() => setInfoModalPair(pair)} 
+                                  className="p-1 text-sky-600 hover:text-sky-800 transition-colors" 
+                                  title={"Ver Detalhes do Par"}
+                                >
+                                    <InfoIcon className="w-5 h-5"/>
+                                </button>
+                                <button onClick={() => removePairFromSession(pair.name)} className="p-1 text-red-500 hover:text-red-700 transition-colors" title="Remover Par">
+                                    <TrashIcon className="w-5 h-5"/>
+                                </button>
+                            </div>
                         </li>
                     ))}
                     </ul>

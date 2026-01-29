@@ -245,6 +245,15 @@ const App: React.FC = () => {
     if (currentStep > Step.PATIENT_INFO) setCurrentStep(currentStep - 1);
   };
 
+  const jumpToStep = (step: Step) => {
+    // Permite navegar livremente até o passo de Finalização (TREATMENT)
+    // O passo SUMMARY (Relatório) requer que o fluxo de tratamento seja concluído formalmente via botão "Próximo"
+    // para registrar o horário de término corretamente, a menos que o usuário já tenha chegado lá uma vez.
+    if (step === Step.SUMMARY && currentStep < Step.TREATMENT) return;
+    
+    setCurrentStep(step);
+  };
+
   const resetSessionState = () => {
       setCurrentStep(Step.PATIENT_INFO);
       setPatient({ name: '', mainComplaint: '' });
@@ -359,12 +368,16 @@ const App: React.FC = () => {
                     { name: 'Relatório', icon: <ReportIcon />, step: Step.SUMMARY }
                   ].map((s, idx) => (
                     <li key={s.name} className={`relative ${idx !== 8 ? 'flex-1' : ''}`}>
-                      <div className="flex flex-col items-center text-sm">
-                        <span className={`flex h-10 w-10 items-center justify-center rounded-full z-10 ${currentStep >= s.step ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                      <button 
+                        onClick={() => jumpToStep(s.step)}
+                        className="flex flex-col items-center text-sm w-full focus:outline-none group"
+                        title={`Ir para etapa ${s.name}`}
+                      >
+                        <span className={`flex h-10 w-10 items-center justify-center rounded-full z-10 transition-all duration-300 transform group-hover:scale-110 ${currentStep >= s.step ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-500'} ${currentStep === s.step ? 'ring-4 ring-teal-100 scale-110' : ''}`}>
                           {React.cloneElement(s.icon as React.ReactElement<any>, { className: "w-6 h-6" })}
                         </span>
-                        <span className={`mt-2 text-xs font-medium ${currentStep >= s.step ? 'text-teal-600 font-bold' : 'text-slate-400'}`}>{s.name}</span>
-                      </div>
+                        <span className={`mt-2 text-xs font-medium transition-colors ${currentStep >= s.step ? 'text-teal-600 font-bold' : 'text-slate-400'} group-hover:text-teal-700`}>{s.name}</span>
+                      </button>
                       {idx !== 8 && <div className="absolute inset-x-0 top-5 left-1/2 -z-0 h-0.5 w-full bg-slate-200" />}
                     </li>
                   ))}
