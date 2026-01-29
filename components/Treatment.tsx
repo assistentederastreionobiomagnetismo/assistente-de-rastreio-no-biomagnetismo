@@ -22,7 +22,7 @@ const Treatment: React.FC<TreatmentProps> = ({ impactionTime, setImpactionTime, 
       </div>
 
       <div className="max-w-4xl mx-auto bg-slate-50 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 space-y-6 text-sm text-slate-700 leading-relaxed">
+        <div className="p-6 space-y-4 text-sm text-slate-700 leading-relaxed">
           
           <div className="flex gap-4 p-4 bg-white rounded-lg border border-slate-100 shadow-sm">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold">1</span>
@@ -67,19 +67,17 @@ const Treatment: React.FC<TreatmentProps> = ({ impactionTime, setImpactionTime, 
             </div>
           </div>
 
-        </div>
-      </div>
-
-      {/* AVISO DE DESCONEXÃO DA ANTENA */}
-      <div className={`max-w-4xl mx-auto p-6 rounded-2xl border-2 transition-all shadow-lg ${isDistancia ? 'bg-red-50 border-red-500 animate-pulse' : 'bg-orange-50 border-orange-400'}`}>
-        <div className="flex items-start gap-4">
-          <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white text-2xl font-black ${isDistancia ? 'bg-red-600' : 'bg-orange-500'}`}>!</div>
-          <div>
-            <h3 className={`text-lg font-black uppercase tracking-tight mb-1 ${isDistancia ? 'text-red-700' : 'text-orange-700'}`}>Atenção!</h3>
-            <p className={`text-base font-bold leading-tight ${isDistancia ? 'text-red-900' : 'text-orange-900'}`}>
-              Se o atendimento foi realizado à distância, mediante uso de antena, não esquecer de desconectar a antena no encerramento da sessão.
-            </p>
+          {/* ITEM 5 SOLICITADO */}
+          <div className={`flex gap-4 p-4 rounded-lg border-2 transition-all ${isDistancia ? 'bg-red-50 border-red-400 animate-pulse' : 'bg-white border-slate-100 shadow-sm'}`}>
+            <span className={`flex-shrink-0 w-8 h-8 rounded-full text-white flex items-center justify-center font-bold ${isDistancia ? 'bg-red-600' : 'bg-teal-600'}`}>5</span>
+            <div>
+              <p className={`font-black uppercase text-xs mb-1 ${isDistancia ? 'text-red-700' : 'text-slate-500'}`}>Observação importante:</p>
+              <p className={`text-base leading-tight ${isDistancia ? 'text-red-900 font-black' : 'text-slate-700 font-bold'}`}>
+                Atenção! Se o atendimento foi realizado à distância, mediante uso de antena, não esquecer de desconectar a antena no encerramento da sessão.
+              </p>
+            </div>
           </div>
+
         </div>
       </div>
 
@@ -98,16 +96,16 @@ const Treatment: React.FC<TreatmentProps> = ({ impactionTime, setImpactionTime, 
         </div>
       </div>
 
-      <div className="flex justify-between pt-8 max-w-4xl mx-auto">
+      <div className="flex justify-between pt-8 max-w-4xl mx-auto border-t">
         <button
           onClick={onBack}
-          className="inline-flex items-center px-8 py-2 border border-slate-300 text-base font-medium rounded-md shadow-sm text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors"
+          className="inline-flex items-center px-8 py-2 border border-slate-300 text-base font-bold rounded-md shadow-sm text-slate-700 bg-white hover:bg-slate-50 transition-colors"
         >
           Voltar
         </button>
         <button
           onClick={onNext}
-          className="inline-flex items-center px-10 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors font-bold shadow-lg"
+          className="inline-flex items-center px-10 py-2 border border-transparent text-base font-black rounded-xl shadow-lg text-white bg-teal-600 hover:bg-teal-700 transition-colors"
         >
           Próximo: Relatório Final
         </button>
