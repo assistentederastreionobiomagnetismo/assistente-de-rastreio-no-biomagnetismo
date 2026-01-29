@@ -372,16 +372,18 @@ const App: React.FC = () => {
               </nav>
             </div>
             <main className="p-6 md:p-10">
-              {/* STATUS HEADER - PERSISTENTE APÓS O PROTOCOLO INICIAL */}
-              {currentStep > Step.START_PROTOCOL && protocolData.legResponse && (
-                <div className="mb-6 p-3 bg-teal-50 border-l-4 border-teal-500 rounded-r shadow-sm animate-fade-in print:hidden">
-                  <div className="flex flex-col md:flex-row gap-x-8 gap-y-2">
-                    <p className="text-teal-800 font-black text-sm uppercase tracking-tight">
-                      Sim do paciente: <span className="bg-teal-600 text-white px-2 py-0.5 rounded ml-1">{protocolData.legResponse}</span>
-                    </p>
+              {/* BARRA DE STATUS PERSISTENTE */}
+              {currentStep > Step.START_PROTOCOL && (protocolData.legResponse || protocolData.antennaResponse) && (
+                <div className="mb-6 p-4 bg-teal-50 border-l-4 border-teal-500 rounded-r shadow-md animate-fade-in print:hidden">
+                  <div className="flex flex-col md:flex-row gap-x-8 gap-y-3">
+                    {protocolData.legResponse && (
+                      <p className="text-teal-800 font-black text-sm uppercase tracking-tight flex items-center">
+                        Sim do paciente: <span className="bg-teal-600 text-white px-3 py-1 rounded-full ml-2 shadow-sm">{protocolData.legResponse}</span>
+                      </p>
+                    )}
                     {protocolData.sessionType === 'distancia' && protocolData.antennaResponse && (
-                      <p className="text-indigo-800 font-black text-sm uppercase tracking-tight border-l-0 md:border-l-2 md:pl-8 border-teal-200">
-                        Sim da antena: <span className="bg-indigo-600 text-white px-2 py-0.5 rounded ml-1">{protocolData.antennaResponse}</span>
+                      <p className="text-indigo-800 font-black text-sm uppercase tracking-tight flex items-center border-l-0 md:border-l-2 md:pl-8 border-teal-200">
+                        Sim da antena: <span className="bg-indigo-600 text-white px-3 py-1 rounded-full ml-2 shadow-sm">{protocolData.antennaResponse}</span>
                       </p>
                     )}
                   </div>

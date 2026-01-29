@@ -39,7 +39,7 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
             </p>
         </div>
 
-        {/* Botões Chamativos */}
+        {/* Seleção de Tipo de Sessão */}
         <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-6 print:hidden">
           <button
             onClick={() => setData({ ...data, sessionType: 'presencial', antennaResponse: '' })}
@@ -66,7 +66,8 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
       <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
         <div className="p-8 space-y-6 text-sm text-slate-700 leading-relaxed">
           
-          <div className="flex gap-4 items-start">
+          {/* ITEM 1 */}
+          <div className="flex gap-4 items-start border-b pb-6">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">1</span>
             <div className="flex-1">
               <p className="mb-3">
@@ -100,22 +101,24 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
             </div>
           </div>
 
-          <div className="flex gap-4">
+          {/* ITEM 2 */}
+          <div className="flex gap-4 items-start">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">2</span>
-            <p>
+            <p className="pt-1">
               <strong>Pedir permissão:</strong> Universo, licença para entrar em contato com esse Organismo. Organismo, licença para entrar em contato com você. Confirme com o sim do organismo.
             </p>
           </div>
 
-          {/* PROTOCOLO ANTENA - SESSÃO A DISTÂNCIA */}
+          {/* ITEM 3 - PROTOCOLO ANTENA (SOMENTE DISTÂNCIA) */}
           {isDistancia && (
             <div className="flex gap-4 p-5 bg-indigo-50 border-2 border-indigo-100 rounded-xl animate-fade-in ring-4 ring-indigo-50">
               <span className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">3</span>
-              <div className="flex-1">
-                <p className="font-bold text-indigo-900 mb-2 uppercase text-xs tracking-widest">Protocolo de Conexão (Antena):</p>
+              <div className="flex-1 space-y-4">
+                <p className="font-bold text-indigo-900 uppercase text-xs tracking-widest border-b border-indigo-200 pb-2">Protocolo de Conexão (Antena)</p>
                 
-                <div className="flex flex-wrap items-center gap-6 p-3 bg-white rounded-lg border border-indigo-200 mb-3 shadow-sm">
-                  <span className="text-xs font-black text-indigo-700 uppercase tracking-tight">Sim da Antena:</span>
+                {/* CAIXAS DE SELEÇÃO SOLICITADAS NO ITEM 3 */}
+                <div className="flex items-center gap-6 p-4 bg-white rounded-xl border border-indigo-200 shadow-sm">
+                  <span className="text-sm font-black text-indigo-700 uppercase tracking-tight">Sim da Antena:</span>
                   <label className="flex items-center gap-2 cursor-pointer group">
                     <input 
                       type="radio" 
@@ -123,9 +126,9 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
                       value="Encurtado"
                       checked={data.antennaResponse === 'Encurtado'}
                       onChange={() => handleAntennaResponseChange('Encurtado')}
-                      className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                      className="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-slate-300"
                     />
-                    <span className={`text-xs font-bold transition-colors ${data.antennaResponse === 'Encurtado' ? 'text-indigo-800' : 'text-slate-500 group-hover:text-slate-700'}`}>Encurtado</span>
+                    <span className={`text-sm font-bold transition-colors ${data.antennaResponse === 'Encurtado' ? 'text-indigo-800' : 'text-slate-500 group-hover:text-indigo-700'}`}>Encurtado</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer group">
                     <input 
@@ -134,9 +137,9 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
                       value="Estendido"
                       checked={data.antennaResponse === 'Estendido'}
                       onChange={() => handleAntennaResponseChange('Estendido')}
-                      className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                      className="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-slate-300"
                     />
-                    <span className={`text-xs font-bold transition-colors ${data.antennaResponse === 'Estendido' ? 'text-indigo-800' : 'text-slate-500 group-hover:text-slate-700'}`}>Estendido</span>
+                    <span className={`text-sm font-bold transition-colors ${data.antennaResponse === 'Estendido' ? 'text-indigo-800' : 'text-slate-500 group-hover:text-indigo-700'}`}>Estendido</span>
                   </label>
                 </div>
 
@@ -148,54 +151,55 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
                   <span className="italic font-medium text-indigo-700">"Organismo, você é o(a) {patientName || 'O PACIENTE'}?"</span>. 
                   <br />Em caso positivo, dar continuidade à sessão.
                 </p>
-                <p className="mt-3 text-red-600 font-black text-[10px] uppercase italic tracking-tighter">A partir de agora, seguem-se os mesmos passos da página anterior conforme já descrito nos passos 3 até 11.</p>
+                <p className="text-red-600 font-black text-[10px] uppercase italic tracking-tighter pt-2 border-t border-indigo-100">A partir de agora, seguem-se os mesmos passos já descritos abaixo nos passos 4 até 10.</p>
               </div>
             </div>
           )}
 
+          {/* ITENS RESTANTES (RE-NUMERADOS AUTOMATICAMENTE) */}
           <div className="flex gap-4">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '4' : '3'}</span>
-            <p>
+            <p className="pt-1">
               <strong>Pedir permissão:</strong> Organismo, há algum programa ou sistema neste Organismo que impede a eficiência desta terapia? Se a resposta do organismo for sim, dar o comando: <span className="text-purple-700 font-bold italic">Desativando programa ou sistema que impede a eficiência desta terapia. Desativando, desativando, desativando!</span> Confirmar com o sim do organismo, se foi desativado.
             </p>
           </div>
 
           <div className="flex gap-4">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '5' : '4'}</span>
-            <p>Pedir permissão ao organismo para rastrear em todas as camadas.</p>
+            <p className="pt-1">Pedir permissão ao organismo para rastrear em todas as camadas.</p>
           </div>
 
           <div className="flex gap-4">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '6' : '5'}</span>
-            <p>
+            <p className="pt-1">
               <strong>Dar o comando:</strong> Inserindo a frequência – <span className="bg-yellow-100 px-3 py-1 rounded-md font-mono font-black text-teal-800 tracking-[0.3em] border border-yellow-300">4 4 3 2 5 7 9 3 3 3</span> (verbalizar número por número).
             </p>
           </div>
 
           <div className="flex gap-4">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '7' : '6'}</span>
-            <p>
+            <p className="pt-1">
               Validar com o Organismo a queixa ou sintomas. Após validação da(s) queixa(s), dar o comando: <span className="text-purple-700 font-bold italic">Organismo, convenciono que a(s) sua(s) queixa(s) do dia é... (mencionar a(s) queixa(s) validadas pelo organismo).</span>
             </p>
           </div>
 
           <div className="flex gap-4">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '8' : '7'}</span>
-            <p>
-              Organismo, comando que você me passe todos os pontos que suportam informações, presença, frequência, ressonância, reservatório, pontos de sobrevivências, toxinas, venenos, mucoproteínas tóxicas, lesões, doenças, desconfortos, produtos e subprodutos de qualquer patógeno e qualquer de suas versions, distorções de PH, disfunção de glândulas que tenha ligação ou causa a(s) sua(s) queixa(s) do dia.
+            <p className="pt-1">
+              Organismo, comando que você me passe todos os pontos que suportam informações, presença, frequência, ressonância, reservatório, pontos de sobrevivências, toxinas, venenos, mucoproteínas tóxicas, lesões, doenças, desconfortos, produtos e subprodutos de qualquer patógeno e qualquer de suas versões, distorções de PH, disfunção de glândulas que tenha ligação ou causa a(s) sua(s) queixa(s) do dia.
             </p>
           </div>
 
           <div className="flex gap-4">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '9' : '8'}</span>
-            <p>
+            <p className="pt-1">
               <strong>Dar o comando:</strong> <span className="text-purple-700 font-bold italic">Organismo, eu fecho e lacro todos os seus reservatórios.</span>
             </p>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold animate-bounce">{isDistancia ? '10' : '9'}</span>
-            <p className="font-black text-teal-700 uppercase tracking-tighter">Ir para o rastreio dos pares na planilha, até finalizar.</p>
+            <p className="font-black text-teal-700 uppercase tracking-tighter pt-1">Ir para o rastreio dos pares na planilha, até finalizar.</p>
           </div>
 
         </div>
