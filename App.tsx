@@ -34,7 +34,7 @@ const PAIRS_STORAGE_KEY = 'biomag_master_pair_list';
 const LAST_SYNC_KEY = 'biomag_last_db_sync_date';
 
 const App: React.FC = () => {
-  // Session State
+  // Session Active State
   const [currentStep, setCurrentStep] = useState<Step>(Step.PATIENT_INFO);
   const [patient, setPatient] = useState<Patient>({ name: '', mainComplaint: '' });
   const [protocolData, setProtocolData] = useState<ProtocolData>({ legResponse: '', antennaResponse: '', sessionType: '' });
@@ -62,10 +62,12 @@ const App: React.FC = () => {
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const [sessionEndTime, setSessionEndTime] = useState<Date | null>(null);
 
-  // App Data State
-  const [biomagneticPairs, setBiomagneticPairs] = useState<BiomagneticPair[]>([]);
+  // User-Bound Data State
   const [sessions, setSessions] = useState<Session[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
+
+  // Global Data State
+  const [biomagneticPairs, setBiomagneticPairs] = useState<BiomagneticPair[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [lastSyncDate, setLastSyncDate] = useState<string>(localStorage.getItem(LAST_SYNC_KEY) || '');
   const [viewingHistoricalSession, setViewingHistoricalSession] = useState<Session | null>(null);
@@ -76,7 +78,7 @@ const App: React.FC = () => {
   const [appView, setAppView] = useState<AppView>('dashboard');
   const [remainingTime, setRemainingTime] = useState<string | null>(null);
 
-  // Load master data
+  // Load Global master data
   useEffect(() => {
     const storedPairsRaw = localStorage.getItem(PAIRS_STORAGE_KEY);
     if (storedPairsRaw) setBiomagneticPairs(JSON.parse(storedPairsRaw));
@@ -98,19 +100,53 @@ const App: React.FC = () => {
     setAllUsers(usersList);
   }, []);
 
-  // Persist Master Pairs
+  // Persist Global Data
   useEffect(() => {
     if (biomagneticPairs.length > 0) {
       localStorage.setItem(PAIRS_STORAGE_KEY, JSON.stringify(biomagneticPairs));
     }
   }, [biomagneticPairs]);
 
-  // Persist Users
   useEffect(() => {
     if (allUsers.length > 0) {
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(allUsers));
     }
   }, [allUsers]);
+
+  // Handle Load/Switch User Context (Patients & Sessions)
+  useEffect(() => {
+    if (currentUser) {
+      const sessionsKey = `biomag_sessions_${currentUser.username}`;
+      const patientsKey = `biomag_patients_${currentUser.username}`;
+      const storedSessions = localStorage.getItem(sessionsKey);
+      const storedPatients = localStorage.getItem(patientsKey);
+      
+      setSessions(storedSessions ? JSON.parse(storedSessions).map((s:any) => ({
+          ...s, 
+          startTime: s.startTime ? new Date(s.startTime) : null, 
+          endTime: s.endTime ? new Date(s.endTime) : null
+      })) : []);
+      setPatients(storedPatients ? JSON.parse(storedPatients) : []);
+    } else {
+      setSessions([]);
+      setPatients([]);
+    }
+  }, [currentUser]);
+
+  // Persist Bound Data (Saves only when the corresponding list changes for the current user)
+  useEffect(() => {
+    if (currentUser && isAuthenticated) {
+        const patientsKey = `biomag_patients_${currentUser.username}`;
+        localStorage.setItem(patientsKey, JSON.stringify(patients));
+    }
+  }, [patients, currentUser, isAuthenticated]);
+
+  useEffect(() => {
+    if (currentUser && isAuthenticated) {
+        const sessionsKey = `biomag_sessions_${currentUser.username}`;
+        localStorage.setItem(sessionsKey, JSON.stringify(sessions));
+    }
+  }, [sessions, currentUser, isAuthenticated]);
 
   const handleImportUsers = (syncCode: string): boolean => {
     try {
@@ -167,6 +203,12 @@ const App: React.FC = () => {
     setIsAuthenticated(false);
     setCurrentUser(null);
     setAppView('dashboard');
+    // State cleanup to ensure total isolation on logout
+    setSessions([]);
+    setPatients([]);
+    setPatient({ name: '', mainComplaint: '' });
+    setSelectedPairs([]);
+    setCurrentStep(Step.PATIENT_INFO);
   };
 
   const jumpToStep = (step: Step) => {
@@ -180,7 +222,6 @@ const App: React.FC = () => {
   };
 
   const handleFinishSession = () => {
-    const sessionsKey = `biomag_sessions_${currentUser?.username}`;
     const newSession: Session = {
         id: new Date().toISOString(),
         patient,
@@ -201,14 +242,28 @@ const App: React.FC = () => {
         startTime: sessionStartTime,
         endTime: sessionEndTime
     };
-    const updatedSessions = [newSession, ...sessions];
-    setSessions(updatedSessions);
-    localStorage.setItem(sessionsKey, JSON.stringify(updatedSessions));
     
-    // Reset session
+    setSessions(prev => [newSession, ...prev]);
+    
+    // Reset session form
     setCurrentStep(Step.PATIENT_INFO);
     setPatient({ name: '', mainComplaint: '' });
     setSelectedPairs([]);
+    setProtocolData({ legResponse: '', antennaResponse: '', sessionType: '' });
+    setPhenomena({ vascularAccidents: [], tumoralPhenomena: [], tumoralGenesis: [], traumas: [], portalPairs: [] });
+    setSelectedEmotions([]);
+    setSelectedSensations([]);
+    setEmotionsNotes('');
+    setSensationsNotes('');
+    setImpactionTime('');
+    setSessionNotes('');
+    setProtocolNotes('');
+    setLevelINotes('');
+    setLevelIINotes('');
+    setLevelIIINotes('');
+    setPhenomenaNotes('');
+    setSessionStartTime(null);
+    setSessionEndTime(null);
     setAppView('dashboard');
   };
 
