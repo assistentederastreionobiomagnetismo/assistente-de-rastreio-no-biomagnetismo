@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Patient, BiomagneticPair, User, Session, PhenomenaData, ProtocolData } from './types';
 import PatientForm from './components/PatientForm';
 import StartProtocol from './components/StartProtocol';
@@ -13,9 +13,53 @@ import Dashboard from './components/Dashboard';
 import UserManager from './components/UserManager';
 import ChangePassword from './components/ChangePassword';
 import SessionDetailModal from './components/SessionDetailModal';
-// Added CheckIcon to the imports below to fix "Cannot find name 'CheckIcon'" error
 import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon, BrainIcon, SuccessIcon, ReportIcon, CheckIcon } from './components/icons/Icons';
 import { BIOMAGNETIC_PAIRS } from './constants';
+
+// --- DATABASE UTILS ---
+const DB_NAME = 'BiomagDB';
+const DB_VERSION = 1;
+const STORES = {
+  PAIRS: 'pairs',
+  USERS: 'users',
+  SESSIONS: 'sessions',
+  PATIENTS: 'patients',
+  CONFIG: 'config'
+};
+
+const openDB = (): Promise<IDBDatabase> => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      Object.values(STORES).forEach(store => {
+        if (!db.objectStoreNames.contains(store)) db.createObjectStore(store);
+      });
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+
+const dbSave = async (storeName: string, key: string, data: any) => {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readwrite');
+    tx.objectStore(storeName).put(data, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+};
+
+const dbLoad = async (storeName: string, key: string): Promise<any> => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readonly');
+    const request = tx.objectStore(storeName).get(key);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
 
 enum Step {
   PATIENT_INFO,
@@ -35,7 +79,6 @@ const PAIRS_STORAGE_KEY = 'biomag_master_pair_list';
 const LAST_SYNC_KEY = 'biomag_last_db_sync_date';
 
 const App: React.FC = () => {
-  // Session Active State
   const [currentStep, setCurrentStep] = useState<Step>(Step.PATIENT_INFO);
   const [patient, setPatient] = useState<Patient>({ name: '', mainComplaint: '' });
   const [protocolData, setProtocolData] = useState<ProtocolData>({ legResponse: '', antennaResponse: '', sessionType: '' });
@@ -53,118 +96,117 @@ const App: React.FC = () => {
   const [sensationsNotes, setSensationsNotes] = useState<string>('');
   const [impactionTime, setImpactionTime] = useState<string>('');
   const [sessionNotes, setSessionNotes] = useState<string>('');
-  
   const [protocolNotes, setProtocolNotes] = useState<string>('');
   const [levelINotes, setLevelINotes] = useState<string>('');
   const [levelIINotes, setLevelIINotes] = useState<string>('');
   const [levelIIINotes, setLevelIIINotes] = useState<string>('');
   const [phenomenaNotes, setPhenomenaNotes] = useState<string>('');
-
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const [sessionEndTime, setSessionEndTime] = useState<Date | null>(null);
 
-  // User-Bound Data State
   const [sessions, setSessions] = useState<Session[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
-
-  // Global Data State
   const [biomagneticPairs, setBiomagneticPairs] = useState<BiomagneticPair[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [lastSyncDate, setLastSyncDate] = useState<string>(localStorage.getItem(LAST_SYNC_KEY) || '');
+  const [lastSyncDate, setLastSyncDate] = useState<string>('');
   const [viewingHistoricalSession, setViewingHistoricalSession] = useState<Session | null>(null);
-
-  // Auth & View State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [appView, setAppView] = useState<AppView>('dashboard');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load Global master data
+  // --- DATA LOADING & MIGRATION ---
   useEffect(() => {
-    const storedPairsRaw = localStorage.getItem(PAIRS_STORAGE_KEY);
-    if (storedPairsRaw) {
+    const initAppData = async () => {
       try {
-        setBiomagneticPairs(JSON.parse(storedPairsRaw));
-      } catch (e) {
-        console.error("Erro ao carregar pares do storage, usando padrão.", e);
-        setBiomagneticPairs(BIOMAGNETIC_PAIRS);
-      }
-    } else {
-      setBiomagneticPairs(BIOMAGNETIC_PAIRS);
-    }
+        // 1. Load Last Sync Date
+        const storedSync = await dbLoad(STORES.CONFIG, 'lastSync') || localStorage.getItem(LAST_SYNC_KEY) || '';
+        setLastSyncDate(storedSync);
 
-    const storedUsersRaw = localStorage.getItem(USERS_STORAGE_KEY);
-    let usersList: User[] = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
-    
-    const adminExists = usersList.some(u => u.username.toLowerCase() === 'vbsjunior.biomagnetismo');
-    if (!adminExists) {
-      usersList.push({
-        username: 'Vbsjunior.Biomagnetismo',
-        password: '@Va135482',
-        fullName: 'Administrador Mestre',
-        isApproved: true,
-        approvalType: 'permanent'
-      });
-    }
-    setAllUsers(usersList);
+        // 2. Load Pairs (Try IndexedDB, fallback to localStorage migration, then defaults)
+        let pairs = await dbLoad(STORES.PAIRS, 'masterList');
+        if (!pairs) {
+          const legacyPairs = localStorage.getItem(PAIRS_STORAGE_KEY);
+          pairs = legacyPairs ? JSON.parse(legacyPairs) : BIOMAGNETIC_PAIRS;
+          await dbSave(STORES.PAIRS, 'masterList', pairs);
+        }
+        setBiomagneticPairs(pairs);
+
+        // 3. Load Users
+        let users = await dbLoad(STORES.USERS, 'list');
+        if (!users) {
+          const legacyUsers = localStorage.getItem(USERS_STORAGE_KEY);
+          users = legacyUsers ? JSON.parse(legacyUsers) : [];
+        }
+        
+        const adminExists = users.some((u: any) => u.username.toLowerCase() === 'vbsjunior.biomagnetismo');
+        if (!adminExists) {
+          users.push({
+            username: 'Vbsjunior.Biomagnetismo',
+            password: '@Va135482',
+            fullName: 'Administrador Mestre',
+            isApproved: true,
+            approvalType: 'permanent'
+          });
+        }
+        setAllUsers(users);
+        await dbSave(STORES.USERS, 'list', users);
+
+        setIsLoading(false);
+      } catch (e) {
+        console.error("Erro na inicialização dos dados:", e);
+        setIsLoading(false);
+      }
+    };
+    initAppData();
   }, []);
 
-  // Persist Global Data with Error Handling
+  // Save changes to IndexedDB when state updates
   useEffect(() => {
-    if (biomagneticPairs.length > 0) {
-      try {
-        localStorage.setItem(PAIRS_STORAGE_KEY, JSON.stringify(biomagneticPairs));
-      } catch (e) {
-        if (e instanceof DOMException && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED')) {
-          alert("ERRO CRÍTICO: Limite de armazenamento do navegador atingido. Reduza o tamanho das imagens cadastradas nos pares para continuar salvando.");
-        }
-      }
+    if (!isLoading && biomagneticPairs.length > 0) {
+      dbSave(STORES.PAIRS, 'masterList', biomagneticPairs);
     }
-  }, [biomagneticPairs]);
+  }, [biomagneticPairs, isLoading]);
 
   useEffect(() => {
-    if (allUsers.length > 0) {
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(allUsers));
+    if (!isLoading && allUsers.length > 0) {
+      dbSave(STORES.USERS, 'list', allUsers);
     }
-  }, [allUsers]);
+  }, [allUsers, isLoading]);
 
   // Handle Load/Switch User Context (Patients & Sessions)
   useEffect(() => {
-    if (currentUser) {
-      const sessionsKey = `biomag_sessions_${currentUser.username}`;
-      const patientsKey = `biomag_patients_${currentUser.username}`;
-      const storedSessions = localStorage.getItem(sessionsKey);
-      const storedPatients = localStorage.getItem(patientsKey);
-      
-      setSessions(storedSessions ? JSON.parse(storedSessions).map((s:any) => ({
-          ...s, 
-          startTime: s.startTime ? new Date(s.startTime) : null, 
-          endTime: s.endTime ? new Date(s.endTime) : null
-      })) : []);
-      setPatients(storedPatients ? JSON.parse(storedPatients) : []);
-    } else {
-      setSessions([]);
-      setPatients([]);
+    if (currentUser && !isLoading) {
+      const loadUserBoundData = async () => {
+        const storedSessions = await dbLoad(STORES.SESSIONS, currentUser.username);
+        const storedPatients = await dbLoad(STORES.PATIENTS, currentUser.username);
+        
+        setSessions(storedSessions ? storedSessions.map((s:any) => ({
+            ...s, 
+            startTime: s.startTime ? new Date(s.startTime) : null, 
+            endTime: s.endTime ? new Date(s.endTime) : null
+        })) : []);
+        setPatients(storedPatients ? storedPatients : []);
+      };
+      loadUserBoundData();
     }
-  }, [currentUser]);
+  }, [currentUser, isLoading]);
 
-  // Persist Bound Data
+  // Persist User Bound Data
   useEffect(() => {
-    if (currentUser && isAuthenticated) {
-        const patientsKey = `biomag_patients_${currentUser.username}`;
-        localStorage.setItem(patientsKey, JSON.stringify(patients));
+    if (currentUser && isAuthenticated && !isLoading) {
+      dbSave(STORES.PATIENTS, currentUser.username, patients);
     }
-  }, [patients, currentUser, isAuthenticated]);
+  }, [patients, currentUser, isAuthenticated, isLoading]);
 
   useEffect(() => {
-    if (currentUser && isAuthenticated) {
-        const sessionsKey = `biomag_sessions_${currentUser.username}`;
-        localStorage.setItem(sessionsKey, JSON.stringify(sessions));
+    if (currentUser && isAuthenticated && !isLoading) {
+      dbSave(STORES.SESSIONS, currentUser.username, sessions);
     }
-  }, [sessions, currentUser, isAuthenticated]);
+  }, [sessions, currentUser, isAuthenticated, isLoading]);
 
-  const handleImportUsers = (syncCode: string): boolean => {
+  const handleImportUsers = async (syncCode: string): Promise<boolean> => {
     try {
-        // Suporte para decodificação UTF-8 segura
         const binaryString = atob(syncCode.trim());
         const bytes = new Uint8Array(binaryString.length);
         for (let i = 0; i < binaryString.length; i++) {
@@ -174,18 +216,17 @@ const App: React.FC = () => {
         const importedData = JSON.parse(decoded);
         
         if (typeof importedData === 'object' && !Array.isArray(importedData)) {
-            if (importedData.users) setAllUsers(importedData.users);
+            if (importedData.users) {
+              setAllUsers(importedData.users);
+              await dbSave(STORES.USERS, 'list', importedData.users);
+            }
             if (importedData.pairs) {
-                // Atualiza a base de pares local com a base vinda do código (Global)
                 setBiomagneticPairs(importedData.pairs);
+                await dbSave(STORES.PAIRS, 'masterList', importedData.pairs);
                 
-                // Registra a data da sincronia
                 const syncTime = importedData.timestamp ? new Date(importedData.timestamp).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR');
                 setLastSyncDate(syncTime);
-                localStorage.setItem(LAST_SYNC_KEY, syncTime);
-                
-                // Força persistência imediata
-                localStorage.setItem(PAIRS_STORAGE_KEY, JSON.stringify(importedData.pairs));
+                await dbSave(STORES.CONFIG, 'lastSync', syncTime);
             }
             return true;
         } 
@@ -219,7 +260,6 @@ const App: React.FC = () => {
     setIsAuthenticated(false);
     setCurrentUser(null);
     setAppView('dashboard');
-    // State cleanup to ensure total isolation on logout
     setSessions([]);
     setPatients([]);
     setPatient({ name: '', mainComplaint: '' });
@@ -261,7 +301,6 @@ const App: React.FC = () => {
     
     setSessions(prev => [newSession, ...prev]);
     
-    // Reset session form
     setCurrentStep(Step.PATIENT_INFO);
     setPatient({ name: '', mainComplaint: '' });
     setSelectedPairs([]);
@@ -283,6 +322,7 @@ const App: React.FC = () => {
     setAppView('dashboard');
   };
 
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-100 font-bold text-teal-600">Carregando Banco de Dados...</div>;
   if (!isAuthenticated) return <Login onLogin={handleTherapistLogin} onRequestReset={() => ({success: false, message: ''})} onImportSync={handleImportUsers} />;
   if (appView === 'changePassword') return <ChangePassword onUpdate={handleUpdatePassword} onLogout={handleLogout} />;
 

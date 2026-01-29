@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BiomagneticPair, PairDetail } from '../types';
 import { TrashIcon, PlusIcon, CheckIcon } from './icons/Icons';
 
@@ -16,6 +16,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
   const [pair, setPair] = useState<BiomagneticPair>(emptyPair);
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'basic' | 'details'>('basic');
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
   
   const isEditing = initialPair !== null;
   const originalName = initialPair?.name;
@@ -38,9 +39,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
     }
   }, [isOpen, initialPair]);
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -71,13 +70,58 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
     setPair(prev => ({ ...prev, details: (prev.details || []).filter((_, i) => i !== index) }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+  // --- IMAGE COMPRESSION LOGIC ---
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPair(prev => ({ ...prev, imageUrl: reader.result as string }));
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 600; // Máximo 600px para economizar muito espaço
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Exporta com qualidade 0.6 para reduzir drasticamente o peso (Base64 menor)
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+          resolve(dataUrl);
+        };
+        img.onerror = reject;
       };
-      reader.readAsDataURL(e.target.files[0]);
+      reader.onerror = reject;
+    });
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setIsProcessingImage(true);
+      try {
+        const compressed = await compressImage(e.target.files[0]);
+        setPair(prev => ({ ...prev, imageUrl: compressed }));
+      } catch (err) {
+        setError("Erro ao processar imagem.");
+      } finally {
+        setIsProcessingImage(false);
+      }
     }
   };
 
@@ -156,7 +200,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                 </div>
                 <div className="p-4 bg-teal-50 rounded-xl border border-teal-100 md:col-span-1">
                     <p className="text-[10px] text-teal-700 font-bold leading-snug">
-                        * A classificação de Nível impede que terapeutas adicionem pares em abas incorretas durante o rastreio.
+                        {isProcessingImage ? 'Otimizando imagem...' : '* Fotos enviadas agora são otimizadas para economizar memória do navegador.'}
                     </p>
                 </div>
             </div>
@@ -210,11 +254,13 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                           <button type="button" onClick={removeImage} className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-lg transition-all"><TrashIcon className="w-4 h-4" /></button>
                         </div>
                       ) : (
-                        <div className="w-32 h-32 bg-slate-200 rounded-xl flex items-center justify-center text-slate-400 text-[10px] font-black uppercase text-center p-2 tracking-widest">Sem Imagem</div>
+                        <div className="w-32 h-32 bg-slate-200 rounded-xl flex items-center justify-center text-slate-400 text-[10px] font-black uppercase text-center p-2 tracking-widest">
+                          {isProcessingImage ? 'Otimizando...' : 'Sem Imagem'}
+                        </div>
                       )}
                       <div className="flex-1">
                           <input id="image-upload" type="file" accept="image/*" onChange={handleImageChange} className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-teal-600 file:text-white hover:file:bg-teal-700 cursor-pointer" />
-                          <p className="mt-2 text-[10px] text-slate-400 font-bold uppercase">PNG ou JPG. Recomenda-se imagens leves para não sobrecarregar o código de sincronismo.</p>
+                          <p className="mt-2 text-[10px] text-slate-400 font-bold uppercase">PNG ou JPG. O sistema comprimirá fotos pesadas automaticamente para garantir a sincronia rápida.</p>
                       </div>
                     </div>
                   </div>
@@ -263,11 +309,6 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                             </td>
                           </tr>
                         ))}
-                        {(pair.details || []).length === 0 && (
-                          <tr>
-                            <td colSpan={5} className="px-6 py-12 text-center text-xs text-slate-400 font-bold uppercase tracking-widest italic bg-slate-25">Nenhuma informação técnica. Clique em "Adicionar Linha".</td>
-                          </tr>
-                        )}
                       </tbody>
                     </table>
                   </div>
@@ -278,7 +319,9 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
           
           <div className="p-6 border-t bg-slate-50 flex justify-end space-x-3 flex-shrink-0">
             <button type="button" onClick={onClose} className="px-8 py-3 bg-white text-slate-400 border border-slate-200 rounded-xl hover:bg-slate-100 transition-all font-black uppercase text-xs tracking-widest">Cancelar</button>
-            <button type="submit" className="px-12 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 shadow-xl transition-all font-black uppercase text-xs tracking-widest">Salvar na Base Master</button>
+            <button type="submit" disabled={isProcessingImage} className="px-12 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 shadow-xl transition-all font-black uppercase text-xs tracking-widest disabled:bg-slate-300">
+              {isProcessingImage ? 'Processando Imagem...' : 'Salvar na Base Master'}
+            </button>
           </div>
         </form>
       </div>
