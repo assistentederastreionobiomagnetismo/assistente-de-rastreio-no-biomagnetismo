@@ -23,7 +23,8 @@ export interface BiomagneticPair {
   description?: string;
   imageUrl?: string;
   isCustom?: boolean;
-  isDefinitive?: boolean; // Novo campo para base global
+  isDefinitive?: boolean;
+  level: 1 | 2 | 3; // Nível obrigatório para o rastreio
   order?: number;
   details?: PairDetail[];
 }

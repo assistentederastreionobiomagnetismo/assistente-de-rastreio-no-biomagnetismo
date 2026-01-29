@@ -12,7 +12,7 @@ interface PairManagementModalProps {
 }
 
 const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClose, onSave, initialPair, existingPairNames }) => {
-  const emptyPair: BiomagneticPair = { name: '', point1: '', point2: '', imageUrl: '', details: [], isDefinitive: true };
+  const emptyPair: BiomagneticPair = { name: '', point1: '', point2: '', imageUrl: '', details: [], isDefinitive: true, level: 1 };
   const [pair, setPair] = useState<BiomagneticPair>(emptyPair);
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'basic' | 'details'>('basic');
@@ -27,7 +27,8 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
             ...initialPair, 
             imageUrl: initialPair.imageUrl || '',
             details: initialPair.details || [],
-            isDefinitive: initialPair.isDefinitive !== undefined ? initialPair.isDefinitive : true
+            isDefinitive: initialPair.isDefinitive !== undefined ? initialPair.isDefinitive : true,
+            level: initialPair.level || 1
         });
       } else {
         setPair(emptyPair);
@@ -41,9 +42,13 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
     return null;
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setPair(prev => ({ ...prev, [name]: value }));
+    if (name === 'level') {
+      setPair(prev => ({ ...prev, level: parseInt(value) as 1 | 2 | 3 }));
+    } else {
+      setPair(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const toggleDefinitive = () => {
@@ -103,23 +108,25 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
         <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
           <div className="p-4 border-b bg-slate-50 flex-shrink-0 flex justify-between items-center">
             <h3 className="text-xl font-bold text-teal-700">{isEditing ? 'Editar Par da Base Master' : 'Adicionar Novo Par Definitivo'}</h3>
-            <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-teal-200">
-                <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Base Global</span>
-                <button 
-                  type="button" 
-                  onClick={toggleDefinitive}
-                  className={`w-10 h-5 rounded-full relative transition-colors duration-300 ${pair.isDefinitive ? 'bg-teal-600' : 'bg-slate-300'}`}
-                >
-                    <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 ${pair.isDefinitive ? 'left-5' : 'left-0.5'}`}></div>
-                </button>
+            <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-teal-200">
+                    <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Base Global</span>
+                    <button 
+                      type="button" 
+                      onClick={toggleDefinitive}
+                      className={`w-10 h-5 rounded-full relative transition-colors duration-300 ${pair.isDefinitive ? 'bg-teal-600' : 'bg-slate-300'}`}
+                    >
+                        <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 ${pair.isDefinitive ? 'left-5' : 'left-0.5'}`}></div>
+                    </button>
+                </div>
             </div>
           </div>
           
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-md">{error}</p>}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-                <div className="flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                <div className="md:col-span-1">
                   <label htmlFor="name" className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Nome do Par</label>
                   <input
                     type="text"
@@ -132,9 +139,24 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                     required
                   />
                 </div>
-                <div className="p-4 bg-teal-50 rounded-xl border border-teal-100">
+                <div className="md:col-span-1">
+                  <label htmlFor="level" className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Nível do Rastreio</label>
+                  <select
+                    id="level"
+                    name="level"
+                    value={pair.level}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 font-bold text-slate-700 cursor-pointer"
+                    required
+                  >
+                    <option value={1}>Nível I - Básico</option>
+                    <option value={2}>Nível II - Específicos</option>
+                    <option value={3}>Nível III - Patógenos Nome</option>
+                  </select>
+                </div>
+                <div className="p-4 bg-teal-50 rounded-xl border border-teal-100 md:col-span-1">
                     <p className="text-[10px] text-teal-700 font-bold leading-snug">
-                        * Pares marcados como <strong>Base Global</strong> serão atualizados em todos os dispositivos dos terapeutas após a sincronização master.
+                        * A classificação de Nível impede que terapeutas adicionem pares em abas incorretas durante o rastreio.
                     </p>
                 </div>
             </div>
