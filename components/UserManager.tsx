@@ -76,7 +76,6 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
     setUsers(updatedUsers);
     setLastCreatedUser(newUser);
     
-    // Limpa campos
     setFormData({
       username: '',
       password: '',
@@ -102,14 +101,15 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
   };
 
   const handleExportSync = () => {
-    // Cria um pacote contendo tanto os usuários quanto os pares biomagnéticos
     const syncPackage = {
         users: users,
-        pairs: biomagneticPairs
+        pairs: biomagneticPairs,
+        timestamp: new Date().toISOString()
     };
     const jsonStr = JSON.stringify(syncPackage);
-    const code = btoa(unescape(encodeURIComponent(jsonStr))); // btoa com suporte a caracteres latinos
+    const code = btoa(unescape(encodeURIComponent(jsonStr)));
     setSyncCode(code);
+    alert('Código de Sincronização gerado com sucesso! Envie aos seus terapeutas para atualizar as permissões e a base de pares.');
   };
 
   const handleSendInstructions = () => {
@@ -153,7 +153,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
       <div className="flex justify-between items-center mb-10">
         <div>
             <h2 className="text-3xl font-black text-slate-800">Controle de Terapeutas</h2>
-            <p className="text-slate-500 text-sm italic">Gestão de acessos, dados e compartilhamento.</p>
+            <p className="text-slate-500 text-sm italic">Gerencie acessos e distribua a base de dados de pares.</p>
         </div>
         <button onClick={onBack} className="px-6 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all border border-slate-200">Voltar</button>
       </div>
@@ -242,18 +242,21 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         </form>
       </div>
 
-      <div className="mb-10 flex flex-col items-center">
-        <button onClick={handleExportSync} className="px-12 py-5 bg-sky-600 text-white font-black rounded-2xl shadow-xl hover:bg-sky-700 transition-all flex items-center gap-3 transform hover:scale-[1.02]">
-            GERAR CÓDIGO DE ACESSO (Usuários + Pares)
+      <div className="mb-10 flex flex-col items-center bg-sky-50 p-8 rounded-3xl border border-sky-100">
+        <div className="text-center mb-6">
+            <h4 className="text-sky-800 font-black uppercase text-xs tracking-widest">Sincronização Master</h4>
+            <p className="text-[11px] text-sky-600 mt-1 max-w-lg">Sempre que você adicionar ou editar um par biomagnético, gere um novo código e envie para seus terapeutas para que eles tenham acesso às novidades.</p>
+        </div>
+        <button onClick={handleExportSync} className="px-12 py-5 bg-sky-600 text-white font-black rounded-2xl shadow-xl hover:bg-sky-700 transition-all flex items-center gap-3 transform hover:scale-[1.02] uppercase tracking-widest text-sm">
+            GERAR NOVO CÓDIGO (Usuários + Pares)
         </button>
-        <p className="mt-2 text-xs text-slate-400 italic">O código acima contém todas as alterações feitas nos pares e permissões de usuários.</p>
       </div>
 
       {syncCode && (
         <div className="mb-12 p-8 bg-sky-50 border-2 border-sky-200 rounded-3xl animate-fade-in shadow-inner">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <p className="text-xs text-sky-700 font-black flex items-center gap-2 uppercase tracking-widest">
-                <CheckIcon className="w-5 h-5" /> Dados prontos para {lastCreatedUser?.fullName || 'o novo terapeuta'}
+                <CheckIcon className="w-5 h-5" /> Dados prontos para {lastCreatedUser?.fullName || 'os terapeutas'}
             </p>
             <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
                 <button 
