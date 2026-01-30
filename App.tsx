@@ -123,13 +123,26 @@ const App: React.FC = () => {
         const storedSync = await dbLoad(STORES.CONFIG, 'lastSync') || localStorage.getItem(LAST_SYNC_KEY) || '';
         setLastSyncDate(storedSync);
 
-        // 2. Load Pairs (Try IndexedDB, fallback to localStorage migration, then defaults)
+        // 2. Load Pairs (Try IndexedDB, fallback to BIOMAGNETIC_PAIRS)
         let pairs = await dbLoad(STORES.PAIRS, 'masterList');
+        
         if (!pairs) {
-          const legacyPairs = localStorage.getItem(PAIRS_STORAGE_KEY);
-          pairs = legacyPairs ? JSON.parse(legacyPairs) : BIOMAGNETIC_PAIRS;
-          await dbSave(STORES.PAIRS, 'masterList', pairs);
+          pairs = BIOMAGNETIC_PAIRS;
+        } else {
+          // MECANISMO DE SINCRONIZAÇÃO FORÇADA:
+          // Se o desenvolvedor marcou um par no constants.ts como 'isDefinitive', ele atualiza a base do usuário.
+          const pairMap = new Map(pairs.map((p: any) => [p.name, p]));
+          BIOMAGNETIC_PAIRS.forEach(masterPair => {
+              if (masterPair.isDefinitive) {
+                  pairMap.set(masterPair.name, masterPair);
+              } else if (!pairMap.has(masterPair.name)) {
+                  pairMap.set(masterPair.name, masterPair);
+              }
+          });
+          pairs = Array.from(pairMap.values());
         }
+        
+        await dbSave(STORES.PAIRS, 'masterList', pairs);
         setBiomagneticPairs(pairs);
 
         // 3. Load Users
