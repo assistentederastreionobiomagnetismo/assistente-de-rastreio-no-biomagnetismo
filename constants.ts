@@ -2,7 +2,22 @@
 import { BiomagneticPair } from './types';
 
 export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
-  { name: 'Timo - Reto', point1: 'Timo', point2: 'Reto', order: 1, level: 1, details: [] },
+  { 
+    name: 'Timo - Reto', 
+    point1: 'Timo', 
+    point2: 'Reto', 
+    order: 1, 
+    level: 1, 
+    imageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAABkCAIAAABmSIdLAAAACXBIWXMAAAsTAAALEwEAmpwYAAADiklEQVR4nO2bS27DMAxEn7lH7n+XbtIdChR9pYAsYI8zH6CAnZpYpCiaD9Lp9P6m0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqdPp9Op9P7W61Wu90uX6vVarfbff0O/0en0/ubTqfT5zqd7u86nf9Kp/t7TqdOp9Ppf5ZOp9P57/fX9uB0On2m0+n0uU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P5r/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P57/ffX9uD0+n0mU6n0+c6nU6f63Q6fa7T6fS5TqfT5zqd7u9Kp/t7TqdOp9Ppf5ZOp9P5r/8B1O8Y9vK3p78AAAAASUVORK5CYII=',
+    details: [
+      {
+        specification: 'Infecção viral (HIV)',
+        disease: 'Vírus HIV',
+        symptoms: 'AIDS - Síndrome da imunodefociência adquirida (em associação com E.coli)',
+        tips: ''
+      }
+    ] 
+  },
   { name: 'Parietal - Parietal', point1: 'Parietal Direito', point2: 'Parietal Esquerdo', order: 2, level: 1, details: [] },
   { name: 'Pineal - Bulbo Raquidiano', point1: 'Pineal', point2: 'Bulbo Raquidiano', order: 3, level: 1, details: [] },
   { name: 'Ouvido - Ouvido', point1: 'Ouvido Direito', point2: 'Ouvido Esquerdo', order: 4, level: 1, details: [] },
