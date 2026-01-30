@@ -69,7 +69,6 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
       <div className="flex items-center justify-between mb-6">
           <div className="flex flex-col">
             <h2 className="text-2xl font-bold text-slate-700">Rastreio {levelTitle}</h2>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Exibindo apenas pares de Nível {targetLevel}</p>
           </div>
           <span className="px-3 py-1 bg-teal-100 text-teal-800 text-[10px] font-black rounded-full uppercase tracking-widest shadow-sm">Pares Ativos</span>
       </div>
