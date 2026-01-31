@@ -13,6 +13,7 @@ interface SessionSummaryProps {
   emotionsNotes?: string;
   sensationsNotes?: string;
   protocolNotes?: string;
+  reservatoriosNotes?: string;
   levelINotes?: string;
   levelIINotes?: string;
   levelIIINotes?: string;
@@ -36,6 +37,7 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
     emotionsNotes,
     sensationsNotes,
     protocolNotes,
+    reservatoriosNotes,
     levelINotes,
     levelIINotes,
     levelIIINotes,
@@ -71,6 +73,14 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const getLevelLabel = (lvl: number) => {
+      if (lvl === 1) return "Reservatórios";
+      if (lvl === 2) return "Nível I";
+      if (lvl === 3) return "Nível II";
+      if (lvl === 4) return "Nível III";
+      return "Nível " + lvl;
   };
 
   return (
@@ -134,7 +144,7 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
         </div>
 
         {/* NOTAS DE ETAPAS */}
-        {(protocolNotes || levelINotes || levelIINotes || levelIIINotes || phenomenaNotes) && (
+        {(protocolNotes || reservatoriosNotes || levelINotes || levelIINotes || levelIIINotes || phenomenaNotes) && (
           <div className="pb-6 border-b border-slate-200">
             <h3 className="text-lg font-bold text-teal-700 mb-4">Observações por Etapa</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -142,6 +152,12 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
                 <div className="p-3 bg-slate-50 rounded border border-slate-200 text-sm">
                   <strong className="text-xs uppercase text-slate-500 block mb-1">Preparação / Protocolo</strong>
                   <p className="italic">{protocolNotes}</p>
+                </div>
+              )}
+              {reservatoriosNotes && (
+                <div className="p-3 bg-slate-50 rounded border border-slate-200 text-sm">
+                  <strong className="text-xs uppercase text-slate-500 block mb-1">Reservatórios</strong>
+                  <p className="italic">{reservatoriosNotes}</p>
                 </div>
               )}
               {levelINotes && (
@@ -177,9 +193,12 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
           {pairs.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {pairs.map((pair, idx) => (
-                <div key={`${pair.name}-${idx}`} className="bg-slate-50 px-3 py-2 rounded border border-slate-200 text-xs font-bold text-slate-800 shadow-sm flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-teal-500"></div>
-                  {pair.name}
+                <div key={`${pair.name}-${idx}`} className="bg-slate-50 px-3 py-2 rounded border border-slate-200 text-[10px] font-bold text-slate-800 shadow-sm flex flex-col gap-0.5">
+                  <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-teal-500"></div>
+                      <span className="truncate">{pair.name}</span>
+                  </div>
+                  <span className="text-[8px] text-slate-400 uppercase ml-4">{getLevelLabel(pair.level)}</span>
                 </div>
               ))}
             </div>

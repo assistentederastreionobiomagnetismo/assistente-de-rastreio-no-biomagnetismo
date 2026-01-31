@@ -23,7 +23,7 @@ export interface BiomagneticPair {
   imageUrl?: string;
   isCustom?: boolean;
   isDefinitive?: boolean;
-  level: 1 | 2 | 3; // Nível obrigatório para o rastreio
+  level: 1 | 2 | 3 | 4; // 1: Reservatórios, 2: Nível I, 3: Nível II, 4: Nível III
   order?: number;
   details?: PairDetail[];
 }
@@ -71,6 +71,7 @@ export interface Session {
     impactionTime?: string;
     notes: string;
     protocolNotes?: string;
+    reservatoriosNotes?: string;
     levelINotes?: string;
     levelIINotes?: string;
     levelIIINotes?: string;

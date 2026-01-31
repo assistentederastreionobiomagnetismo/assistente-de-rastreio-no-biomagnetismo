@@ -44,7 +44,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === 'level') {
-      setPair(prev => ({ ...prev, level: parseInt(value) as 1 | 2 | 3 }));
+      setPair(prev => ({ ...prev, level: parseInt(value) as 1 | 2 | 3 | 4 }));
     } else {
       setPair(prev => ({ ...prev, [name]: value }));
     }
@@ -67,7 +67,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
   };
 
   const removeDetailRow = (index: number) => {
-    setPair(prev => ({ ...prev, details: (prev.details || []).filter((_, i) => i !== index) }));
+    setPair(prev => ({ ...prev, details: (pair.details || []).filter((_, i) => i !== index) }));
   };
 
   // --- IMAGE COMPRESSION LOGIC ---
@@ -80,7 +80,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
         img.src = event.target?.result as string;
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_SIZE = 600; // Máximo 600px para economizar muito espaço
+          const MAX_SIZE = 600; 
           let width = img.width;
           let height = img.height;
 
@@ -101,7 +101,6 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, width, height);
           
-          // Exporta com qualidade 0.6 para reduzir drasticamente o peso (Base64 menor)
           const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
           resolve(dataUrl);
         };
@@ -138,7 +137,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
     }
     
     if (pair.name !== originalName && existingPairNames.includes(pair.name)) {
-        setError('Já existe um par com este nome.');
+        setError('Já existe un par com este nome.');
         return;
     }
 
@@ -184,7 +183,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                   />
                 </div>
                 <div className="md:col-span-1">
-                  <label htmlFor="level" className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Nível do Rastreio</label>
+                  <label htmlFor="level" className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Classificação Técnica</label>
                   <select
                     id="level"
                     name="level"
@@ -193,9 +192,10 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                     className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 font-bold text-slate-700 cursor-pointer"
                     required
                   >
-                    <option value={1}>Nível I - Básico</option>
-                    <option value={2}>Nível II - Específicos</option>
-                    <option value={3}>Nível III - Patógenos Nome</option>
+                    <option value={1}>Reservatórios</option>
+                    <option value={2}>Nível I - Básico</option>
+                    <option value={3}>Nível II - Específicos</option>
+                    <option value={4}>Nível III - Patógenos Nome</option>
                   </select>
                 </div>
                 <div className="p-4 bg-teal-50 rounded-xl border border-teal-100 md:col-span-1">
@@ -282,7 +282,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                         <tr>
                           <th className="px-3 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/3 border-r">Especificação</th>
                           <th className="px-3 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/3 border-r">Doença/Disfunção</th>
-                          <th className="px-3 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/3">Sintomas</th>
+                          <th className="px-3 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/3">Sintomas e algumas dicas</th>
                           <th className="px-2 py-3 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest w-12"></th>
                         </tr>
                       </thead>

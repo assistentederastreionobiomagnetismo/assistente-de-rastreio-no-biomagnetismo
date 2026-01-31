@@ -1,3 +1,4 @@
+
 // Otimização: Substituído por versões leves para garantir a estabilidade do app
 export const ANATOMY_IMAGES = {
     female: {

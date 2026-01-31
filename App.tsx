@@ -17,7 +17,7 @@ import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon
 import { BIOMAGNETIC_PAIRS } from './constants';
 
 // --- DATABASE UTILS ---
-const DB_NAME = 'BiomagDB_v4'; // Incrementado para v4 para limpar cache e aplicar exclusão do Timo-Reto
+const DB_NAME = 'BiomagDB_v20'; // Atualizado para v20
 const DB_VERSION = 1;
 const STORES = {
   PAIRS: 'pairs',
@@ -64,6 +64,7 @@ const dbLoad = async (storeName: string, key: string): Promise<any> => {
 enum Step {
   PATIENT_INFO,
   START_PROTOCOL,
+  SCANNING_RESERVATORIOS,
   SCANNING_LEVEL_I,
   SCANNING_LEVEL_II,
   SCANNING_LEVEL_III,
@@ -95,6 +96,7 @@ const App: React.FC = () => {
   const [impactionTime, setImpactionTime] = useState<string>('');
   const [sessionNotes, setSessionNotes] = useState<string>('');
   const [protocolNotes, setProtocolNotes] = useState<string>('');
+  const [reservatoriosNotes, setReservatoriosNotes] = useState<string>('');
   const [levelINotes, setLevelINotes] = useState<string>('');
   const [levelIINotes, setLevelIINotes] = useState<string>('');
   const [levelIIINotes, setLevelIIINotes] = useState<string>('');
@@ -187,7 +189,7 @@ const App: React.FC = () => {
     }
   }, [currentUser, isLoading]);
 
-  const handleImportUsers = async (syncCode: string): Promise<boolean> => {
+  const handleImportSync = async (syncCode: string): Promise<boolean> => {
     try {
         const binaryString = atob(syncCode.trim());
         const bytes = new Uint8Array(binaryString.length);
@@ -265,6 +267,7 @@ const App: React.FC = () => {
         impactionTime,
         notes: sessionNotes,
         protocolNotes,
+        reservatoriosNotes,
         levelINotes,
         levelIINotes,
         levelIIINotes,
@@ -283,7 +286,7 @@ const App: React.FC = () => {
   };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-100 font-bold text-teal-600">Carregando Banco de Dados...</div>;
-  if (!isAuthenticated) return <Login onLogin={handleTherapistLogin} onRequestReset={() => ({success: false, message: ''})} onImportSync={handleImportUsers} />;
+  if (!isAuthenticated) return <Login onLogin={handleTherapistLogin} onRequestReset={() => ({success: false, message: ''})} onImportSync={handleImportSync} />;
   if (appView === 'changePassword') return <ChangePassword onUpdate={handleUpdatePassword} onLogout={handleLogout} />;
 
   return (
@@ -334,10 +337,11 @@ const App: React.FC = () => {
           <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden relative">
             <div className="p-4 md:p-6 border-b border-slate-200 overflow-x-auto print:hidden">
               <nav aria-label="Progress">
-                <ol role="list" className="flex items-center min-w-[800px]">
+                <ol role="list" className="flex items-center min-w-[1000px]">
                   {[
                     { name: 'Paciente', icon: <UserIcon />, step: Step.PATIENT_INFO },
                     { name: 'Início', icon: <InfoIcon />, step: Step.START_PROTOCOL },
+                    { name: 'Reserv.', icon: <ClipboardIcon />, step: Step.SCANNING_RESERVATORIOS },
                     { name: 'Nível I', icon: <ClipboardIcon />, step: Step.SCANNING_LEVEL_I },
                     { name: 'Nível II', icon: <ClipboardIcon />, step: Step.SCANNING_LEVEL_II },
                     { name: 'Nível III', icon: <ClipboardIcon />, step: Step.SCANNING_LEVEL_III },
@@ -346,14 +350,14 @@ const App: React.FC = () => {
                     { name: 'Final', icon: <SuccessIcon />, step: Step.TREATMENT },
                     { name: 'Relatório', icon: <ReportIcon />, step: Step.SUMMARY }
                   ].map((s, idx) => (
-                    <li key={s.name} className={`relative ${idx !== 8 ? 'flex-1' : ''}`}>
+                    <li key={s.name} className={`relative ${idx !== 9 ? 'flex-1' : ''}`}>
                       <button onClick={() => jumpToStep(s.step)} className="flex flex-col items-center text-sm w-full group">
                         <span className={`flex h-10 w-10 items-center justify-center rounded-full z-10 transition-all duration-300 transform group-hover:scale-110 ${currentStep >= s.step ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-500'} ${currentStep === s.step ? 'ring-4 ring-teal-100 scale-110' : ''}`}>
                           {React.cloneElement(s.icon as React.ReactElement<any>, { className: "w-6 h-6" })}
                         </span>
-                        <span className={`mt-2 text-xs font-medium ${currentStep >= s.step ? 'text-teal-600 font-bold' : 'text-slate-400'}`}>{s.name}</span>
+                        <span className={`mt-2 text-[10px] font-bold ${currentStep >= s.step ? 'text-teal-600 font-bold' : 'text-slate-400'}`}>{s.name}</span>
                       </button>
-                      {idx !== 8 && <div className="absolute inset-x-0 top-5 left-1/2 -z-0 h-0.5 w-full bg-slate-200" />}
+                      {idx !== 9 && <div className="absolute inset-x-0 top-5 left-1/2 -z-0 h-0.5 w-full bg-slate-200" />}
                     </li>
                   ))}
                 </ol>
@@ -362,13 +366,14 @@ const App: React.FC = () => {
             <main className="p-6 md:p-10">
               {currentStep === Step.PATIENT_INFO && <PatientForm patient={patient} setPatient={setPatient} onNext={nextStep} patientsList={patients} setPatientsList={setPatients} />}
               {currentStep === Step.START_PROTOCOL && <StartProtocol data={protocolData} setData={setProtocolData} notes={protocolNotes} setNotes={setProtocolNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PATIENT_INFO)} patientName={patient.name} />}
-              {currentStep === Step.SCANNING_LEVEL_I && <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelINotes} setNotes={setLevelINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.START_PROTOCOL)} biomagneticPairs={biomagneticPairs} />}
+              {currentStep === Step.SCANNING_RESERVATORIOS && <Scanning levelTitle="Reservatórios" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={reservatoriosNotes} setNotes={setReservatoriosNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.START_PROTOCOL)} biomagneticPairs={biomagneticPairs} />}
+              {currentStep === Step.SCANNING_LEVEL_I && <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelINotes} setNotes={setLevelINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_RESERVATORIOS)} biomagneticPairs={biomagneticPairs} />}
               {currentStep === Step.SCANNING_LEVEL_II && <Scanning levelTitle="Nível II" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIINotes} setNotes={setLevelIINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_I)} biomagneticPairs={biomagneticPairs} />}
               {currentStep === Step.SCANNING_LEVEL_III && <Scanning levelTitle="Nível III" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIIINotes} setNotes={setLevelIIINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_II)} biomagneticPairs={biomagneticPairs} />}
               {currentStep === Step.PHENOMENA && <Phenomena data={phenomena} setData={setPhenomena} notes={phenomenaNotes} setNotes={setPhenomenaNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_III)} />}
               {currentStep === Step.EMOTIONAL && <Emocional selectedEmotions={selectedEmotions} setSelectedEmotions={setSelectedEmotions} selectedSensations={selectedSensations} setSelectedSensations={setSelectedSensations} emotionsNotes={emotionsNotes} setEmotionsNotes={setEmotionsNotes} sensationsNotes={sensationsNotes} setSensationsNotes={setSensationsNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PHENOMENA)} />}
               {currentStep === Step.TREATMENT && <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.EMOTIONAL)} sessionType={protocolData.sessionType} />}
-              {currentStep === Step.SUMMARY && <SessionSummary patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} emotions={selectedEmotions} sensations={selectedSensations} emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes} protocolNotes={protocolNotes} levelINotes={levelINotes} levelIINotes={levelIINotes} levelIIINotes={levelIIINotes} phenomenaNotes={phenomenaNotes} impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} onFinish={handleFinishSession} onBack={() => setCurrentStep(Step.TREATMENT)} />}
+              {currentStep === Step.SUMMARY && <SessionSummary patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} emotions={selectedEmotions} sensations={selectedSensations} emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes} protocolNotes={protocolNotes} reservatoriosNotes={reservatoriosNotes} levelINotes={levelINotes} levelIINotes={levelIINotes} levelIIINotes={levelIIINotes} phenomenaNotes={phenomenaNotes} impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} onFinish={handleFinishSession} onBack={() => setCurrentStep(Step.TREATMENT)} />}
             </main>
           </div>
         )}

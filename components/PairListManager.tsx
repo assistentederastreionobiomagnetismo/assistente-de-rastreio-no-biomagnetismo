@@ -40,7 +40,6 @@ const PairListManager: React.FC<PairListManagerProps> = ({
                 return [...prev, { ...savedPair, order: newOrder }];
             }
         });
-        // Correcting the state setter from setIsGenerating to setIsSaving
         setIsSaving(false);
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 2000);
@@ -52,6 +51,14 @@ const PairListManager: React.FC<PairListManagerProps> = ({
     if (window.confirm(`Tem certeza que deseja EXCLUIR permanentemente o par "${name}" da base master?`)) {
         setBiomagneticPairs(prev => prev.filter(p => p.name !== name));
     }
+  };
+
+  const getLevelLabel = (lvl: number) => {
+      if (lvl === 1) return "Reservatórios";
+      if (lvl === 2) return "Nível I";
+      if (lvl === 3) return "Nível II";
+      if (lvl === 4) return "Nível III";
+      return "Nível " + lvl;
   };
 
   const filteredPairs = useMemo(() => {
@@ -119,8 +126,8 @@ const PairListManager: React.FC<PairListManagerProps> = ({
                             {p.isDefinitive && (
                                 <span className="px-2 py-0.5 bg-teal-600 text-white text-[8px] font-black uppercase tracking-tighter rounded-md shadow-sm">Global</span>
                             )}
-                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${p.level === 3 ? 'bg-red-100 text-red-600' : p.level === 2 ? 'bg-blue-100 text-blue-600' : 'bg-teal-100 text-teal-600'}`}>
-                                Nível {p.level}
+                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${p.level === 4 ? 'bg-red-100 text-red-600' : p.level === 3 ? 'bg-blue-100 text-blue-600' : 'bg-teal-100 text-teal-600'}`}>
+                                {getLevelLabel(p.level)}
                             </span>
                         </div>
                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{p.point1} (-) / {p.point2} (+)</span>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BiomagneticPair } from '../types';
 
@@ -64,7 +63,7 @@ const PairDetailModal: React.FC<PairDetailModalProps> = ({ pair, onClose }) => {
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider border-r">Especificação</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider border-r">Doença / Disfunção</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Sintomas</th>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Sintomas e algumas dicas</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-slate-200">
@@ -73,7 +72,13 @@ const PairDetailModal: React.FC<PairDetailModalProps> = ({ pair, onClose }) => {
                         <tr key={index} className="hover:bg-slate-50 transition-colors">
                           <td className="px-4 py-4 text-sm text-slate-700 border-r align-top whitespace-pre-wrap font-medium">{detail.specification || '-'}</td>
                           <td className="px-4 py-4 text-sm text-slate-700 border-r align-top whitespace-pre-wrap">{detail.disease || '-'}</td>
-                          <td className="px-4 py-4 text-sm text-slate-700 align-top whitespace-pre-wrap">{detail.symptoms || '-'}</td>
+                          <td className="px-4 py-4 text-sm text-slate-700 align-top whitespace-pre-wrap">
+                            {detail.symptoms?.includes('Quando este par der ativo') ? (
+                              <span className="text-red-600 font-bold">{detail.symptoms}</span>
+                            ) : (
+                              detail.symptoms || '-'
+                            )}
+                          </td>
                         </tr>
                       ))
                     ) : (
