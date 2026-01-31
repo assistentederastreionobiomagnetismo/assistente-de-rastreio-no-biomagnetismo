@@ -1,11 +1,11 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { BiomagneticPair } from "../types";
 
-// Always use process.env.API_KEY directly when initializing the @google/genai client instance.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export async function getPairInformation(pair: BiomagneticPair): Promise<string> {
+  // Always use process.env.API_KEY directly when initializing the @google/genai client instance.
+  // Instantiate right before making an API call to ensure it always uses the most up-to-date API key.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
   // Use process.env.API_KEY directly if checking availability.
   if (!process.env.API_KEY) {
     return Promise.resolve("A funcionalidade de IA está desativada porque a chave da API não está configurada.");

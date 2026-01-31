@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { ClipboardIcon, WhatsAppIcon } from './icons/Icons';
 
 interface LoginProps {
   onLogin: (username: string, password: string) => { success: boolean; message?: string };
   onRequestReset: (username: string, newPass: string) => { success: boolean; message: string };
-  onImportSync: (code: string) => boolean;
+  // Fixed: Changed return type to Promise<boolean> to match the async implementation in App.tsx
+  onImportSync: (code: string) => Promise<boolean>;
 }
 
 type ViewMode = 'login' | 'sync';
@@ -22,13 +22,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, onImportSync }) => {
     const urlParams = new URLSearchParams(window.location.search);
     const codeFromUrl = urlParams.get('sync');
     if (codeFromUrl) {
-      if (onImportSync(codeFromUrl)) {
-        alert('Dispositivo sincronizado automaticamente com sucesso! Agora você pode fazer o login.');
-        // Limpa a URL para evitar re-sincronização acidental
-        window.history.replaceState({}, document.title, window.location.pathname);
-      } else {
-        console.error("Código de sincronização automático inválido.");
-      }
+      // Fixed: onImportSync is now async, so we use .then() to handle the result
+      onImportSync(codeFromUrl).then(success => {
+        if (success) {
+          alert('Dispositivo sincronizado automaticamente com sucesso! Agora você pode fazer o login.');
+          // Limpa a URL para evitar re-sincronização acidental
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } else {
+          console.error("Código de sincronização automático inválido.");
+        }
+      });
     }
   }, [onImportSync]);
 
@@ -39,9 +42,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onImportSync }) => {
     if (!result.success) setError(result.message || 'Dados de acesso incorretos.');
   };
 
-  const handleSync = (e: React.FormEvent) => {
+  // Fixed: Made handleSync async to properly await the result of onImportSync
+  const handleSync = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (onImportSync(syncCode.trim())) {
+    const success = await onImportSync(syncCode.trim());
+    if (success) {
         alert('Dispositivo sincronizado! O banco de dados foi atualizado. Agora faça seu login.');
         setViewMode('login');
     } else {
