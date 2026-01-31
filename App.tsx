@@ -17,7 +17,7 @@ import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon
 import { BIOMAGNETIC_PAIRS } from './constants';
 
 // --- DATABASE UTILS ---
-const DB_NAME = 'BiomagDB';
+const DB_NAME = 'BiomagDB_v4'; // Incrementado para v4 para limpar cache e aplicar exclusão do Timo-Reto
 const DB_VERSION = 1;
 const STORES = {
   PAIRS: 'pairs',
@@ -30,7 +30,7 @@ const STORES = {
 const openDB = (): Promise<IDBDatabase> => {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = () => {
+    request.onupgradeneeded = (event: any) => {
       const db = request.result;
       Object.values(STORES).forEach(store => {
         if (!db.objectStoreNames.contains(store)) db.createObjectStore(store);
@@ -74,8 +74,6 @@ enum Step {
 }
 
 type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager' | 'changePassword';
-const USERS_STORAGE_KEY = 'biomag_therapist_users';
-const PAIRS_STORAGE_KEY = 'biomag_master_pair_list';
 const LAST_SYNC_KEY = 'biomag_last_db_sync_date';
 
 const App: React.FC = () => {
@@ -115,43 +113,29 @@ const App: React.FC = () => {
   const [appView, setAppView] = useState<AppView>('dashboard');
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- DATA LOADING & MIGRATION ---
   useEffect(() => {
     const initAppData = async () => {
       try {
-        // 1. Load Last Sync Date
-        const storedSync = await dbLoad(STORES.CONFIG, 'lastSync') || localStorage.getItem(LAST_SYNC_KEY) || '';
+        const storedSync = await dbLoad(STORES.CONFIG, 'lastSync') || '';
         setLastSyncDate(storedSync);
 
-        // 2. Load Pairs (Try IndexedDB, fallback to BIOMAGNETIC_PAIRS)
-        let pairs = await dbLoad(STORES.PAIRS, 'masterList');
-        
-        if (!pairs) {
-          pairs = BIOMAGNETIC_PAIRS;
-        } else {
-          // MECANISMO DE SINCRONIZAÇÃO FORÇADA:
-          // Se o desenvolvedor marcou um par no constants.ts como 'isDefinitive', ele atualiza a base do usuário.
-          const pairMap = new Map(pairs.map((p: any) => [p.name, p]));
-          BIOMAGNETIC_PAIRS.forEach(masterPair => {
-              if (masterPair.isDefinitive) {
-                  pairMap.set(masterPair.name, masterPair);
-              } else if (!pairMap.has(masterPair.name)) {
-                  pairMap.set(masterPair.name, masterPair);
-              }
-          });
-          pairs = Array.from(pairMap.values());
-        }
-        
-        await dbSave(STORES.PAIRS, 'masterList', pairs);
-        setBiomagneticPairs(pairs);
+        let localPairs = await dbLoad(STORES.PAIRS, 'masterList') || [];
+        const pairMap = new Map();
+        localPairs.forEach((p: any) => pairMap.set(p.name, p));
 
-        // 3. Load Users
-        let users = await dbLoad(STORES.USERS, 'list');
-        if (!users) {
-          const legacyUsers = localStorage.getItem(USERS_STORAGE_KEY);
-          users = legacyUsers ? JSON.parse(legacyUsers) : [];
-        }
+        BIOMAGNETIC_PAIRS.forEach(masterPair => {
+            if (masterPair.isDefinitive === true) {
+                pairMap.set(masterPair.name, masterPair);
+            } else if (!pairMap.has(masterPair.name)) {
+                pairMap.set(masterPair.name, masterPair);
+            }
+        });
         
+        const mergedPairsList = Array.from(pairMap.values()) as BiomagneticPair[];
+        await dbSave(STORES.PAIRS, 'masterList', mergedPairsList);
+        setBiomagneticPairs(mergedPairsList);
+
+        let users = await dbLoad(STORES.USERS, 'list') || [];
         const adminExists = users.some((u: any) => u.username.toLowerCase() === 'vbsjunior.biomagnetismo');
         if (!adminExists) {
           users.push({
@@ -174,7 +158,6 @@ const App: React.FC = () => {
     initAppData();
   }, []);
 
-  // Save changes to IndexedDB when state updates
   useEffect(() => {
     if (!isLoading && biomagneticPairs.length > 0) {
       dbSave(STORES.PAIRS, 'masterList', biomagneticPairs);
@@ -187,7 +170,6 @@ const App: React.FC = () => {
     }
   }, [allUsers, isLoading]);
 
-  // Handle Load/Switch User Context (Patients & Sessions)
   useEffect(() => {
     if (currentUser && !isLoading) {
       const loadUserBoundData = async () => {
@@ -204,19 +186,6 @@ const App: React.FC = () => {
       loadUserBoundData();
     }
   }, [currentUser, isLoading]);
-
-  // Persist User Bound Data
-  useEffect(() => {
-    if (currentUser && isAuthenticated && !isLoading) {
-      dbSave(STORES.PATIENTS, currentUser.username, patients);
-    }
-  }, [patients, currentUser, isAuthenticated, isLoading]);
-
-  useEffect(() => {
-    if (currentUser && isAuthenticated && !isLoading) {
-      dbSave(STORES.SESSIONS, currentUser.username, sessions);
-    }
-  }, [sessions, currentUser, isAuthenticated, isLoading]);
 
   const handleImportUsers = async (syncCode: string): Promise<boolean> => {
     try {
@@ -236,24 +205,20 @@ const App: React.FC = () => {
             if (importedData.pairs) {
                 setBiomagneticPairs(importedData.pairs);
                 await dbSave(STORES.PAIRS, 'masterList', importedData.pairs);
-                
-                const syncTime = importedData.timestamp ? new Date(importedData.timestamp).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR');
+                const syncTime = new Date().toLocaleString('pt-BR');
                 setLastSyncDate(syncTime);
                 await dbSave(STORES.CONFIG, 'lastSync', syncTime);
             }
             return true;
         } 
-    } catch (e) {
-        console.error("Erro ao importar código de sincronização", e);
-    }
+    } catch (e) { console.error(e); }
     return false;
   };
 
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
     const foundUser = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     if (!foundUser) return { success: false, message: 'Usuário ou senha inválidos.' };
-    if (!foundUser.isApproved) return { success: false, message: 'Cadastro aguardando ativação pelo administrador.' };
-
+    if (!foundUser.isApproved) return { success: false, message: 'Cadastro aguardando ativação.' };
     setIsAuthenticated(true);
     setCurrentUser(foundUser);
     setAppView(foundUser.requiresPasswordChange ? 'changePassword' : 'dashboard');
@@ -266,7 +231,6 @@ const App: React.FC = () => {
     setAllUsers(updatedUsers);
     setCurrentUser(prev => prev ? { ...prev, password: newPassword, requiresPasswordChange: false } : null);
     setAppView('dashboard');
-    alert('Senha alterada com sucesso!');
   };
 
   const handleLogout = () => {
@@ -275,9 +239,6 @@ const App: React.FC = () => {
     setAppView('dashboard');
     setSessions([]);
     setPatients([]);
-    setPatient({ name: '', mainComplaint: '' });
-    setSelectedPairs([]);
-    setCurrentStep(Step.PATIENT_INFO);
   };
 
   const jumpToStep = (step: Step) => {
@@ -311,28 +272,14 @@ const App: React.FC = () => {
         startTime: sessionStartTime,
         endTime: sessionEndTime
     };
-    
-    setSessions(prev => [newSession, ...prev]);
-    
-    setCurrentStep(Step.PATIENT_INFO);
+    const newSessions = [newSession, ...sessions];
+    setSessions(newSessions);
+    dbSave(STORES.SESSIONS, currentUser!.username, newSessions);
+    setAppView('dashboard');
+    // Reset states for next
     setPatient({ name: '', mainComplaint: '' });
     setSelectedPairs([]);
-    setProtocolData({ legResponse: '', antennaResponse: '', sessionType: '' });
-    setPhenomena({ vascularAccidents: [], tumoralPhenomena: [], tumoralGenesis: [], traumas: [], portalPairs: [] });
-    setSelectedEmotions([]);
-    setSelectedSensations([]);
-    setEmotionsNotes('');
-    setSensationsNotes('');
-    setImpactionTime('');
-    setSessionNotes('');
-    setProtocolNotes('');
-    setLevelINotes('');
-    setLevelIINotes('');
-    setLevelIIINotes('');
-    setPhenomenaNotes('');
-    setSessionStartTime(null);
-    setSessionEndTime(null);
-    setAppView('dashboard');
+    setCurrentStep(Step.PATIENT_INFO);
   };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-100 font-bold text-teal-600">Carregando Banco de Dados...</div>;
@@ -353,7 +300,7 @@ const App: React.FC = () => {
             {lastSyncDate && (
                 <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-white border border-teal-100 rounded-full shadow-sm">
                     <CheckIcon className="w-3 h-3 text-teal-600" />
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Última Sincronia da Base: {lastSyncDate}</span>
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Base Sincronizada</span>
                 </div>
             )}
           </div>

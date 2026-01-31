@@ -57,12 +57,12 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
   const handleDetailChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     const newDetails = [...(pair.details || [])];
-    newDetails[index] = { ...newDetails[index], [name]: value };
+    newDetails[index] = { ...newDetails[index], [name]: value } as any;
     setPair(prev => ({ ...prev, details: newDetails }));
   };
   
   const addDetailRow = () => {
-    const newDetail: PairDetail = { specification: '', disease: '', symptoms: '', tips: '' };
+    const newDetail: PairDetail = { specification: '', disease: '', symptoms: '' };
     setPair(prev => ({ ...prev, details: [...(prev.details || []), newDetail] }));
   };
 
@@ -280,10 +280,9 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                     <table className="min-w-full divide-y divide-slate-200">
                       <thead className="bg-slate-50">
                         <tr>
-                          <th className="px-3 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/4">Especificação</th>
-                          <th className="px-3 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/4">Doença/Disfunção</th>
-                          <th className="px-3 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/4">Sintomas</th>
-                          <th className="px-3 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/4">Dicas Técnicas</th>
+                          <th className="px-3 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/3 border-r">Especificação</th>
+                          <th className="px-3 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/3 border-r">Doença/Disfunção</th>
+                          <th className="px-3 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/3">Sintomas</th>
                           <th className="px-2 py-3 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest w-12"></th>
                         </tr>
                       </thead>
@@ -298,9 +297,6 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                             </td>
                             <td className="px-2 py-2 align-top">
                               <textarea name="symptoms" value={detail.symptoms} onChange={(e) => handleDetailChange(index, e)} rows={3} className="block w-full text-xs p-3 border-slate-200 rounded-xl shadow-inner focus:ring-teal-500 resize-none font-medium text-slate-700"></textarea>
-                            </td>
-                            <td className="px-2 py-2 align-top">
-                              <textarea name="tips" value={detail.tips} onChange={(e) => handleDetailChange(index, e)} rows={3} className="block w-full text-xs p-3 border-slate-200 rounded-xl shadow-inner focus:ring-teal-500 resize-none font-medium text-slate-700"></textarea>
                             </td>
                             <td className="px-2 py-2 align-middle text-center">
                               <button type="button" onClick={() => removeDetailRow(index)} className="text-slate-300 hover:text-red-600 p-2 rounded-xl hover:bg-red-50 transition-all">

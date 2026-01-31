@@ -28,11 +28,19 @@ const PairDetailModal: React.FC<PairDetailModalProps> = ({ pair, onClose }) => {
             <div className="lg:col-span-1 bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner flex flex-col items-center">
                <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 text-center">Imagem de Referência</h4>
                {pair.imageUrl ? (
-                 <div className="w-full bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+                 <div className="w-full bg-white p-2 rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                    <img 
+                    key={pair.imageUrl}
                     src={pair.imageUrl} 
                     alt={`Referência para ${pair.name}`} 
-                    className="w-full h-auto rounded object-contain max-h-[400px]" 
+                    referrerPolicy="no-referrer"
+                    className="w-full h-auto rounded object-contain max-h-[400px] block mx-auto" 
+                    onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        console.log("Erro ao carregar imagem do Drive");
+                        target.onerror = null; 
+                        target.src="https://via.placeholder.com/400x500?text=Imagem+Indisponivel";
+                    }}
                    />
                  </div>
                ) : (
@@ -40,8 +48,8 @@ const PairDetailModal: React.FC<PairDetailModalProps> = ({ pair, onClose }) => {
                    Nenhuma imagem de referência cadastrada.
                  </div>
                )}
-               <div className="mt-4 text-sm text-slate-600 text-center">
-                 <p><strong>Ponto 1 (N):</strong> {pair.point1}</p>
+               <div className="mt-4 text-sm text-slate-600 text-center font-medium">
+                 <p className="border-b border-slate-100 pb-1 mb-1"><strong>Ponto 1 (N):</strong> {pair.point1}</p>
                  <p><strong>Ponto 2 (P):</strong> {pair.point2}</p>
                </div>
             </div>
@@ -56,23 +64,21 @@ const PairDetailModal: React.FC<PairDetailModalProps> = ({ pair, onClose }) => {
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider border-r">Especificação</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider border-r">Doença / Disfunção</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider border-r">Sintomas</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Dicas</th>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Sintomas</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-slate-200">
                     {(pair.details && pair.details.length > 0) ? (
                       pair.details.map((detail, index) => (
                         <tr key={index} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-4 text-sm text-slate-700 border-r align-top whitespace-pre-wrap">{detail.specification || '-'}</td>
+                          <td className="px-4 py-4 text-sm text-slate-700 border-r align-top whitespace-pre-wrap font-medium">{detail.specification || '-'}</td>
                           <td className="px-4 py-4 text-sm text-slate-700 border-r align-top whitespace-pre-wrap">{detail.disease || '-'}</td>
-                          <td className="px-4 py-4 text-sm text-slate-700 border-r align-top whitespace-pre-wrap">{detail.symptoms || '-'}</td>
-                          <td className="px-4 py-4 text-sm text-slate-700 align-top whitespace-pre-wrap">{detail.tips || '-'}</td>
+                          <td className="px-4 py-4 text-sm text-slate-700 align-top whitespace-pre-wrap">{detail.symptoms || '-'}</td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={4} className="px-6 py-10 text-center text-sm text-slate-400 italic bg-slate-25">Nenhuma informação técnica cadastrada para este par pelo administrador.</td>
+                        <td colSpan={3} className="px-6 py-10 text-center text-sm text-slate-400 italic bg-slate-25">Nenhuma informação técnica cadastrada para este par.</td>
                       </tr>
                     )}
                   </tbody>

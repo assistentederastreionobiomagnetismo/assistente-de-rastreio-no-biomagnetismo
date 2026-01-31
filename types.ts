@@ -13,7 +13,6 @@ export interface PairDetail {
   specification: string;
   disease: string;
   symptoms: string;
-  tips: string;
 }
 
 export interface BiomagneticPair {
