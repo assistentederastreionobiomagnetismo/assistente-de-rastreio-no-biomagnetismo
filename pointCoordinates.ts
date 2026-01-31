@@ -1,4 +1,3 @@
-
 export const POINT_DEFINITIONS: { [key: string]: { x: number; y: number; view: 'front' | 'back'; offset?: number } } = {
   // Cabeça
   'Parietal Direito': { x: 40, y: 20, view: 'front' },
@@ -11,9 +10,19 @@ export const POINT_DEFINITIONS: { [key: string]: { x: number; y: number; view: '
   'Timo': { x: 50, y: 40, view: 'front' },
   'Nervo Vago': { x: 50, y: 35, view: 'front' },
   'Clavícula Média': { x: 50, y: 38, view: 'front', offset: 10 },
+  'Axila': { x: 50, y: 45, view: 'front', offset: 20 },
+  'Axila (D/E)': { x: 50, y: 45, view: 'front', offset: 20 },
+  'Subclávia': { x: 50, y: 40, view: 'front', offset: 15 },
+  'Subclávia (D/E)': { x: 50, y: 40, view: 'front', offset: 15 },
+  'Deltoide': { x: 50, y: 38, view: 'front', offset: 32 },
+  'Deltoide (D/E)': { x: 50, y: 38, view: 'front', offset: 32 },
+  'Úmero': { x: 50, y: 55, view: 'front', offset: 35 },
+  'Úmero (D/E)': { x: 50, y: 55, view: 'front', offset: 35 },
   // Pescoço / Tórax (Costas)
   'Primeira Cervical': { x: 50, y: 30, view: 'back' },
   'Supraespinoso': { x: 50, y: 38, view: 'back', offset: 15 },
+  'Supraespinhoso': { x: 50, y: 38, view: 'back', offset: 15 },
+  'Supraespinhoso (D/E)': { x: 50, y: 38, view: 'back', offset: 15 },
   'Escápula': { x: 50, y: 45, view: 'back', offset: 10 },
   'Quarta Dorsal': { x: 50, y: 48, view: 'back' },
   // Abdômen (Frente)
@@ -26,15 +35,19 @@ export const POINT_DEFINITIONS: { [key: string]: { x: number; y: number; view: '
   'Píloro': { x: 48, y: 68, view: 'front' },
   'Íliaco': { x: 50, y: 80, view: 'front', offset: 8 },
   'Ligamento Pancreático': { x: 58, y: 68, view: 'front' },
-  'Baço': { x: 60, y: 65, view: 'front' },
+  'Baço': { x: 60, y: 65, view: 'front', offset: 4 },
   'Bexiga': { x: 50, y: 85, view: 'front' },
   'Cabeça do Pâncreas': { x: 52, y: 67, view: 'front' },
   'Cauda do Pâncreas': { x: 58, y: 66, view: 'front' },
   'Pâncreas': { x: 55, y: 66, view: 'front' },
+  'Pâncreas (Corpo)': { x: 55, y: 66, view: 'front' },
+  'Ponta do pâncreas': { x: 62, y: 66, view: 'front' },
+  'Cólon descendente': { x: 60, y: 80, view: 'front' },
   // Abdômen (Costas)
   'Reto': { x: 50, y: 90, view: 'back' },
   'Rim Direito': { x: 42, y: 70, view: 'back' },
   'Rim Esquerdo': { x: 58, y: 70, view: 'back' },
+  'Rim do mesmo lado': { x: 50, y: 70, view: 'back', offset: 8 },
   'Suprarrenais': { x: 58, y: 68, view: 'back' },
   'Glúteo': { x: 50, y: 85, view: 'back', offset: 8 },
   'Sacro': { x: 50, y: 82, view: 'back' },

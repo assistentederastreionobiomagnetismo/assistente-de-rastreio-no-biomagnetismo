@@ -13,7 +13,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Ecuador",
         disease: "Cisticercosis",
-        symptoms: "Dores de cabeça frequentes, convulsões, transtornos de visão, alterações psiquiátricas, vômitos, infecções na coluna, demência e perda da consciência."
+        symptoms: "Dores de cabeça frequentes, convulsões, transtornos de visão, alterações psiquiátricas, vômitos, infecções na coluna, demência e perda da consciousness."
       }
     ]
   },
@@ -509,7 +509,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Par Especial Carmen (Disfunção ovárica)",
         disease: "Disfunção de ovários",
-        symptoms: "Dismenorreia, amenorrreira, Primária ou secundária a um processo inflamatório."
+        symptoms: "Dismenorreia, amenorrreira, Primária ou secundária a um processo inflamonatório."
       }
     ]
   },
@@ -557,7 +557,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "Citomegalovírus",
-        symptoms: "Esclerose múltipla ou lateral, Lesão medular, debilidade muscular, paralisia. Falsas escleroses quando alguma bactéria oprime medula. Infecções do fígado. Coriorrefinite."
+        symptoms: "Esclerose múltiqa ou lateral, Lesão medular, debilidade muscular, paralisia. Falsas escleroses quando alguma bactéria oprime medula. Infecções do fígado. Coriorrefinite."
       }
     ]
   },
@@ -568,7 +568,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
     order: 36, 
     level: 2, 
     isDefinitive: true, 
-    imageUrl: 'https://lh3.googleusercontent.com/d/11J-GBdjpxDwHaavrFTmU8-tl6oDqQ7t1',
+    imageUrl: 'https://lh3.googleusercontent.com/d/11J-GBdjpxDwHaavrFTmU8-tl6oDQQ7t1',
     details: [
       {
         specification: "Par Especial Isaac",
@@ -589,7 +589,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção parasitária",
         disease: "Toxoplasma gondii",
-        symptoms: "Toxoplasmose, encefalite, convulsões, surdez, zumbidos, perda de equilíbrio horizontal, tonturas, enjôo, Sind. de meniére, dor nos olhos, cegueira, rinite. Pode estar associado a hiperidrose."
+        symptoms: "Toxoplasmose, deve-se encefalite, convulsões, surdez, zumbidos, perda de equilíbrio horizontal, tonturas, enjôo, Sind. de meniére, dor nos olhos, cegueira, rinite. Pode estar associado a hiperidrose."
       }
     ]
   },
@@ -603,7 +603,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
     imageUrl: 'https://lh3.googleusercontent.com/d/15aKfTZVD6jD0Ofn2rVlisokWRT0_roHf',
     details: [
       {
-        specification: "Par Especial Leny",
+        specification: "Pares craniais",
         disease: "Pares craniais",
         symptoms: "Melhora a função dos 12 pares cranianos. Corrige Tics Nervosos. Paralisia facial, neuralgia do trigêmeo. Pode auxiliar no tratamento de intoxicações."
       }
@@ -685,7 +685,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Par Especial Lolita",
         disease: "Disfunção das parótidas",
-        symptoms: "Disfunção da parótida, glândula que produz hormônio parotidina que influencia a produção hormonal da tireoide, paratireoide e pâncreas, o que estimula a produção de insulina, tiroxina e calcitocina. Quando este par está ativo há diminuição destes hormônios, causando transtornos digestivos, de peso e ósseos. Quando se impacta e se trata este par, pode ocorrer aumento de apetite."
+        symptoms: "Disfunção da parótida, glândula que produz hormônio parotidina que influência a produção hormonal da tireoide, paratireoide e pâncreas, o que estimula a produção de insulina, tiroxina e calcitocina. Quando este par está ativo há diminuição destes hormônios, causando transtornos digestivos, de peso e ósseos. Quando se impacta e se trata este par, pode ocorrer aumento de apetite."
       }
     ]
   },
@@ -718,6 +718,614 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
         specification: "Disfunção Glandular (Tireoide)",
         disease: "Disfunção tireoidiana",
         symptoms: "Hipo/hipertireoidismo (Magreza ou obesidade)"
+      }
+    ]
+  },
+  { 
+    name: 'Paratireoide (D/E) - Paratireoide', 
+    point1: 'Paratireoide (D/E)', 
+    point2: 'Paratireoide', 
+    order: 46, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1_JrO86KxVc_h0Gmab2UVj53ivsAq8haQ',
+    details: [
+      {
+        specification: "Disfunção Glandular (Paratireoide)",
+        disease: "Disfunção de paratireoides",
+        symptoms: "Hipo/hipertireoidismo (Magreza ou obesidade), transtorno no metabolismo do cálcio, fósforo: hipocalcemia, osteoporose, descalcificação. Dá-se por um traumatismo, idade, insolação, infecções, disfunção. Associado a bactérias produz lipomas."
+      }
+    ]
+  },
+  { 
+    name: 'Timo - Reto', 
+    point1: 'Timo', 
+    point2: 'Reto', 
+    order: 47, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1hNNch5gz0tgONa3tD9eqRlwzNSd95SqQ',
+    details: [
+      {
+        specification: "Infecção viral (HIV)",
+        disease: "Vírus HIV",
+        symptoms: "AIDS - Síndrome da imunodeficiência adquirida (em associação com E. Coli)"
+      }
+    ]
+  },
+  { 
+    name: 'Timo - Parietal (D/E)', 
+    point1: 'Timo', 
+    point2: 'Parietal (D/E)', 
+    order: 48, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1sJg3sVja4TofisPEI0h1e0rSI6vzfhF3',
+    details: [
+      {
+        specification: "Infecção viral (Rubéola vírus)",
+        disease: "Rubéola vírus",
+        symptoms: "Dor de cabeça, febre, alterações do olfato e paladar, linfadenopatia, manifestações cutâneas. Transtornos psiquiátricas, psicológicos e motores."
+      }
+    ]
+  },
+  { 
+    name: 'Timo - Suprarrenal', 
+    point1: 'Timo', 
+    point2: 'Suprarrenal', 
+    order: 49, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1GHo4fgBGmpdXhjo1Qz2zt_MlgKvgBX3Q',
+    details: [
+      {
+        specification: "Par Especial Álvaro (Disfunção hormonal)",
+        disease: "Disfunção hormonal",
+        symptoms: "Para harmonização de hormônios em geral. Aumenta os níveis do hormônio do crescimento. Impactar este par antes da adolescência promove maior crescimento."
+      }
+    ]
+  },
+  { 
+    name: 'Timo (Sup) - Timo (Inf)', 
+    point1: 'Timo (Sup)', 
+    point2: 'Timo (Inf)', 
+    order: 50, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/19Vl8wcOUh5Lg2ti9ifO-HDpDpLKVNdT2',
+    details: [
+      {
+        specification: "Disfunção Glandular (Timo)",
+        disease: "Imunodeficiência",
+        symptoms: "Trata imunodeficiência, seja por exposição a agentes diversos, depressão, alimentação ruim... Regula o hormônio timosina que dá a imuno-resposta. Desarmonia hormonal. O Timo comanda e coordena a ação do sistema defensivo do organismo."
+      }
+    ]
+  },
+  { 
+    name: 'Timo - Baço', 
+    point1: 'Timo', 
+    point2: 'Baço', 
+    order: 51, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1FbsFW2hhvFkcrpoeeC3O_VbQ7Dz6Se2z',
+    details: [
+      {
+        specification: "Par Especial Marco Antônio",
+        disease: "Surfactante Pulmonar",
+        symptoms: "Fibrose Pulmonar - Bebês prematuros."
+      }
+    ]
+  },
+  { 
+    name: 'Mediastino (Sup) - Mediastino (inf)', 
+    point1: 'Mediastino (Sup)', 
+    point2: 'Mediastino (inf)', 
+    order: 52, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1u78LO7d4UTPe4zAqpD4O0GC6J3f5bm_D',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Proteus Mirabilis",
+        symptoms: "Sintomas laríngeos, pulmonares e bronquiais. Por proximidade ao Timo pode provocar falsa imunodeficiência. Pode provocar também, aumento dos níveis de ureia (Gota)."
+      }
+    ]
+  },
+  { 
+    name: 'Cárdia - Suprarrenal (C)', 
+    point1: 'Cárdia', 
+    point2: 'Suprarrenal (C)', 
+    order: 53, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/100tcZchWUYACBzB9sl8XwqclzSM8tSDx',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Streptococcus Beta Hemolítico",
+        symptoms: "Muito agressivo. Pode causar escarlatina e varizes de esôfago. Faringoamigdalite, que podem dar origem a febre reumática, dores articulares intensas e glomerulonefrite."
+      }
+    ]
+  },
+  { 
+    name: 'Cárdia - Piloro', 
+    point1: 'Cárdia', 
+    point2: 'Piloro', 
+    order: 54, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1YzpzLKgyc8S1XErp5H9nGdWhRItRokha',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Streptococcus C3",
+        symptoms: "Muito agressivo. Pode causar escarlatina e varizes de esôfago. Faringoamigdalite, que podem dar origem a febre reumática, dores articulares intensas e glomerulonefrite."
+      }
+    ]
+  },
+  { 
+    name: 'Estômago - Suprarrenal (C)', 
+    point1: 'Estômago', 
+    point2: 'Suprarrenal (C)', 
+    order: 55, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1QSNNDtWPWut6K_DSe3a3Lg1z3CBIhisu',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Sarampo Vírus",
+        symptoms: "Sarampo (doença Exantemática). Em criança é passageiro. Em adultos provoca gastrite, úlceras, sangramento gastrointestinal alto, conjuntivite, retinite pigmentar, cansaço e dermatite atópica."
+      }
+    ]
+  },
+  { 
+    name: 'Estômago - Piloro', 
+    point1: 'Estômago', 
+    point2: 'Piloro', 
+    order: 56, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1UWlZRSHWS-YH8HcY3g8uKyEEdyhMnRHt',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Clostridium Perfringens",
+        symptoms: "Problemas digestivos por lácteos. Intolerância à lactose. Pode estar associado à fibrose cística."
+      }
+    ]
+  },
+  { 
+    name: 'Estômago - Estômago', 
+    point1: 'Estômago', 
+    point2: 'Estômago', 
+    order: 57, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1p5gEsSa0lUB-_lyKwhRvG9pSJk3KYVlm',
+    details: [
+      {
+        specification: "Disfunção Gástrica",
+        disease: "Disfunção",
+        symptoms: "Dores epigástricas, má digestão, arrotos."
+      }
+    ]
+  },
+  { 
+    name: 'Estômago - Fígado', 
+    point1: 'Estômago', 
+    point2: 'Fígado', 
+    order: 58, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1VmlpbvdFH3RKxsUNbjbtU8ECQ8E0P18h',
+    details: [
+      {
+        specification: "Par Especial",
+        disease: "Par Especial",
+        symptoms: "Obesidade, espinhas, alergias."
+      }
+    ]
+  },
+  { 
+    name: 'Estômago - Cólon transverso', 
+    point1: 'Estômago', 
+    point2: 'Cólon transverso', 
+    order: 59, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1r99BztEb-Uml7j3gdd6RuD7oyHYKiPQ9',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Clamidia Tucans ou Africana",
+        symptoms: "Pode causar infecções em genitais, problemas de vias urinárias/excretoras."
+      }
+    ]
+  },
+  { 
+    name: 'Estômago - Pâncreas', 
+    point1: 'Estômago', 
+    point2: 'Pâncreas', 
+    order: 60, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/128dzwL27WXkd6PKF3RIbUTZYYzsuoY4a',
+    details: [
+      {
+        specification: "Par Especial",
+        disease: "Par Especial",
+        symptoms: "Alergias."
+      }
+    ]
+  },
+  { 
+    name: 'Estômago - Timo (Inf)', 
+    point1: 'Estômago', 
+    point2: 'Timo (Inf)', 
+    order: 61, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1ZqmpH1Zann6531NQ8UK17kNmSb_dWhir',
+    details: [
+      {
+        specification: "Bactéria",
+        disease: "Escherichia Coli",
+        symptoms: "Transgênica - Intecção intestinal e vias urinárias."
+      }
+    ]
+  },
+  { 
+    name: 'Cabeça de pâncreas - Suprarrenal (C)', 
+    point1: 'Cabeça de pâncreas', 
+    point2: 'Suprarrenal (C)', 
+    order: 62, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/18YrVXNeso8GzLHx4hg3VgqUjhcvMjd64',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Staphylococcus Aureus Coagulasa negativa",
+        symptoms: "DRGE (Refluxo gastroesofágico), se associada with Leprae origina câncer de cabeça de pâncreas. Pode dar falsa diabetes. Halitose."
+      }
+    ]
+  },
+  { 
+    name: 'Cabeça de pâncreas - Piloro', 
+    point1: 'Cabeça de pâncreas', 
+    point2: 'Piloro', 
+    order: 63, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1sqpDjp8_eYQ6CrFQx2RGONh4HSNaHZfG',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Clostridium dificile",
+        symptoms: "Necroses, muitas vezes no intestino."
+      }
+    ]
+  },
+  { 
+    name: 'Cabeça de pâncreas - Pâncreas', 
+    point1: 'Cabeça de pâncreas', 
+    point2: 'Pâncreas', 
+    order: 64, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1ffUcWev4uPBRFNezqJyDxtKaaMmP-jEQ',
+    details: [
+      {
+        specification: "Par Especial Ramsés",
+        disease: "Par Ramsés",
+        symptoms: "Intoxicação por metais pesados."
+      }
+    ]
+  },
+  { 
+    name: 'Cabeça de pâncreas - Fígado', 
+    point1: 'Cabeça de pâncreas', 
+    point2: 'Fígado', 
+    order: 65, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1afVotjEhErp6L2J5X_xE9sccTicu7Wv3',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Staphylococcus Aureus",
+        symptoms: "Hepatite K"
+      }
+    ]
+  },
+  { 
+    name: 'Pâncreas (Corpo do pâncreas) - Pâncreas', 
+    point1: 'Pâncreas (Corpo)', 
+    point2: 'Pâncreas', 
+    order: 66, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1cz22iawG3q_7cggwofhMQbkUjs6YhMJU',
+    details: [
+      {
+        specification: "Par Especial Ramsés",
+        disease: "Pancreatite ou Par Ramsés (Intoxicação por metais pesados)",
+        symptoms: "Intoxicação por metais pesados. Intoxicação medicamentosa ou digestiva que gera estados psicóticos no paciente, afetando o SNC. Pancreatite."
+      }
+    ]
+  },
+  { 
+    name: 'Pâncreas (Corpo) - Duodeno', 
+    point1: 'Pâncreas (Corpo)', 
+    point2: 'Duodeno', 
+    order: 67, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1PUw3FQMVqRzK4NoHZMHtZXIENqLUXNwH',
+    details: [
+      {
+        specification: "Infecção parasitária",
+        disease: "Anisakis Simplex",
+        symptoms: "Distúrbios gatrointestinais (Dor abdominal, náuseas e vômitos). Reação alérgica, choque anafilático, urticária. Crises de tosse, às vezes com larvas vistas à secreção: se as larvas vão ao estômago pode ser fatal, em função de hemorragia e/ou hérnias."
+      }
+    ]
+  },
+  { 
+    name: 'Pâncreas (Corpo) - Baço', 
+    point1: 'Pâncreas (Corpo)', 
+    point2: 'Baço', 
+    order: 68, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1HQTBbFzIIr2y6D2jS8hOvl1TZiB3XOJj',
+    details: [
+      {
+        specification: "Infecção Parasitária",
+        disease: "Echinococcus Granulosos",
+        symptoms: "Infecção provocada por larvas echinococcus."
+      }
+    ]
+  },
+  { 
+    name: 'Cauda do pâncreas - Fígado', 
+    point1: 'Cauda do Pâncreas', 
+    point2: 'Fígado', 
+    order: 69, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1uhaxJnfythzDWZfGdW4m1LWvGLuKda9s',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Clostridium Botulinum",
+        symptoms: "Botulismo. Gera toxina altamente venenosa para o organismo. Pode gerar metástase se associado a verdadeiro câncer. Problemas intestinais, dor muscular, cólicas e gases. Hepatite. Este par pode ser encontrado em pessoas que fizeram aplicação de botox."
+      }
+    ]
+  },
+  { 
+    name: 'Ponta do pâncreas - Baço', 
+    point1: 'Ponta do pâncreas', 
+    point2: 'Baço', 
+    order: 70, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1Y2c2xI3leE-GwVHGGttNCZs2XsIAqlre',
+    details: [
+      {
+        specification: "Doença viral",
+        disease: "Verruga comum (viral)",
+        symptoms: "Verrugas pelo corpo."
+      }
+    ]
+  },
+  { 
+    name: 'Ponta do pâncreas - Fígado', 
+    point1: 'Ponta do pâncreas', 
+    point2: 'Fígado', 
+    order: 71, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1TE4rgu7SK0M-eRgtaWr-wHmf8czY_c1C',
+    details: [
+      {
+        specification: "Disfunção",
+        disease: "Disfunção pancreática",
+        symptoms: "Diabetes."
+      }
+    ]
+  },
+  { 
+    name: 'Ligamento pancreático - Baço', 
+    point1: 'Ligamento pancreático', 
+    point2: 'Baço', 
+    order: 72, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1_rJ-kB6UnRN1mhpYWpcqTJE4rReDVFuG',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Nilo Vírus - Influenza",
+        symptoms: "Cefaleia, tonturas, halitose, linfadenopatia, tintomas similares à leucemias. Pode ser mortal se associado ao clostridium. (Se houver necessidade de impactar este par, ATENÇÃO ESPECIAL AO SE RASTREAR O PAR RIM-RIM! OS DOIS NÃO PODEM SER IMPACTADOS AO MESMO TEMPO, pois a reação pode ser muito forte e/ou FATAL!)"
+      }
+    ]
+  },
+  { 
+    name: 'Ligamento pancreático - Cólon descendente', 
+    point1: 'Ligamento pancreático', 
+    point2: 'Cólon descendente', 
+    order: 73, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1UKBQJqFNVPzKyU9gJ7XDMK81TJEEPtYe',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Pasteurela",
+        symptoms: "Linfadenopatia regional, febre, calafrios, sintomas urinários e cerebrais."
+      }
+    ]
+  },
+  { 
+    name: 'Baço - Fígado', 
+    point1: 'Baço', 
+    point2: 'Fígado', 
+    order: 74, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1CRjDZLw-XZshf4OOI3zQ3tksVlp9oI4r',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Brucella Abortus",
+        symptoms: "Mal estar geral, dores musculares e articulares, insônia, dor de cabeça, febre, problemas respiratórios. Falsa leucemia, afeta o baço alterando o número de plaquetas e hemácias (plaquetopenia, anemia, púrpura). Hepatite I."
+      }
+    ]
+  },
+  { 
+    name: 'Baço - Baço', 
+    point1: 'Baço', 
+    point2: 'Baço', 
+    order: 75, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1Hjv9PoHvcPrEmEYNvGsr77Qh6pWbaRiQ',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Yersínia Pestis",
+        symptoms: "Este microorganismo pode estar também no par Testículo-Testículo. Tosse contínua sem expectoração, problemas e inflamações de garganta. Azoospermia, corrimento vaginal."
+      }
+    ]
+  },
+  { 
+    name: 'Baço - Baço (Disfunção)', 
+    point1: 'Baço', 
+    point2: 'Baço', 
+    order: 76, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1Hjv9PoHvcPrEmEYNvGsr77Qh6pWbaRiQ',
+    details: [
+      {
+        specification: "Disfunção do Baço",
+        disease: "Disfunção do Baço",
+        symptoms: "Anemia, sintomas leucêmicos."
+      }
+    ]
+  },
+  { 
+    name: 'Baço - Duodeno', 
+    point1: 'Baço', 
+    point2: 'Duodeno', 
+    order: 77, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1QSSWoYGBsc9CwbaSc16RaJD5nJM95JlS',
+    details: [
+      {
+        specification: "Doença complexa (Leucemia)",
+        disease: "Leucemia",
+        symptoms: "Leucemia verdadeira. A presença de células imaturas ou blastos no sangue periférico."
+      }
+    ]
+  },
+  { 
+    name: 'Axila (D/E) - Axila', 
+    point1: 'Axila (D/E)', 
+    point2: 'Axila', 
+    order: 78, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1iorixw5cYlXmBMioPOT8ZSdwrFl-LGO8',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Raiva Vírus",
+        symptoms: "Sintomas laríngeos, otite, sinusite crônicas, contrações musculares. Sintomas neurológicos com problemas no SNC, podendo ocorrer alterações de personalidade."
+      }
+    ]
+  },
+  { 
+    name: 'Subclávia (D/E) - Subclávia', 
+    point1: 'Subclávia (D/E)', 
+    point2: 'Subclávia', 
+    order: 79, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1XvnDsLQBEgILasqnbtD_kRNAeHb02oBH',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Corynebacterium Diphtheriae",
+        symptoms: "Traqueobronquite, tosse crônica, rouquidão. Diarreia, edema geral. Transmitida por lácteos. (Ao se encontrar este par, orienta-se o paciente a suspender temporariamente o consumo de lácteo e alimentos brancos refinados (farinha de trigo, açúcar, sal e arroz)). Geralmente o bem estar é tanto, que o próprio paciente opta por não voltar a consumir estes alimentos."
+      }
+    ]
+  },
+  { 
+    name: 'Supraespinhoso (D/E) - Supraespinhoso', 
+    point1: 'Supraespinhoso (D/E)', 
+    point2: 'Supraespinhoso', 
+    order: 80, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1AaHR2B1pKxLec1C8G36ngZtvA09S0C4m',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Mycobacterium Tuberculosis",
+        symptoms: "Tuberculose. Tosse crônica, febre e sudorese noturna, perda de peso, escarros sanguinolentos. TB militar (abscessos disseminados)."
+      }
+    ]
+  },
+  { 
+    name: 'Deltoide (D/E) - Deltoide', 
+    point1: 'Deltoide (D/E)', 
+    point2: 'Deltoide', 
+    order: 81, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1cRrPRMLaLsBkCS3u53HQ58-R_a-66DEq',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Treponema Pallidum - Treponema Bucalli",
+        symptoms: "Falsa artrite, confunde-se com com sífilis, reumatismo articular falso (ombro congelado, cotovelo endurecido), dores dorso-lombar, enjôos, zumbidos. Este microorganismo também pode ser encontrado no par Quadrado lombar-Quadrado lombar."
+      }
+    ]
+  },
+  { 
+    name: 'Deltoide (D/E) - Rim do mesmo lado', 
+    point1: 'Deltoide (D/E)', 
+    point2: 'Rim do mesmo lado', 
+    order: 82, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/13zi6p_u2miflPl-sW3tbcBIv8RoTok-8',
+    details: [
+      {
+        specification: "Infecção Parasitária",
+        disease: "Leishmania sp",
+        symptoms: "Lesões e úlceras expostas, nódulos na pele, febre, dor abdominal, obstrução nasal, tosse, anemia, anorexia com perda de peso, alopecia. Mudanças na coloração da pele (mas não é vitiligo). Dores/inflamações em braços e ombros (esse sintoma é muito característico neste par)."
+      }
+    ]
+  },
+  { 
+    name: 'Úmero (D/E) - Úmero', 
+    point1: 'Úmero (D/E)', 
+    point2: 'Úmero', 
+    order: 83, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1Dxe8MPNs9yIXU6hpHyNlqRgdAL1wTFs3',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Enterobacter Pneumoniae",
+        symptoms: "Pneumonias e outros problemas respiratórios. Transmite-se por gatos e cachorros."
       }
     ]
   }

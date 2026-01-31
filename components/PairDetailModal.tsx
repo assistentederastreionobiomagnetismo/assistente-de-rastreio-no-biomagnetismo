@@ -7,6 +7,21 @@ interface PairDetailModalProps {
 }
 
 const PairDetailModal: React.FC<PairDetailModalProps> = ({ pair, onClose }) => {
+  // Função para renderizar sintomas com realce em vermelho para textos entre parênteses
+  const renderSymptoms = (text: string) => {
+    if (!text) return '-';
+    
+    // Regex para identificar texto dentro de parênteses
+    const parts = text.split(/(\(.*?\))/g);
+    
+    return parts.map((part, i) => {
+      if (part.startsWith('(') && part.endsWith(')')) {
+        return <span key={i} className="text-red-600 font-bold">{part}</span>;
+      }
+      return part;
+    });
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4" onClick={onClose}>
       <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[95vh] flex flex-col animate-fade-in" onClick={(e) => e.stopPropagation()}>
@@ -73,11 +88,7 @@ const PairDetailModal: React.FC<PairDetailModalProps> = ({ pair, onClose }) => {
                           <td className="px-4 py-4 text-sm text-slate-700 border-r align-top whitespace-pre-wrap font-medium">{detail.specification || '-'}</td>
                           <td className="px-4 py-4 text-sm text-slate-700 border-r align-top whitespace-pre-wrap">{detail.disease || '-'}</td>
                           <td className="px-4 py-4 text-sm text-slate-700 align-top whitespace-pre-wrap">
-                            {detail.symptoms?.includes('Quando este par der ativo') ? (
-                              <span className="text-red-600 font-bold">{detail.symptoms}</span>
-                            ) : (
-                              detail.symptoms || '-'
-                            )}
+                            {renderSymptoms(detail.symptoms)}
                           </td>
                         </tr>
                       ))
