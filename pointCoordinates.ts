@@ -18,6 +18,10 @@ export const POINT_DEFINITIONS: { [key: string]: { x: number; y: number; view: '
   'Deltoide (D/E)': { x: 50, y: 38, view: 'front', offset: 32 },
   'Úmero': { x: 50, y: 55, view: 'front', offset: 35 },
   'Úmero (D/E)': { x: 50, y: 55, view: 'front', offset: 35 },
+  'Bursa': { x: 50, y: 42, view: 'front', offset: 30 },
+  'Bursa (D/E)': { x: 50, y: 42, view: 'front', offset: 30 },
+  'Cotovelo': { x: 50, y: 70, view: 'front', offset: 40 },
+  'Cotovelo (D/E)': { x: 50, y: 70, view: 'front', offset: 40 },
   // Pescoço / Tórax (Costas)
   'Primeira Cervical': { x: 50, y: 30, view: 'back' },
   'Supraespinoso': { x: 50, y: 38, view: 'back', offset: 15 },

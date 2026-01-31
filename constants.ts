@@ -1328,5 +1328,37 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
         symptoms: "Pneumonias e outros problemas respiratórios. Transmite-se por gatos e cachorros."
       }
     ]
+  },
+  { 
+    name: 'Bursa (D/E) - Bursa', 
+    point1: 'Bursa (D/E)', 
+    point2: 'Bursa', 
+    order: 84, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1l3D-VTGsmdh0GUou3AWawBYtV03qeqqv',
+    details: [
+      {
+        specification: "Infecção Bacteriana",
+        disease: "Actinomyces",
+        symptoms: "Lesões fibróticas semelhantes a Psoríase, com aspecto de \"madeira'; confunde-se com Psoríase, mas as lesões são mais endurecidas. Tais lesões vem e vão (remissão)."
+      }
+    ]
+  },
+  { 
+    name: 'Cotovelo (D/E) - Cotovelo', 
+    point1: 'Cotovelo (D/E)', 
+    point2: 'Cotovelo', 
+    order: 85, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1PgET6zkIlKNyC9-NwX19VABDZG6xDQ2a',
+    details: [
+      {
+        specification: "Par Especial Castañeda",
+        disease: "Disfunção ocular",
+        symptoms: "Problemas de visão"
+      }
+    ]
   }
 ];
