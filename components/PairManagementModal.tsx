@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { BiomagneticPair, PairDetail } from '../types';
 import { TrashIcon, PlusIcon, CheckIcon } from './icons/Icons';
@@ -6,12 +5,12 @@ import { TrashIcon, PlusIcon, CheckIcon } from './icons/Icons';
 interface PairManagementModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (pair: BiomagneticPair, originalName?: string) => void;
+  onSave: (pair: BiomagneticPair, originalOrder?: number) => void;
   initialPair: BiomagneticPair | null;
-  existingPairNames: string[];
+  existingPairs: BiomagneticPair[];
 }
 
-const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClose, onSave, initialPair, existingPairNames }) => {
+const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClose, onSave, initialPair, existingPairs }) => {
   const emptyPair: BiomagneticPair = { name: '', point1: '', point2: '', imageUrl: '', details: [], isDefinitive: true, level: 1 };
   const [pair, setPair] = useState<BiomagneticPair>(emptyPair);
   const [error, setError] = useState<string>('');
@@ -19,7 +18,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   
   const isEditing = initialPair !== null;
-  const originalName = initialPair?.name;
+  const originalOrder = initialPair?.order;
 
   useEffect(() => {
     if (isOpen) {
@@ -136,12 +135,16 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
       return;
     }
     
-    if (pair.name !== originalName && existingPairNames.includes(pair.name)) {
-        setError('Já existe un par com este nome.');
+    const anotherPairHasSameName = existingPairs.some(
+      p => p.name.trim().toLowerCase() === pair.name.trim().toLowerCase() && p.order !== originalOrder
+    );
+
+    if (anotherPairHasSameName) {
+        setError('Já existe outro par com este nome. Apenas o mesmo par pode ter o mesmo nome.');
         return;
     }
 
-    onSave(pair, originalName);
+    onSave(pair, originalOrder);
     onClose();
   };
 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Patient, BiomagneticPair, User, Session, PhenomenaData, ProtocolData } from './types';
 import PatientForm from './components/PatientForm';
@@ -121,19 +120,30 @@ const App: React.FC = () => {
         const storedSync = await dbLoad(STORES.CONFIG, 'lastSync') || '';
         setLastSyncDate(storedSync);
 
-        let localPairs = await dbLoad(STORES.PAIRS, 'masterList') || [];
-        const pairMap = new Map();
-        localPairs.forEach((p: any) => pairMap.set(p.name, p));
+        let localPairs: BiomagneticPair[] = await dbLoad(STORES.PAIRS, 'masterList') || [];
+        const pairMap = new Map<number, BiomagneticPair>();
+        
+        // BUG FIX: Use 'order' as key to handle pairs with the same name.
+        localPairs.forEach((p) => {
+            if (p.order !== undefined) {
+                pairMap.set(p.order, p);
+            }
+        });
 
         BIOMAGNETIC_PAIRS.forEach(masterPair => {
+            if (masterPair.order === undefined) return;
+            
+            // Definitive pairs from constants always overwrite local changes to ensure master data integrity.
             if (masterPair.isDefinitive === true) {
-                pairMap.set(masterPair.name, masterPair);
-            } else if (!pairMap.has(masterPair.name)) {
-                pairMap.set(masterPair.name, masterPair);
+                pairMap.set(masterPair.order, masterPair);
+            } 
+            // Non-definitive pairs from constants are only added if they don't already exist from a previous session/sync.
+            else if (!pairMap.has(masterPair.order)) {
+                pairMap.set(masterPair.order, masterPair);
             }
         });
         
-        const mergedPairsList = Array.from(pairMap.values()) as BiomagneticPair[];
+        const mergedPairsList = Array.from(pairMap.values());
         await dbSave(STORES.PAIRS, 'masterList', mergedPairsList);
         setBiomagneticPairs(mergedPairsList);
 

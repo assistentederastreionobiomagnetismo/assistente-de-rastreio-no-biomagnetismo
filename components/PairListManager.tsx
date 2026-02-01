@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { BiomagneticPair, User } from '../types';
 import { PlusIcon, SearchIcon, TrashIcon, PencilIcon, CheckIcon, MagnetIcon } from './icons/Icons';
@@ -26,15 +25,14 @@ const PairListManager: React.FC<PairListManagerProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const handleSavePair = async (savedPair: BiomagneticPair, originalName?: string) => {
+  const handleSavePair = async (savedPair: BiomagneticPair, originalOrder?: number) => {
     setIsSaving(true);
     setSaveSuccess(false);
     
-    // Feedback visual e atomicidade
     setTimeout(() => {
         setBiomagneticPairs(prev => {
-            if (originalName) {
-                return prev.map(p => p.name === originalName ? savedPair : p);
+            if (originalOrder !== undefined) {
+                return prev.map(p => p.order === originalOrder ? { ...savedPair, order: originalOrder } : p);
             } else {
                 const newOrder = prev.length > 0 ? Math.max(...prev.map(p => p.order || 0)) + 1 : 1;
                 return [...prev, { ...savedPair, order: newOrder }];
@@ -47,9 +45,11 @@ const PairListManager: React.FC<PairListManagerProps> = ({
     }, 100);
   };
 
-  const handleDelete = (name: string) => {
-    if (window.confirm(`Tem certeza que deseja EXCLUIR permanentemente o par "${name}" da base master?`)) {
-        setBiomagneticPairs(prev => prev.filter(p => p.name !== name));
+  const handleDelete = (order?: number) => {
+    if (order === undefined) return;
+    const pairToDelete = biomagneticPairs.find(p => p.order === order);
+    if (window.confirm(`Tem certeza que deseja EXCLUIR permanentemente o par "${pairToDelete?.name}" da base master?`)) {
+        setBiomagneticPairs(prev => prev.filter(p => p.order !== order));
     }
   };
 
@@ -62,7 +62,9 @@ const PairListManager: React.FC<PairListManagerProps> = ({
   };
 
   const filteredPairs = useMemo(() => {
-    return biomagneticPairs.filter(p => 
+    return [...biomagneticPairs]
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+      .filter(p => 
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.point1.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.point2.toLowerCase().includes(searchTerm.toLowerCase())
@@ -76,7 +78,7 @@ const PairListManager: React.FC<PairListManagerProps> = ({
         onClose={() => setManageModalOpen(false)}
         onSave={handleSavePair}
         initialPair={editingPair}
-        existingPairNames={biomagneticPairs.map(p => p.name)}
+        existingPairs={biomagneticPairs}
       />
       
       <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
@@ -119,7 +121,7 @@ const PairListManager: React.FC<PairListManagerProps> = ({
       <div className="h-[550px] overflow-y-auto border border-slate-200 rounded-3xl bg-slate-50 shadow-inner">
         <div className="grid grid-cols-1 divide-y divide-slate-200">
             {filteredPairs.length > 0 ? filteredPairs.map(p => (
-                <div key={p.name} className="flex justify-between items-center p-6 hover:bg-white transition-all group">
+                <div key={p.order} className="flex justify-between items-center p-6 hover:bg-white transition-all group">
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-3">
                             <span className="font-black text-slate-800 group-hover:text-teal-700 transition-colors">{p.name}</span>
@@ -141,7 +143,7 @@ const PairListManager: React.FC<PairListManagerProps> = ({
                             <PencilIcon className="h-5 w-5" />
                         </button>
                         <button 
-                            onClick={() => handleDelete(p.name)} 
+                            onClick={() => handleDelete(p.order)} 
                             className="p-3 bg-white text-red-500 rounded-2xl shadow-sm border border-slate-100 hover:bg-red-50 transition-all"
                             title="Remover da Base"
                         >

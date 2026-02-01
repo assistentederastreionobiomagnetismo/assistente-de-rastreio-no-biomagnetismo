@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { BiomagneticPair } from '../types';
 import { PlusIcon, SearchIcon, InfoIcon, TrashIcon, CheckIcon } from './icons/Icons';
@@ -19,8 +18,8 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
   const [searchTerm, setSearchTerm] = useState('');
   const [infoModalPair, setInfoModalPair] = useState<BiomagneticPair | null>(null);
   
-  // Estado para os checks de guia (apenas para o terapeuta se guiar na lista)
-  const [guidedChecks, setGuidedChecks] = useState<Set<string>>(new Set());
+  // Estado para os checks de guia (usando 'order' como ID único)
+  const [guidedChecks, setGuidedChecks] = useState<Set<number>>(new Set());
 
   // Mapeia o título da aba para o nível numérico
   const targetLevel = useMemo(() => {
@@ -31,26 +30,29 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
     return 1;
   }, [levelTitle]);
 
-  const toggleGuidedCheck = (pairName: string) => {
+  const toggleGuidedCheck = (pairOrder: number | undefined) => {
+    if (pairOrder === undefined) return;
     setGuidedChecks(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(pairName)) {
-        newSet.delete(pairName);
+      if (newSet.has(pairOrder)) {
+        newSet.delete(pairOrder);
       } else {
-        newSet.add(pairName);
+        newSet.add(pairOrder);
       }
       return newSet;
     });
   };
 
   const addPairToSession = (pair: BiomagneticPair) => {
-    if (!selectedPairs.some(p => p.name === pair.name)) {
+    // Usa 'order' para unicidade
+    if (!selectedPairs.some(p => p.order === pair.order)) {
       setSelectedPairs(prev => [...prev, pair]);
     }
   };
   
-  const removePairFromSession = (pairName: string) => {
-    setSelectedPairs(prev => prev.filter(p => p.name !== pairName));
+  const removePairFromSession = (pairOrder: number | undefined) => {
+    if (pairOrder === undefined) return;
+    setSelectedPairs(prev => prev.filter(p => p.order !== pairOrder));
   }
   
   const filteredPairs = useMemo(() => {
@@ -152,16 +154,16 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
 
           <div className="h-96 overflow-y-auto border rounded-2xl p-2 bg-slate-50 shadow-inner">
             <ul className="divide-y divide-slate-200">
-              {filteredPairs.map(pair => {
-                const isChecked = guidedChecks.has(pair.name);
-                const isSelected = selectedPairs.some(p => p.name === pair.name);
+              {filteredPairs.map((pair, idx) => {
+                const isChecked = pair.order !== undefined && guidedChecks.has(pair.order);
+                const isSelected = selectedPairs.some(p => p.order === pair.order);
                 
                 return (
-                  <li key={pair.name} className={`flex items-center justify-between p-3 rounded-xl transition-all group ${isChecked ? 'bg-slate-100 opacity-70' : 'hover:bg-white'}`}>
+                  <li key={pair.order || idx} className={`flex items-center justify-between p-3 rounded-xl transition-all group ${isChecked ? 'bg-slate-100 opacity-70' : 'hover:bg-white'}`}>
                     <div className="flex items-center gap-3 flex-1 overflow-hidden">
                       {/* BOTAO DE CHECK (GUIA) */}
                       <button 
-                        onClick={() => toggleGuidedCheck(pair.name)}
+                        onClick={() => toggleGuidedCheck(pair.order)}
                         className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isChecked ? 'bg-green-500 border-green-500 text-white shadow-sm' : 'border-slate-300 text-transparent hover:border-green-400'}`}
                         title="Marcar como Testado (Guia)"
                       >
@@ -214,8 +216,8 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
                     </div>
                 ) : (
                     <ul className="divide-y divide-slate-200">
-                    {selectedPairs.map(pair => (
-                        <li key={pair.name} className="flex items-center justify-between p-3 hover:bg-slate-50 transition-colors">
+                    {selectedPairs.map((pair, idx) => (
+                        <li key={pair.order || idx} className="flex items-center justify-between p-3 hover:bg-slate-50 transition-colors">
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-slate-900">{pair.name}</span>
                                 <span className="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded font-black uppercase tracking-tighter w-fit">{getLevelLabel(pair.level)}</span>
@@ -228,7 +230,7 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
                                 >
                                     <InfoIcon className="w-5 h-5"/>
                                 </button>
-                                <button onClick={() => removePairFromSession(pair.name)} className="p-1 text-red-500 hover:text-red-700 transition-colors" title="Remover Par">
+                                <button onClick={() => removePairFromSession(pair.order)} className="p-1 text-red-500 hover:text-red-700 transition-colors" title="Remover Par">
                                     <TrashIcon className="w-5 h-5"/>
                                 </button>
                             </div>
