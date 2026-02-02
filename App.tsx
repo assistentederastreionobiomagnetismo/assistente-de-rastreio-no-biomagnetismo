@@ -16,7 +16,7 @@ import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon
 import { BIOMAGNETIC_PAIRS } from './constants';
 
 // --- DATABASE UTILS ---
-const DB_NAME = 'BiomagDB_v20'; // Atualizado para v20
+const DB_NAME = 'BiomagDB_v20';
 const DB_VERSION = 1;
 const STORES = {
   PAIRS: 'pairs',
@@ -112,6 +112,12 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [appView, setAppView] = useState<AppView>('dashboard');
   const [isLoading, setIsLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 30000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const initAppData = async () => {
@@ -123,9 +129,7 @@ const App: React.FC = () => {
         const pairMap = new Map<number, BiomagneticPair>();
         
         localPairs.forEach((p) => {
-            if (p.order !== undefined) {
-                pairMap.set(p.order, p);
-            }
+            if (p.order !== undefined) pairMap.set(p.order, p);
         });
 
         BIOMAGNETIC_PAIRS.forEach(masterPair => {
@@ -197,16 +201,12 @@ const App: React.FC = () => {
     try {
         const code = syncCode.trim();
         let decodedData: any;
-
-        // Tentar detectar se é código comprimido ou legado
         try {
             const binaryString = atob(code);
             const bytes = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i++) {
                 bytes[i] = binaryString.charCodeAt(i);
             }
-
-            // Tentar descompressão GZIP
             try {
                 const stream = new Blob([bytes]).stream();
                 const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'));
@@ -215,7 +215,6 @@ const App: React.FC = () => {
                 const jsonStr = new TextDecoder().decode(buffer);
                 decodedData = JSON.parse(jsonStr);
             } catch (decompError) {
-                // Fallback para código legado (Base64 direto de JSON string)
                 const legacyStr = new TextDecoder().decode(bytes);
                 decodedData = JSON.parse(legacyStr);
             }
@@ -247,7 +246,16 @@ const App: React.FC = () => {
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
     const foundUser = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     if (!foundUser) return { success: false, message: 'Usuário ou senha inválidos.' };
-    if (!foundUser.isApproved) return { success: false, message: 'Cadastro aguardando ativação.' };
+    
+    if (foundUser.approvalExpiry) {
+        const expiry = new Date(foundUser.approvalExpiry);
+        if (expiry < new Date()) {
+            return { success: false, message: `Seu acesso expirou em ${expiry.toLocaleDateString('pt-BR')}. Entre em contato com o administrador.` };
+        }
+    }
+
+    if (!foundUser.isApproved) return { success: false, message: 'Seu cadastro está bloqueado. Entre em contato com o administrador.' };
+    
     setIsAuthenticated(true);
     setCurrentUser(foundUser);
     setAppView(foundUser.requiresPasswordChange ? 'changePassword' : 'dashboard');
@@ -311,6 +319,40 @@ const App: React.FC = () => {
     setCurrentStep(Step.PATIENT_INFO);
   };
 
+  const ValidityHeader = ({ user }: { user: User }) => {
+    if (!user.approvalExpiry || user.approvalType === 'permanent') {
+      return (
+        <div className="flex flex-col items-center mt-1">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Validade</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Seu acesso é Vitalício</p>
+        </div>
+      );
+    }
+
+    const expiry = new Date(user.approvalExpiry);
+    const diff = expiry.getTime() - currentTime.getTime();
+    const formattedExpiry = expiry.toLocaleDateString('pt-BR') + ' às ' + expiry.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    
+    if (diff <= 0) return <p className="text-[10px] font-black text-red-600 uppercase tracking-widest mt-1">Seu acesso expirou em {formattedExpiry}.</p>;
+
+    const minutesRemaining = diff / (1000 * 60);
+    const daysRemaining = diff / (1000 * 60 * 60 * 24);
+
+    const isTest = user.approvalType === '5min';
+    const isStandardTerm = ['1month', '3months', '6months', '1year'].includes(user.approvalType || '');
+    
+    const isUrgent = (isTest && minutesRemaining <= 2) || (isStandardTerm && daysRemaining <= 5);
+
+    return (
+      <div className="flex flex-col items-center mt-1">
+        <p className={`text-xs font-bold uppercase tracking-widest ${isUrgent ? 'text-red-600' : 'text-slate-500'}`}>Validade</p>
+        <p className={`text-sm font-black text-center max-w-xl ${isUrgent ? 'text-red-600 animate-pulse' : 'text-slate-500'}`}>
+          Seu acesso expira em {formattedExpiry}. {isUrgent && 'Por favor, procure o administrador para revalidar seu acesso.'}
+        </p>
+      </div>
+    );
+  };
+
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-100 font-bold text-teal-600">Carregando Banco de Dados...</div>;
   if (!isAuthenticated) return <Login onLogin={handleTherapistLogin} onRequestReset={() => ({success: false, message: ''})} onImportSync={handleImportSync} />;
   if (appView === 'changePassword') return <ChangePassword onUpdate={handleUpdatePassword} onLogout={handleLogout} />;
@@ -324,10 +366,11 @@ const App: React.FC = () => {
       <div className="container mx-auto p-4 md:p-8">
         <header className="text-center mb-8 print:hidden">
           <h1 className="text-4xl font-bold text-teal-600">Assistente para Rastreios no Biomagnetismo</h1>
-          <div className="flex flex-col items-center mt-2">
-            <p className="text-slate-500">Terapeuta: <span className="font-bold">{currentUser?.fullName || currentUser?.username}</span></p>
+          <div className="flex flex-col items-center mt-4">
+            <p className="text-slate-600 text-sm font-medium">Terapeuta: <span className="text-lg font-black text-slate-800 uppercase">{currentUser?.fullName || currentUser?.username}</span></p>
+            {currentUser && <ValidityHeader user={currentUser} />}
             {lastSyncDate && (
-                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-white border border-teal-100 rounded-full shadow-sm">
+                <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 bg-white border border-teal-100 rounded-full shadow-sm">
                     <CheckIcon className="w-3 h-3 text-teal-600" />
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Base Sincronizada</span>
                 </div>
