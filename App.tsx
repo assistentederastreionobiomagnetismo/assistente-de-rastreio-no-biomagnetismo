@@ -74,7 +74,6 @@ enum Step {
 }
 
 type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager' | 'changePassword';
-const LAST_SYNC_KEY = 'biomag_last_db_sync_date';
 
 const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<Step>(Step.PATIENT_INFO);
@@ -123,7 +122,6 @@ const App: React.FC = () => {
         let localPairs: BiomagneticPair[] = await dbLoad(STORES.PAIRS, 'masterList') || [];
         const pairMap = new Map<number, BiomagneticPair>();
         
-        // BUG FIX: Use 'order' as key to handle pairs with the same name.
         localPairs.forEach((p) => {
             if (p.order !== undefined) {
                 pairMap.set(p.order, p);
@@ -132,13 +130,9 @@ const App: React.FC = () => {
 
         BIOMAGNETIC_PAIRS.forEach(masterPair => {
             if (masterPair.order === undefined) return;
-            
-            // Definitive pairs from constants always overwrite local changes to ensure master data integrity.
             if (masterPair.isDefinitive === true) {
                 pairMap.set(masterPair.order, masterPair);
-            } 
-            // Non-definitive pairs from constants are only added if they don't already exist from a previous session/sync.
-            else if (!pairMap.has(masterPair.order)) {
+            } else if (!pairMap.has(masterPair.order)) {
                 pairMap.set(masterPair.order, masterPair);
             }
         });
@@ -201,29 +195,52 @@ const App: React.FC = () => {
 
   const handleImportSync = async (syncCode: string): Promise<boolean> => {
     try {
-        const binaryString = atob(syncCode.trim());
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
-        const decoded = new TextDecoder().decode(bytes);
-        const importedData = JSON.parse(decoded);
-        
-        if (typeof importedData === 'object' && !Array.isArray(importedData)) {
-            if (importedData.users) {
-              setAllUsers(importedData.users);
-              await dbSave(STORES.USERS, 'list', importedData.users);
+        const code = syncCode.trim();
+        let decodedData: any;
+
+        // Tentar detectar se é código comprimido ou legado
+        try {
+            const binaryString = atob(code);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
             }
-            if (importedData.pairs) {
-                setBiomagneticPairs(importedData.pairs);
-                await dbSave(STORES.PAIRS, 'masterList', importedData.pairs);
+
+            // Tentar descompressão GZIP
+            try {
+                const stream = new Blob([bytes]).stream();
+                const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'));
+                const response = new Response(decompressedStream);
+                const buffer = await response.arrayBuffer();
+                const jsonStr = new TextDecoder().decode(buffer);
+                decodedData = JSON.parse(jsonStr);
+            } catch (decompError) {
+                // Fallback para código legado (Base64 direto de JSON string)
+                const legacyStr = new TextDecoder().decode(bytes);
+                decodedData = JSON.parse(legacyStr);
+            }
+        } catch (atobError) {
+            console.error("Código de sincronização corrompido.");
+            return false;
+        }
+        
+        if (decodedData && typeof decodedData === 'object') {
+            if (decodedData.users) {
+              setAllUsers(decodedData.users);
+              await dbSave(STORES.USERS, 'list', decodedData.users);
+            }
+            if (decodedData.pairs) {
+                setBiomagneticPairs(decodedData.pairs);
+                await dbSave(STORES.PAIRS, 'masterList', decodedData.pairs);
                 const syncTime = new Date().toLocaleString('pt-BR');
                 setLastSyncDate(syncTime);
                 await dbSave(STORES.CONFIG, 'lastSync', syncTime);
             }
             return true;
         } 
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error("Erro fatal na importação:", e); 
+    }
     return false;
   };
 
@@ -289,7 +306,6 @@ const App: React.FC = () => {
     setSessions(newSessions);
     dbSave(STORES.SESSIONS, currentUser!.username, newSessions);
     setAppView('dashboard');
-    // Reset states for next
     setPatient({ name: '', mainComplaint: '' });
     setSelectedPairs([]);
     setCurrentStep(Step.PATIENT_INFO);
