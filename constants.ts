@@ -488,7 +488,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
     order: 31, 
     level: 2, 
     isDefinitive: true, 
-    imageUrl: 'https://lh3.googleusercontent.com/d/1ZhjaWoAC3RzTqkhgn1fPFljtKnfT_E4b',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1ZhjaWoAC3RzTqkhgn1fPFljtKnT_E4b',
     details: [
       {
         specification: "Infecção Viral (Dengue Vírus)",
@@ -589,7 +589,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção parasitária",
         disease: "Toxoplasma gondii",
-        symptoms: "Toxoplasmose, deve-se encefalite, comvulsões, surdez, zumbidos, perda de equilíbrio horizontal, tonturas, enjôo, Sind. de meniére, dor nos olhos, cegueira, rinite. Pode estar associado a hiperidrose."
+        symptoms: "Toxoplasmose, deve-se encefalite, comvulsões, surdez, zumbidos, perda de equilíbrio horizontal, tonturas, enjôo, Sind. de meniére, dor nos olhos, cegira, rinite. Pode estar associado a hiperidrose."
       }
     ]
   },
@@ -685,7 +685,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Par Especial Lolita",
         disease: "Disfunção das parótidas",
-        symptoms: "Disfunção da parótida, glândula que produz hormônio parotidina que influência a produção hormonal da tireoide, paratireoide e pâncreas, o que estimula a produção de insulina, tiroxina e calcitocina. Quando este par está ativo há diminuição destes hormônios, causando transtornos digestivos, de peso e ósseos. Quando se impacta e se trata este par, pode ocorrer aumento de apetite."
+        symptoms: "Disfunção da parótida, glândula que produz hormônio parotidina que influência a produção hormonal da tireoide, paratireoide e pâncreas, o que estimula a produção de insulina, tiroxina e calcitocina. Quando este par está ativo há diminuíção destes hormônios, causando transtornos digestivos, de peso e ósseos. Quando se impacta e se trata este par, pode ocorrer aumento de apetite."
       }
     ]
   },
@@ -797,7 +797,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Disfunção Glandular (Timo)",
         disease: "Imunodeficiência",
-        symptoms: "Trata imunodeficiência, seja por exposição a agentes diversos, depressão, alimentação ruim... Regula o hormônio timosina que dá a imuno-resposta. Desarmonia hormonal. O Timo comanda e coordena a ação do sistema defensivo do organismo."
+        symptoms: "Trata imunodeficiência, seja por exposição a agentes diversos, de pressão, alimentação ruim... Regula o hormônio timosina que dá a imuno-resposta. Desarmonia hormonal. O Timo comanda e coordena a ação do sistema defensivo do organismo."
       }
     ]
   },
@@ -1261,7 +1261,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Corynebacterium Diphtheriae",
-        symptoms: "Traqueobronquite, tosse crônica, rouquidão. Diarreia, edema geral. Transmitida por lácteos. (Ao se encontrar este par, orienta-se o paciente a suspender temporariamente o consumo de lácteo e alimentos brancos refinados (farinha de trigo, açúcar, sal e arroz)). Geralmente o bem estar é tanto, que o próprio paciente opta por não voltar a consumir estes alimentos."
+        symptoms: "Traqueobronquite, tosse com catarro, rouquidão. Diarreia, edema geral. Transmitida por lácteos. (Ao se encontrar este par, orienta-se o paciente a suspender temporariamente o consumo de lácteo e alimentos brancos refinados (farinha de trigo, açúcar, sal e arroz)). Geralmente o bem estar é tanto, que o próprio paciente opta por não voltar a consumir estes alimentos."
       }
     ]
   },
@@ -1277,7 +1277,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Mycobacterium Tuberculosis",
-        symptoms: "Tuberculose. Tosse crônica, febre e sudorese noturna, perda de peso, escarros sanguinolentos. TB militar (abscessos disseminados)."
+        symptoms: "Tuberculose. Tosse crônica, feitre e sudorese noturna, perda de peso, escarros sanguinolentos. TB militar (abscessos disseminados)."
       }
     ]
   },
@@ -1293,7 +1293,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Treponema Pallidum - Treponema Bucalli",
-        symptoms: "Falsa artrite, confunde-se with sífilis, reumatismo articular falso (ombro congelado, cotovelo endurecido), dores dorso-lombar, enjôos, zumbidos. Este microorganismo também pode be encontrado no par Quadrado lombar-Quadrado lombar."
+        symptoms: "Falsa artrite, confunde-se with slice, reumatismo articular falso (ombro congelado, cotovelo endurecido), dores dorso-lombar, enjôos, zumbidos. Este microorganismo também pode be encontrado no par Quadrado lombar-Quadrado lombar."
       }
     ]
   },
@@ -1389,7 +1389,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "Herpes virus 3",
-        symptoms: "Herpes em mucosas. As erupções são internas. As dores são bastante intensas."
+        symptoms: "Herpes em mudosas. As erupções são internas. As dores são bastante intensas."
       }
     ]
   },
@@ -1436,8 +1436,8 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
     details: [
       {
         specification: "Infecção parasitária",
-        disease: "Febre, traqueza, hipoglicemia, dores abdominais, anemia, edema pulmonar, calafrios, vômitos. Malária/Paludismo. Sudorese noturna, feitre vespertina em acessos de 48 horas (feitre terciária) e de 72 horas (feitres quaternárias) causadas por picada de mosquito anópheles. Dores generalizadas. Usado para impedir que reapareçam os sintomas da esclerose múltipla. Sufocos. Confunde-se com artrite ou reumatismo. Verdadeira Fibromialgia.",
-        symptoms: ""
+        disease: "Malária/Paludismo",
+        symptoms: "Febre, traqueza, hipoglicemia, dores abdominais, anemia, edema pulmonar, calafrios, vômitos. Sudorese noturna, feitre vespertina em acessos de 48 horas (feitre terciária) e de 72 horas (feitres quaternárias) causadas por picada de mosquito anópheles. Dores generalizadas. Usado para impedir que reapareçam os sintomas da esclerose múltipla. Sufocos. Confunde-se com artrite ou reumatismo. Verdadeira Fibromialgia."
       }
     ]
   },
@@ -1597,7 +1597,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "Hepatite E",
-        symptoms: "Fadiga, náuseas, febre alta, perda de peso, anorexia, diarreia, dor muscular, dor de cabeça. Icterícia, colúria, acolia."
+        symptoms: "Sintomas de hepatite: fadiga, náuseas, febre baixa, diarreia, icterícia, colúria, acolia fecal"
       }
     ]
   },
@@ -2088,7 +2088,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
     order: 131, 
     level: 2, 
     isDefinitive: true, 
-    imageUrl: 'https://lh3.googleusercontent.com/d/1ozwHHGYqV0AYE3mfwuyLty72leXt6hIr',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1ru030ZqtnX6doyvU_bGJao47HvJitFbt',
     details: [
       {
         specification: "Infecção viral",
@@ -2477,7 +2477,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Bordetella Pertussis",
-        symptoms: "Espulsa eletrólitos de forma massiva causando rápida desidratação, with sensação de ressaca. O aparelho respiratório se necrosa rapidamente. É comum em diabetes."
+        symptoms: "Espulsa eletrólitos de forma massiva causando rápida desidratação, with sensação de rês saca. O aparelho respiratório se necrosa rapidamente. É comum em diabetes."
       }
     ]
   },
@@ -2846,6 +2846,518 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
         specification: "Infecção bacteriana",
         disease: "Salmonella Typhi",
         symptoms: "Etapas de encistamento; dor nas costas (dorso-lombar); transtornos digestivos com diarreia; sangramento retal. Alimentos contaminados por coliformes fecais."
+      }
+    ]
+  },
+  { 
+    name: 'Trocânter maior (D/E) - Rim do mesmo lado', 
+    point1: 'Trocânter maior (D/E)', 
+    point2: 'Rim do mesmo lado', 
+    order: 179, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1JV7dhc_b8ZsL2C4SM-rQczl1vSTVihOY',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Bacilo Paratífico II",
+        symptoms: "Tifo"
+      }
+    ]
+  },
+  { 
+    name: 'Quadril (D/E) - Quadril', 
+    point1: 'Quadril (D/E)', 
+    point2: 'Quadril', 
+    order: 180, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/19jgQ0_84NYRkR8ZnvFiiMzhiGIov4NcF',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Clamidia Pneumoniae",
+        symptoms: "Principal causa de câncer cérvico-uterino. Simula pneumonia. Distúrbios de coagulação e sangramento. Na mulher, fluxo vaginal, sangramento e manchas. Se associada with Pseudomonas ou Yersinia provoca falso câncer."
+      }
+    ]
+  },
+  { 
+    name: 'Quadríceps (D/E) - Quadríceps', 
+    point1: 'Quadríceps (D/E)', 
+    point2: 'Quadríceps', 
+    order: 181, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1sv42YpwHDPScY43kNuQzwEnn-Qd0UYu6',
+    details: [
+      {
+        specification: "Par Especial Magda",
+        disease: "Intoxicação por bismuto (medicamentos ou inseticidas)",
+        symptoms: "Problemas de coordenação motora, de memória e musculares. Encefalopatia, insônia e sintomas psiquiátricos"
+      }
+    ]
+  },
+  { 
+    name: 'Ciático (D/E) - Ciático', 
+    point1: 'Ciático (D/E)', 
+    point2: 'Ciático', 
+    order: 182, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/10dDsS8p0s8Ni3Z4JXMdwlL0-wTYn5hKi',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Polio vírus",
+        symptoms: "Poliomielite. Afeta o SNC. Na fase aguda causa inflamação de neurônios motores na medula espinhal e cérebro e leva a atrofia muscular, paralisias temporárias ou permanentes, paralisia diafragmática e deformidades."
+      }
+    ]
+  },
+  { 
+    name: 'Ísquio (D/E) - Ísquio', 
+    point1: 'Ísquio (D/E)', 
+    point2: 'Ísquio', 
+    order: 183, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1caHRL2_rOrFFprn696MGlHsOmbWm8U4S',
+    details: [
+      {
+        specification: "Infecção parasitária",
+        disease: "Onchocerca Volvulus (oncocercose)",
+        symptoms: "Desencadeia resposta inflamatória imunitária severa após a morte de microfilárias. Lesões na pele e nos olhos, cegueira e linfedema em membros inferiores."
+      }
+    ]
+  },
+  { 
+    name: 'Glúteo (D/E) - Piloro', 
+    point1: 'Glúteo (D/E)', 
+    point2: 'Piloro', 
+    order: 184, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1WUz7KV38-Kk6to_ZFVhYdBxElG3rVK9c',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Veillonella",
+        symptoms: "Transtornos digestivos"
+      }
+    ]
+  },
+  { 
+    name: 'Glúteo (D/E) - Glúteo', 
+    point1: 'Glúteo (D/E)', 
+    point2: 'Glúteo', 
+    order: 185, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1L2kxnpVS_j8oP8wUWXukioKeuS_SA-Fz',
+    details: [
+      {
+        specification: "Infecção parasitária",
+        disease: "Taenia Saginata",
+        symptoms: "Transtornos digestivos. (Impactação: ímã negativo exatamente no meio do glúteo, e positivo mais para fora (lateral))"
+      }
+    ]
+  },
+  { 
+    name: 'Glúteo (D/E) - Veia femoral do mesmo lado', 
+    point1: 'Glúteo (D/E)', 
+    point2: 'Veia femoral do mesmo lado', 
+    order: 186, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1B6VlYlNqSBrjmIaZYrsgaMk1RaJk_iKz',
+    details: [
+      {
+        specification: "Infecção parasitária",
+        disease: "Babesia",
+        symptoms: "Transmitido por carrapatos, sangramentos, anemias, palidez, paraqueza, calafrios, sudorese, dores de cabeça, dores pelo corpo, diarreia."
+      }
+    ]
+  },
+  { 
+    name: 'Glúteo Menor (D/E) - Sacro', 
+    point1: 'Glúteo Menor (D/E)', 
+    point2: 'Sacro', 
+    order: 187, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1l3N-nnuAXuRS6q0rOW3lfimIBMr3Q6P3',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Ureplasma Urealyticum",
+        symptoms: "Ureplasma Urealyticum"
+      }
+    ]
+  },
+  { 
+    name: 'Cóccix (sup) - Cóccix (inf)', 
+    point1: 'Cóccix (sup)', 
+    point2: 'Cóccix (inf)', 
+    order: 188, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1Kq-e_u3NyQCLklHBYOieU6msZ1czaLlB',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Rotavírus",
+        symptoms: "Diarreia grave em neonatos e crianças. Causa mais comum de morte em recém nascidos."
+      }
+    ]
+  },
+  { 
+    name: 'Sacro (D/E) - Sacro (D/E)', 
+    point1: 'Sacro (D/E)', 
+    point2: 'Sacro (D/E)', 
+    order: 189, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1-74irCrKk8T2sSJAw9v4ZJnWlDfY35wd',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Proteus Mirabilis",
+        symptoms: "Infecção urinária. Bactéria produz altos níveis de urease (hidrolisando a uréia em amoníaco) alcalinizando a urina, favorecendo a formação de cristais de estruvita, carbonato de cálcio e apatita, provocando Gota. Impactação: - à Dir e + à Esq, separados uns 2 ou 3 dedos. OBS: o sacro sempre deve ser checado nos 3 pontos: D, E e meio."
+      }
+    ]
+  },
+  { 
+    name: 'Ilíaco (D/E) - Ilíaco', 
+    point1: 'Ilíaco (D/E)', 
+    point2: 'Ilíaco', 
+    order: 190, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1HzGZ1AhvfFoh3EEXdjHPt3p7RCf9P0kc',
+    details: [
+      {
+        specification: "Par Especial Elena",
+        disease: "Disfunção gastrointestinal",
+        symptoms: "Disfunção gastrointestinal e obesidade/sobrepeso que não estão relacionados às disfunções glandulares e nem ao excesso de alimentação. Intestino preso e excessiva absorção intestinal. Pode ser impactado sem rastreio para alívio de desconordo gastrointestinal."
+      }
+    ]
+  },
+  { 
+    name: 'Rama isquiática (D/E) - Rama isquiática', 
+    point1: 'Rama isquiática (D/E)', 
+    point2: 'Rama isquiática', 
+    order: 191, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1HuNfrCK-UZbl1Pv6T4dXbIooq6AmX6AC',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Streptococcus C",
+        symptoms: "Anemia hemolítica e debilidade. É mortal."
+      }
+    ]
+  },
+  { 
+    name: 'Quadrado lombar (D/E) - Quadrado lombar', 
+    point1: 'Quadrado lombar (D/E)', 
+    point2: 'Quadrado lombar (D/E)', 
+    order: 192, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1PiLevzvB1Oze39v40KIgln0kTYI-MVBL',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Treponema Pallidum",
+        symptoms: "Sífilis. Rigidez articular (joelhos, quadril, cotovelos), confunde-se com artrite/artrose e doenças reumáticas. Complicação cardiovasculares (aortite e aneurisma sifilítico). Comprometimento do SNC podendo levar à morte. Também pode estar em deltoide/deltoide."
+      }
+    ]
+  },
+  { 
+    name: 'Quarta Lombar (D) - Quarta Lombar (E)', 
+    point1: 'Quarta Lombar (D)', 
+    point2: 'Quarta Lombar (E)', 
+    order: 193, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1PkX83hn6XRB-HUvYuYOGi1CTbE7Fms-B',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Neisseria Gonorrhoeae",
+        symptoms: "Gera uma falsa artrite reumatoide. Problemas de coluna, uretrite, piuria, faringite"
+      }
+    ]
+  },
+  { 
+    name: 'Cálice renal (D/E) - Ureter mesmo lado', 
+    point1: 'Cálice renal (D/E)', 
+    point2: 'Ureter mesmo lado', 
+    order: 194, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1dvIHs0F2ThFNU51C0ExMmRRNN-8mFpMw',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Herpes vírus 3",
+        symptoms: "Doença infecciosa em imunodeprimidos. Retinite, hepatite e outras inflamações. Mononucleose - \"Doença do beijo\"."
+      }
+    ]
+  },
+  { 
+    name: 'Rim (D/E) - Rim', 
+    point1: 'Rim (D/E)', 
+    point2: 'Rim', 
+    order: 195, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1-Jb-SkfAEntOUS6nOogFkRkZzYldhAFQ',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Clostridium Tetanii",
+        symptoms: "Tétano. Contraturas e espasmos musculares, trismo, opistótono: arqueamento da coluna, tetania: contraturas musculares súbitas, fortes e dolorosas. (NÃO IMPACTAR JUNTO COM LIGAMENTO PANCREÁTICO-BAÇO! PODE LEVAR A MORTE!)"
+      }
+    ]
+  },
+  { 
+    name: 'Rim (D/E) - Ureter mesmo lado', 
+    point1: 'Rim (D/E)', 
+    point2: 'Ureter mesmo lado', 
+    order: 196, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1_qX8TzFmw6AtkxWEJK5-VwhsTuxct3GD',
+    details: [
+      {
+        specification: "Par Especial Machín",
+        disease: "Cólica nefrítica (renal)",
+        symptoms: "Nefrolitíase (cálculos renais). Gerado em processos irritativos do ureter. Nefrolitíase (cálculos renais). Dilata o ureter para a passagem de cálculos renais. Pode ser impactado sem rastreio como um par SOS em episódios de cólicas renais. Este par pode ocorrer em dismenorreia (cólicas menstruais) e traumas abdominais."
+      }
+    ]
+  },
+  { 
+    name: 'Rim (D) - Duodeno', 
+    point1: 'Rim (D)', 
+    point2: 'Duodeno', 
+    order: 197, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1X_VNU5xcO5nVcGt8QszkADfrevWTpTFP',
+    details: [
+      {
+        specification: "Doença complexa",
+        disease: "Diabetes Mellitus (DM)",
+        symptoms: "Sintomas relacionados à DM. Poliúria, polidipsia, polifagia, perda súbita de peso"
+      }
+    ]
+  },
+  { 
+    name: 'Capsula Renal (D) - Capsula Renal (E)', 
+    point1: 'Capsula Renal (D)', 
+    point2: 'Capsula Renal (E)', 
+    order: 198, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1gtTpgC0lGDecA84VmJHarKG01Kn_hvTc',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Proteus Mirabilis",
+        symptoms: "Lupus. Infecção urinária, dor nos joelhos, pelvis, debilidade muscular, infecção, irritação, lesão rabo de cavalo, paralisia e parestesias, inflamação órgãos sexuais, infertilidade."
+      }
+    ]
+  },
+  { 
+    name: 'Suprarrenal ( C ) - Reto', 
+    point1: 'Suprarrenal (C)', 
+    point2: 'Reto', 
+    order: 199, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1MzqSGfABMRjA1Wd5tqLTOUbtyhPrt6St',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Leptospira",
+        symptoms: "Leptospirose. Flatulência constante. Parecida com a sarna, podendo causar alopésia. Muco de animais domésticos. Problemas tubo-digestivos (inflamação), vias aéreas e mucosas. Gases retais exagerados."
+      }
+    ]
+  },
+  { 
+    name: 'Suprarrenal (D/E) - Suprarrenal', 
+    point1: 'Suprarrenal (D/E)', 
+    point2: 'Suprarrenal', 
+    order: 200, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1JacT-j63IjYiMqYBNY07WLzqTV8hXN1u',
+    details: [
+      {
+        specification: "Disfunção glandular",
+        disease: "Disfunção glandular suprarrenal",
+        symptoms: "Fadiga crônica, cansaço e debilidade muscular, sintomas gastrointestinais, hipotensão, desidratação, hipotensão, queda nos níveis do hormônio de crescimento. Doença de Addison"
+      }
+    ]
+  },
+  { 
+    name: 'Suprarrenal ( C ) - Pulmão (D/E)', 
+    point1: 'Suprarrenal (C)', 
+    point2: 'Pulmão (D/E)', 
+    order: 201, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1_ZBnrkEem0E51oOd6LsK12vUHf8AnczK',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Pseudomonas aeruginosa",
+        symptoms: "Infecta pulmões, vias respiratórias e vias urinárias. Sepse. Feridas e lesões que se infectam mais facilmente. Se associado a câncer verdadeiro, provoca metástase."
+      }
+    ]
+  },
+  { 
+    name: 'Suprarrenal (C) - Rim', 
+    point1: 'Suprarrenal (C)', 
+    point2: 'Rim', 
+    order: 202, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1Bsq0vELw5UqMKgO0PfVTiKMeYW23EdpF',
+    details: [
+      {
+        specification: "Doença complexa",
+        disease: "Asma alérgica",
+        symptoms: "Asma Alérgica, bronquite. Déficit de corticoesteroides das suprarrenais. Dificuldade respiratória causada pela obstrução das vias respiratórias (bronquios). Ácaros"
+      }
+    ]
+  },
+  { 
+    name: 'Suprarrenal (C) - Toda frente do torax', 
+    point1: 'Suprarrenal (C)', 
+    point2: 'Toda frente do torax', 
+    order: 203, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1A7NlI6hiZhQUXYnE3yxvXyFIgMwjUC_D',
+    details: [
+      {
+        specification: "Doença complexa",
+        disease: "Asma alérgica",
+        symptoms: "Asma Alérgica, bronquite. Déficit de corticoesteroides das suprarrenais. Dificuldade respiratória causada pela obstrução das vias respiratórias (bronquios). Ácaros"
+      }
+    ]
+  },
+  { 
+    name: 'Cava (D/E) - Cava (D/E)', 
+    point1: 'Cava (D/E)', 
+    point2: 'Cava (D/E)', 
+    order: 204, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1ipaOmSYfTnLcxD6tmAtoMepilEnxsWic',
+    details: [
+      {
+        specification: "Infecção fúngica",
+        disease: "Trichophyton",
+        symptoms: "Micose nos pés, \"reto de atleta\", problemas respiratórios mais severos. Muito resistente a medicamentos. Impactação: separados por uns 3 dedos"
+      }
+    ]
+  },
+  { 
+    name: 'Escápula (D/E) - Escápula (D/E)', 
+    point1: 'Escápula (D/E)', 
+    point2: 'Escápula (D/E)', 
+    order: 205, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1LX37re6FPFKJxuaA3CIe_BE0kWEz8_wu',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Mycobacterium Leprae",
+        symptoms: "Hanseníase. Sozinha causa lepromas. Lesões tão agressivas que causam deformidades. Verdadeiro câncer se associada a outros pares e fatores."
+      }
+    ]
+  },
+  { 
+    name: 'Dorsal - Lombar', 
+    point1: 'Dorsal', 
+    point2: 'Lombar', 
+    order: 206, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1zCNWAFJ-syEN4gMRZDQtHiIf9Y3gRv94',
+    details: [
+      {
+        specification: "Neisseria Meningitidis (meningococo)",
+        disease: "Neisseria Meningitidis (meningococo)",
+        symptoms: "Edema cerebral, alteração do líquor, hidrocefalia, microtromboses, vasculite, aumento da pressão intracraneal. Meningite bacteriana. Localiza-se no conduto medular. Espinha bífida (por mal formação congênita). Caso se infiltre na vagina de mulher grávida, faltará ao bebê formação de medula e osso vertebral (espinha bífida). Reumatismo poliarticular. Associado com Neisseria Gonorrae = Artrite Reumatoide."
+      }
+    ]
+  },
+  { 
+    name: 'Dorsal 2 (vértebras torácicas) - Dorsal 2 (vértebras torácicas)', 
+    point1: 'Dorsal 2', 
+    point2: 'Dorsal 2', 
+    order: 207, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1GnWmGRBtW7lGPVUGsm3D2fJTmtUApyQK',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Legionella",
+        symptoms: "Doenças respiratórias, dificuldade de respiração, tosse, febre alta, mialgia, dor de garganta. Dor no peito. É comum nos aparelhos de ar condicionado."
+      }
+    ]
+  },
+  { 
+    name: 'Pescoço (D/E) - Pescoço', 
+    point1: 'Pescoço (D/E)', 
+    point2: 'Pescoço', 
+    order: 208, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1FzEsoRiMQMLcrw9xtPc__wszkli1p14H',
+    details: [
+      {
+        specification: "Infecção parasitária",
+        disease: "Blastocystis Hominis",
+        symptoms: "Distúrbios intestinais e estomacais (às vezes com distensão de estômago)"
+      }
+    ]
+  },
+  { 
+    name: 'Plexo Cervical - Plexo Cervical', 
+    point1: 'Plexo Cervical', 
+    point2: 'Plexo Cervical', 
+    order: 209, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/18ihOD-g55cSF8URiEF-j2KHaxx5_ED77',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Enterococcus Faecalis",
+        symptoms: "Diarreia pastosa, pode haver sangramento do reto, Infecção de feridas. Responsável por várias doenças, entre elas, infecção urinária, intestinal ou simplesmente infecção de feridas. A contaminação é por falta de higiene. (Tubo digestivo. Abrange toda família faecales e faecalis)."
+      }
+    ]
+  },
+  { 
+    name: 'Cervical - Deltoide', 
+    point1: 'Cervical', 
+    point2: 'Deltoide', 
+    order: 210, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1L8o45mgM68rdWRsXoi7WcJICWE-zQaec',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Balantidium Tifo",
+        symptoms: "Mal estar generalizado. Febre \"tifoidea\" (membrana que cobre as paredes bronquiais causando insuficiência respiratória, retenção de líquido, inflamação)."
       }
     ]
   }
