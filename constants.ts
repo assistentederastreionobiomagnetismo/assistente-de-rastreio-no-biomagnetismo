@@ -317,7 +317,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Micoses",
         disease: "Cryptococcus Neoformans",
-        symptoms: "Infecta o SNC, dá comvulsões, dor de cabeça, encefalite, edema. É mortal e ataca imuno-deficientes."
+        symptoms: "Infecta o SNC, dá comvulsões, dor de cabeça, acefalite, edema. É mortal e ataca imuno-deficientes."
       }
     ]
   },
@@ -333,7 +333,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Micoses",
         disease: "Cryptococcus Neoformans",
-        symptoms: "Infecta o SNC, dá comvulsões, dor de cabeça, encefalite, edema. É mortal e ataca imuno-deficientes."
+        symptoms: "Infecta o SNC, dá comvulsões, dor de cabeça, acefalite, edema. É mortal e ataca imuno-deficientes."
       }
     ]
   },
@@ -348,7 +348,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
     details: [
       {
         specification: "Infecção Viral",
-        disease: "Síndrome de Guillain Barré",
+        disease: "Newcastle Vírus",
         symptoms: "Paralisia, Polirradiculoneuropatia aguda de evolução prolongada, imunomediada. Desmielinização de raízes nervosas espinhais e nervos periféricos após quadro infeccioso. Fraqueza muscular de avanço rápido."
       }
     ]
@@ -397,7 +397,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Micoses",
         disease: "Cryptococcus Neoformans",
-        symptoms: "Infecta o SNC, dá comvulsões, dor de cabeça, encefalite, edema. É mortal e ataca imuno-deficientes."
+        symptoms: "Infecta o SNC, dá comvulsões, dor de cabeça, acefalite, edema. É mortal e ataca imuno-deficientes."
       }
     ]
   },
@@ -589,7 +589,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção parasitária",
         disease: "Toxoplasma gondii",
-        symptoms: "Toxoplasmose, deve-se encefalite, comvulsões, surdez, zumbidos, perda de equilíbrio horizontal, tonturas, enjôo, Sind. de meniére, dor nos olhos, cegira, rinite. Pode estar associado a hiperidrose."
+        symptoms: "Toxoplasmose, deve-se acefalite, comvulsões, surdez, zumbidos, perda de equilíbrio horizontal, tonturas, enjôo, Sind. de meniére, dor nos olhos, cegira, rinite. Pode estar associado a hiperidrose."
       }
     ]
   },
@@ -637,7 +637,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção parasitária",
         disease: "Plasmodium Vivax",
-        symptoms: "Malária, dor muscular, sudorese expressiva, feitre, vômito, mal estar, fadiga, anemia hemolítica, hipoglicemia, edema pulmonar. Causa Fibromialgia."
+        symptoms: "Malária, dor muscular, sudorese expressiva, feitre, vômito, mal estar, fadiga, anemia hemolítica, hipglicemia, edema pulmonar. Causa Fibromialgia."
       }
     ]
   },
@@ -747,9 +747,9 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
     imageUrl: 'https://lh3.googleusercontent.com/d/1hNNch5gz0tgONa3tD9eqRlwzNSd95SqQ',
     details: [
       {
-        specification: "Infecção viral (HIV)",
+        specification: "Infecção viral",
         disease: "Vírus HIV",
-        symptoms: "AIDS - Síndrome da imunodeficiência adquirida (em associação com E. Coli)"
+        symptoms: "AIDS - Síndrome da imunodeficiência adquirida (em associação with E. Coli)"
       }
     ]
   },
@@ -1068,8 +1068,8 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
     details: [
       {
         specification: "Infecção parasitária",
-        disease: "Anisakis Simplex",
-        symptoms: "Distúrbios gatrointestinais (Dor abdominal, náuseas e vômitos). Reação alérgica, choque anafilático, urticária. Crises de tosse, às vezes com larvas vistas à secreção: se as larvas vão ao estômago pode be fatal, em função de hemorragia e/ou hérnias."
+        disease: "Entamoeba Histolytica",
+        symptoms: "Cefaleia, vômitos, comvulsões, abscessos intracraneais, dor abdominal, cefaleia. Crises epilépticas e autismo."
       }
     ]
   },
@@ -1293,7 +1293,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Treponema Pallidum - Treponema Bucalli",
-        symptoms: "Falsa artrite, confunde-se with slice, reumatismo articular falso (ombro congelado, cotovelo endurecido), dores dorso-lombar, enjôos, zumbidos. Este microorganismo também pode be encontrado no par Quadrado lombar-Quadrado lombar."
+        symptoms: "Falsa artrite, confunde-se with slice, reumatismo articular falso (ombro congelado, cotovelo endurecido), dores dorso-lombar, enjôos, zumbidos. Este microorganismo também pode be found no par Quadrado lombar-Quadrado lombar."
       }
     ]
   },
@@ -1325,7 +1325,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Enterobacter Pneumoniae",
-        symptoms: "Pneumonias e outros problemas respiratórios. Transmite-se por gatos e cachorros."
+        symptoms: "Pneumonias e os outros problemas respiratórios. Transmite-se por gatos e cachorros."
       }
     ]
   },
@@ -1341,7 +1341,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Actinomyces",
-        symptoms: "Lesões fibróticas semelhantes a Psoríase, com aspect de \"madeira'; confunde-se com Psoríase, mas as lesions são mais endurecidas. Tais lesions vem e vão (remissão)."
+        symptoms: "Lesões fibróticas semelhantes a Psoríase, with aspect de \"madeira'; confunde-se with Psoríase, mas as lesions são mais endurecidas. Tais lesions vem e vão (remissão)."
       }
     ]
   },
@@ -1437,7 +1437,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção parasitária",
         disease: "Malária/Paludismo",
-        symptoms: "Febre, traqueza, hipoglicemia, dores abdominais, anemia, edema pulmonar, calafrios, vômitos. Sudorese noturna, feitre vespertina em acessos de 48 horas (feitre terciária) e de 72 horas (feitres quaternárias) causadas por picada de mosquito anópheles. Dores generalizadas. Usado para impedir que reapareçam os sintomas da esclerose múltipla. Sufocos. Confunde-se com artrite ou reumatismo. Verdadeira Fibromialgia."
+        symptoms: "Febre, traqueza, hipoglicemia, dores abdominais, anemia, edema pulmonar, calafrios, vômitos. Sudorese noturna, feitre vespertina em acessos de 48 horas (feitre terciária) e de 72 horas (feitres quaternárias) causadas por picada de mosquito anópheles. Dores generalizadas. Usado para impedir que reapareçam os sintomas da esclerose múltipla. Sufocos. Confunde-se with artrite ou reumatismo. Verdadeira Fibromialgia."
       }
     ]
   },
@@ -1501,7 +1501,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção bacteriana",
         disease: "Pseudomona Aeruginosa",
-        symptoms: "Infecção de pulmões, vias respiratórias e urinárias, de pele e tecido conjuntivo (feridas/escaras). Sepse"
+        symptoms: "Infecção de pulmões, vias respiratórias e urinárias, de pele e tejido conjuntivo (feridas/escaras). Sepse"
       }
     ]
   },
@@ -1549,7 +1549,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "Hepatite B",
-        symptoms: "Dor abdominal, urina escura, febre, dor nas articulações, perda de apetite, náusea e vômitos, traqueza e fadiga, amarelamento da pele (icterícia)."
+        symptoms: "Dor abdominal, urina escura, febre, dor nas articijulções, perda de apetite, náusea e vômitos, traqueza e fadiga, amarelamento da pele (icterícia)."
       }
     ]
   },
@@ -1576,7 +1576,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
     order: 99, 
     level: 2, 
     isDefinitive: true, 
-    imageUrl: 'https://lh3.googleusercontent.com/d/1XOqfgGmVHUzcwV6gLf5T6vD4KKsPMaSe',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1XOqfgGmVHUzcwV6gLf5T6!vD4KKsPMaSe',
     details: [
       {
         specification: "Infecção viral",
@@ -1597,7 +1597,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "Hepatite E",
-        symptoms: "Sintomas de hepatite: fadiga, náuseas, febre baixa, diarreia, icterícia, colúria, acolia fecal"
+        symptoms: "Fadiga, náuseas, febre alta, perda de peso, anorexia, diarreia, dor muscular, dor de cabeça. Icterícia, colúria, acolia."
       }
     ]
   },
@@ -1677,7 +1677,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Morganella Tifo",
-        symptoms: "Anorexia total, trastornos digestivos severos com diarreia e febre (feitre tifóide)."
+        symptoms: "Anorexia total, trastornos digestivos severos with diarreia e febre (feitre tifóide)."
       }
     ]
   },
@@ -1693,7 +1693,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Borrelia",
-        symptoms: "Diabetes falsa. Erupçäo cutânea e sintomas parecidos com os da gripe; e então manifestações musculoesqueléticas, artríticas, neurológicas, psiquiátricas e cardíacas. Enfermidade de Lyme. Cirrose hepática. Destruição hepática. Inflama gânglios linfáticos. Problemas Psicológicos."
+        symptoms: "Diabetes falsa. Erupçäo cutânea e sintomas parecidos with os da gripe; e então manifestações musculoesqueléticas, artríticas, neurológicas, psiquiátricas e cardíacas. Enfermidade de Lyme. Cirrose hepática. Destruição hepática. Inflama gânglios linfáticos. Problemas Psicológicos."
       }
     ]
   },
@@ -1805,7 +1805,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção parasitária",
         disease: "Enterobios Vermicularis (Oxiurus)",
-        symptoms: "Transtornos digestivos, prurido anal, febre, dor muscular e articular, edema, anorexia, gastrite, paralisia temporal dos nervos da face. Gosto metálico na boca. Diminuição dos níveis de potássio com ocorrência de cãimbras."
+        symptoms: "Transtornos digestivos, prurido anal, febre, dor muscular e articular, edema, anorexia, gastrite, paralisia temporal dos nervos da face. Gosto metálico na boca. Diminuição dos níveis de potássio with ocorrência de cãimbras."
       }
     ]
   },
@@ -1821,7 +1821,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção fúngica",
         disease: "Candida Albicans",
-        symptoms: "Infecção fúngica genital (vaginite na mulher, e ressecamento da glande do pênis no homem). Candidíase oral, Problemas em pele. Sintomas gastrointestinais: alteração do hábito intestinal, intolerâncias, dor e distensão abdominal, flatulência. Insônia, cefaleia, depressão."
+        symptoms: "Infecção fúngica genital (vaginite na mulher, e ressecamento da glande do pênis no homem). Candidíase oral, Problemas em pele. Sintomas gastrointestinais: alteração do hábito intestinal, intolerâncias, dor e distensão abdominal, flatulência. Insônia, cefaleia, depression."
       }
     ]
   },
@@ -1853,7 +1853,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção parasitária",
         disease: "Trichella Spiralis",
-        symptoms: "Triquinose. Transtornos gastrointestinais severos. Inflamação da língua e problemas bucais. Pode be se confundir com câncer de boca."
+        symptoms: "Triquinose. Transtornos gastrointestinais severos. Inflamação da língua e problemas bucais. Pode be se confundir with câncer de boca."
       }
     ]
   },
@@ -1949,7 +1949,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Parasiáaria",
         disease: "Anisakis Simplex",
-        symptoms: "É um genero de parasita cujo ciclo vital afeta peixes e mamíferos marinhos. No homem há invasão da mucosa gastrica ou intestinal pela larva ocasionando disturbios gastro intestinais ( dor abdominal, nauseas, vomitos e hemorragias). Tambem pode causar reações alérgica tipo choque anafilatico ou urticaria, crises de tosse , as vezes secreções com as larvas as vistas."
+        symptoms: "É um genero de parasita cujo ciclo vital afeta peixes e mamíferos marinhos. No homem há invasão da mucosa gastrica ou intestinal pela larva ocasionando disturbios gastro intestinais ( dor abdominal, nauseas, vomitos e hemorragias). Tambem pode causar reações alérgica tipo choque anafilatico ou urticaria, crises de tosse , as vezes secreções with as larvas as vistas."
       }
     ]
   },
@@ -2109,7 +2109,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Enterobacter Cloacae",
-        symptoms: "Problemas digestivos, flatulência, má absorção, distensão abdominal. A longo prazo pode distender o cólon (megacólon). Transmitido por cães/gatos."
+        symptoms: "Problemas digestivos, flatulência, náuseas, distensão abdominal. A longo prazo pode distender o cólon (megacólon). Transmitido por cães/gatos."
       }
     ]
   },
@@ -2525,7 +2525,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "HTVL 2",
-        symptoms: "Fraqueza nas pernas; Rigidez, endurecimento dos músculos das pernas. Em alguns casos este endurecimento pode levar o paciente a ter espasmos, câimbras e tremores nas pernas. Pele muito seca, boca e olhos secos; dormências e formigamentos, dores, sensação de queimação nos pés ou nas pernas; Dores nas articulações."
+        symptoms: "Fraqueza nas pernas; Rigidez, encoderimento dos músculos das pernas. Em alguns casos este encoderimento pode levar o paciente a ter espasmos, câimbras e tremores nas pernas. Pele muito seca, boca e olhos secos; dormências e formigamentos, dores, sensação de queimação nos pés ou nas pernas; Dores nas articulações."
       }
     ]
   },
@@ -2621,7 +2621,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "Norwalk virus",
-        symptoms: "Gastroenterite. Síndrome aguda respiratória. Afeta toda a cavidade pélvica. Coceira no ânus. Detectar vírus ajuda a eliminá-los mais facilmente. Normavírus - Provoca cisto ovárico, problemas inflamonatórios do lado direito da pelvis. Apendicite. Inflama gânglios intestinais. Os 2 ímãs vão do mesmo lado. Associado com fungos ou bactérias pode ser mortal."
+        symptoms: "Gastroenterite. Síndrome aguda respiratória. Afeta toda a cavidade pélvica. Coceira no ânus. Detectar vírus ajuda a eliminá-los mais facilmente. Normavírus - Provoca cisto ovárico, problemas inflamonatórios do lado direito da pelvis. Apendicite. Inflama gânglios intestinais. Os 2 ímãs vão do mesmo lado. Associado with fungos ou bactérias pode ser mortal."
       }
     ]
   },
@@ -2637,7 +2637,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "Paramyxovirus",
-        symptoms: "Parotidite, caxumba, papeira. Afeta os testículos (orquite) (orforite do ovário) e bexiga. Infertilidade (Pode alterar irreversivelmente a produção de semen nas crianças). Associado com Parótida/Parótida e Pudendo/Pudendo fornece a verdadeira síndrome de Schögen. Sintomatologia nos órgãos sexuais. Coceira, irritação e ressecamento dos órgãos sexuais na mulher. Transtorno sexual na mulher. Papiloma, se lhe atribui câncer intra-uterino."
+        symptoms: "Parotidite, caxumba, papeira. Afeta os testículos (orquite) (orforite do ovário) e bexiga. Infertilidade (Pode alterar irreversivelmente a produção de semen nas crianças). Associado with Parótida/Parótida e Pudendo/Pudendo fornece a verdadeira síndrome de Schögen. Sintomatologia nos órgãos sexuais. Coceira, irritação e ressecamento dos órgãos sexuais na mulher. Transtorno sexual na mulher. Papiloma, se lhe atribui câncer intra-uterino."
       }
     ]
   },
@@ -2669,7 +2669,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "HTVL 1",
-        symptoms: "Oncovírus HTLV 1 .Problemas urinários, da bexiga, sexual, prurido, coceira na zona genital. dor nas costas baixas, vaginite, uretrite, gravidez tubárica."
+        symptoms: "Oncovírus HTLV 1 .Problemas urinários, da bexiga, sexual, prurido, coceira na zona genital. dor nas costas baixas, vaginite, ueetrite, gravidez tubárica."
       }
     ]
   },
@@ -2712,7 +2712,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
     order: 170, 
     level: 2, 
     isDefinitive: true, 
-    imageUrl: 'https://lh3.googleusercontent.com/d/1Q44Li0FQX2R60QT1v79fGXF9hxzMhHKk',
+    imageUrl: 'https://lh3.googleusercontent.com/d/1Vt2vgNAyxOaouq011PkQT4rc-tbbcsnM',
     details: [
       {
         specification: "Infecção viral",
@@ -2765,7 +2765,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Rickettsia",
-        symptoms: "Debilidade muscular e articular. Transmitida por pulgas. Doença de Alzheimer se combinada com punho-punho."
+        symptoms: "Debilidade muscular e articular. Transmitida por pulgas. Doença de Alzheimer se combinada with punho-punho."
       }
     ]
   },
@@ -2845,7 +2845,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção bacteriana",
         disease: "Salmonella Typhi",
-        symptoms: "Etapas de encistamento; dor nas costas (dorso-lombar); transtornos digestivos com diarreia; sangramento retal. Alimentos contaminados por coliformes fecais."
+        symptoms: "Etapas de encistamento; dor nas costas (dorso-lombar); transtornos digestivos with diarreia; sangramento retal. Alimentos contaminados por coliformes fecais."
       }
     ]
   },
@@ -3069,7 +3069,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção bacteriana",
         disease: "Treponema Pallidum",
-        symptoms: "Sífilis. Rigidez articular (joelhos, quadril, cotovelos), confunde-se com artrite/artrose e doenças reumáticas. Complicação cardiovasculares (aortite e aneurisma sifilítico). Comprometimento do SNC podendo levar à morte. Também pode estar em deltoide/deltoide."
+        symptoms: "Sífilis. Rigidez articular (joelhos, quadril, cotovelos), confunde-se with artrite/artrose e doenças reumáticas. Complicação cardiovasculares (aortite e aneurisma sifilítico). Comprometimento do SNC podendo levar à morte. Também pode estar em deltoide/deltoide."
       }
     ]
   },
@@ -3085,7 +3085,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção bacteriana",
         disease: "Neisseria Gonorrhoeae",
-        symptoms: "Gera uma falsa artrite reumatoide. Problemas de coluna, uretrite, piuria, faringite"
+        symptoms: "Gera uma falsa artrite reumatoide. Problemas de coluna, ueetrite, piuria, faringite"
       }
     ]
   },
@@ -3165,7 +3165,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção bacteriana",
         disease: "Proteus Mirabilis",
-        symptoms: "Lupus. Infecção urinária, dor nos joelhos, pelvis, debilidade muscular, infecção, irritação, lesão rabo de cavalo, paralisia e parestesias, inflamação órgãos sexuais, infertilidade."
+        symptoms: "Lupus. Infecção urinária, dor nos joelhos, pelvis, debilidade muscular, infecção, irritação, lelesão rabo de cavalo, paralisia e parestesias, inflamação órgãos sexuais, infertilidade."
       }
     ]
   },
@@ -3181,7 +3181,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção bacteriana",
         disease: "Leptospira",
-        symptoms: "Leptospirose. Flatulência constante. Parecida com a sarna, podendo causar alopésia. Muco de animais domésticos. Problemas tubo-digestivos (inflamação), vias aéreas e mucosas. Gases retais exagerados."
+        symptoms: "Leptospirose. Flatulência constante. Parecida with a sarna, podendo causar alopésia. Muco de animais domésticos. Problemas tubo-digestivos (inflamação), vias aéreas e mucosas. Gases retais exagerados."
       }
     ]
   },
@@ -3293,7 +3293,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Neisseria Meningitidis (meningococo)",
         disease: "Neisseria Meningitidis (meningococo)",
-        symptoms: "Edema cerebral, alteração do líquor, hidrocefalia, microtromboses, vasculite, aumento da pressão intracraneal. Meningite bacteriana. Localiza-se no conduto medular. Espinha bífida (por mal formação congênita). Caso se infiltre na vagina de mulher grávida, faltará ao bebê formação de medula e osso vertebral (espinha bífida). Reumatismo poliarticular. Associado com Neisseria Gonorrae = Artrite Reumatoide."
+        symptoms: "Edema cerebral, alteração do líquor, hidrocefalia, microtromboses, vasculite, aumento da pressão intracraneal. Meningite bacteriana. Localiza-se no conduto medular. Espinha bífida (por mal formação congênita). Caso se infiltre na vagina de mulher grávida, faltará ao bebê formação de medula e osso vertebral (espinha bífida). Reumatismo poliarticular. Associado with Neisseria Gonorrae = Artrite Reumatoide."
       }
     ]
   },
@@ -3325,7 +3325,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção parasitária",
         disease: "Blastocystis Hominis",
-        symptoms: "Distúrbios intestinais e estomacais (às vezes com distensão de estômago)"
+        symptoms: "Distúrbios intestinais e estomacais (às vezes with distensão de estômago)"
       }
     ]
   },
@@ -3358,6 +3358,502 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
         specification: "Infecção bacteriana",
         disease: "Balantidium Tifo",
         symptoms: "Mal estar generalizado. Febre \"tifoidea\" (membrana que cobre as paredes bronquiais causando insuficiência respiratória, retenção de líquido, inflamação)."
+      }
+    ]
+  },
+  { 
+    name: 'Cervical - Sacro', 
+    point1: 'Cervical', 
+    point2: 'Sacro', 
+    order: 211, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1GtYWb8PQBScQT-J4ZH-s7jVEHUbfYz89',
+    details: [
+      {
+        specification: "Disfunção do Sistema Nervoso",
+        disease: "Disfunção parasimpática",
+        symptoms: "Taquicardia, bradicardia, palpitações, pressão sanguínea baixa, mudanças bruscas na PA, síncope, tonturas, problemas gastrointestinais, náuseas, tremores, micções frequentes, convulsões, visão turva ou \"de túnel\", déficit cognitivo, enxaquequa ou \"estado enxaquecoso\"."
+      }
+    ]
+  },
+  { 
+    name: 'Cervical - Dorsal', 
+    point1: 'Cervical', 
+    point2: 'Dorsal', 
+    order: 212, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1t_XZiE9pD22kefPgo9yXHrEuHITDvQdl',
+    details: [
+      {
+        specification: "Par Especial Pasciano",
+        disease: "Par especial",
+        symptoms: "Dor de cotovelo"
+      }
+    ]
+  },
+  { 
+    name: 'Cervical - Supraespinhoso', 
+    point1: 'Cervical', 
+    point2: 'Supraespinhoso', 
+    order: 213, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/17-QRigWzn2C0omDUZ1HmmnkZEiYoLLog',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Balantidium Coli",
+        symptoms: "Mal estar generalizado. Febre \"tifoidea\" (membrana que cobre as paredes bronquiais causando insuficiência respiratória, retenção de líquido, inflamação)"
+      }
+    ]
+  },
+  { 
+    name: 'Atlas - Atlas', 
+    point1: 'Atlas', 
+    point2: 'Atlas', 
+    order: 214, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/19bhudMEYWSZ2Gk2rLfLM4-PpWsN6ROZC',
+    details: [
+      {
+        specification: "Par Especial Juana",
+        disease: "Sexualidade, libido",
+        symptoms: "Sexualidade, libido"
+      }
+    ]
+  },
+  { 
+    name: 'Bulbo raquidiano - Cerebelo (C)', 
+    point1: 'Bulbo raquidiano', 
+    point2: 'Cerebelo (C)', 
+    order: 215, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1uacmFj8VWLmo43BFohofJQe_LchnrLrL',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Newcastle Vírus",
+        symptoms: "Conjuntivite e síndrome gripal"
+      }
+    ]
+  },
+  { 
+    name: 'Bulbo raquidiano - Bexiga', 
+    point1: 'Bulbo raquidiano', 
+    point2: 'Bexiga', 
+    order: 216, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/10e34jk06GlMiA8D6tZI1HFswlGKrlDpY',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Dengue hemorrágica",
+        symptoms: "Hemorragias, disfunção endotelial."
+      }
+    ]
+  },
+  { 
+    name: 'Cerebelo (D/E) - Cerebelo', 
+    point1: 'Cerebelo (D/E)', 
+    point2: 'Cerebelo', 
+    order: 217, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1czIKgoh-QsPQv_olwJIt7H6LtwhW7iAJ',
+    details: [
+      {
+        specification: "Par Especial Chapingo",
+        disease: "Crises convulsivas",
+        symptoms: "Pode ser usado para se controlar uma crise convulsiva (fisiológica ou por impactação). Pode ser usado também em indivíduos com Parkinson para minimizar os sintomas e facilitar o rastreio."
+      }
+    ]
+  },
+  { 
+    name: 'Occipital (D/E) - Occipital', 
+    point1: 'Occipital (D/E)', 
+    point2: 'Occipital', 
+    order: 218, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1QNebxIE1CwOJkNtaJPiZtxwEdp_zGQ2W',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Epstein Barr Virus",
+        symptoms: "Irritabilidade, náuseas, confusão mental, sintomas neurológicos, fadiga"
+      }
+    ]
+  },
+  { 
+    name: 'Temporal E - Temporal E', 
+    point1: 'Temporal E', 
+    point2: 'Temporal E', 
+    order: 219, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1jRy7AbfxEJMZsHJ8LuMDNJyJOCHQ6iJ9',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Polioma Virus",
+        symptoms: "Pode causar leucoencefalopatia multifocal progressiva. Infecção urinária em imunodeficientes e transplantados"
+      }
+    ]
+  },
+  { 
+    name: 'Temporal (D/E) - Temporal', 
+    point1: 'Temporal (D/E)', 
+    point2: 'Temporal', 
+    order: 220, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1MByrBehxiIapz1jRFHC7vXly-1_oLQCD',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Rickettsia Prowazecki",
+        symptoms: "Tifo exantemático. Febre, calafrios, dores musculares, dor nas costas, dores de cabeça fortes, prisões de ventre.. Erupção cutânea semelhante ao sarampo, poupando palmas e plantas"
+      }
+    ]
+  },
+  { 
+    name: 'Temporal D - Temporal D', 
+    point1: 'Temporal D', 
+    point2: 'Temporal D', 
+    order: 221, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1MByrBehxiIapz1jRFHC7vXly-1_oLQCD',
+    details: [
+      {
+        specification: "Par Especial Bonilla",
+        disease: "Agressividade",
+        symptoms: "Em pessoas normais (que não tenham este par ativo por agressividade), pode ser usado como SOS para controlar a temperatura corporal, tanto para frio como para calor."
+      }
+    ]
+  },
+  { 
+    name: 'Temporoccipital (D) - Temporoccipital (E)', 
+    point1: 'Temporoccipital (D)', 
+    point2: 'Temporoccipital (E)', 
+    order: 222, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1U622LgbAjOZ6SnFrtNsZCmgtrJV93Zk1',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Mycoplasma",
+        symptoms: "Grandes dores de cabeça (cefaleia e enxaquecas), febre, irritabilidade, nervosismo, confusão, reações febris. Principal causa de confusão mental."
+      }
+    ]
+  },
+  { 
+    name: 'Seio frontal (D) - Seio frontal (E)', 
+    point1: 'Seio frontal (D)', 
+    point2: 'Seio frontal (E)', 
+    order: 223, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/10CmM6lgSQSqKU-ijamrz6lfQYgItMY20',
+    details: [
+      {
+        specification: "Doença viral",
+        disease: "Vários tipos de vírus",
+        symptoms: "Sinusite frontal"
+      }
+    ]
+  },
+  { 
+    name: 'Seio paranasal (D) - Seio paranasal (E)', 
+    point1: 'Seio paranasal (D)', 
+    point2: 'Seio paranasal (E)', 
+    order: 224, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1EIw4YlJWePCsYKW1CYzWKWCL_00iKXkQ',
+    details: [
+      {
+        specification: "Doença viral",
+        disease: "Vários tipos de vírus",
+        symptoms: "Sinusite paranasal"
+      }
+    ]
+  },
+  { 
+    name: 'Polo (D) - Polo (E)', 
+    point1: 'Polo (D)', 
+    point2: 'Polo (E)', 
+    order: 225, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1RDkRraX01RciQSaJCsz9QW6JmW8XEXJ6',
+    details: [
+      {
+        specification: "Par Especial Abraham",
+        disease: "Para especial",
+        symptoms: "Equilibrio vertical, dislexia"
+      }
+    ]
+  },
+  { 
+    name: 'Malar (D) - Malar (E)', 
+    point1: 'Malar (D)', 
+    point2: 'Malar (E)', 
+    order: 226, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1CYBokqs-zBRKVqkF71sQjaTpO3Rp3vAM',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Enterovírus",
+        symptoms: "Infecção gastrointestinal, cefaleias, tonturas. Confunde-se com HIV"
+      }
+    ]
+  },
+  { 
+    name: 'Craneal (D) - Craneal (E)', 
+    point1: 'Craneal (D)', 
+    point2: 'Craneal (E)', 
+    order: 227, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1eFCvNMLxUIcfQlQMFq1hY5XAOicNuN0A',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Bacillus Anthracis",
+        symptoms: "Problemas nasofaríngeos, pólipos nasais, dor, alterações da visão, fotofobia, muco, cistos, tumor hipofisário."
+      }
+    ]
+  },
+  { 
+    name: 'Lacrimal (D) - Lacrimal (E)', 
+    point1: 'Lacrimal (D)', 
+    point2: 'Lacrimal (E)', 
+    order: 228, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/158QmGFrs_ZJrkyiaHrmsdnN7PSQGB9ir',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Haemophilus Influenzae",
+        symptoms: "Produz bronquite, pneumonia. Altera fatores de coagulação: sangramentos, epistaxis. Produz também meningite. Catarro. renite, laringite, produz hemorragia nasal. K. Pneumoniae"
+      }
+    ]
+  },
+  { 
+    name: 'Nariz (D) - Nariz (E)', 
+    point1: 'Nariz (D)', 
+    point2: 'Nariz (E)', 
+    order: 229, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1NHMXugJ7CRsgCFVIYM5Vvc9Gan7GyTZf',
+    details: [
+      {
+        specification: "Enfermidade Complexa",
+        disease: "Rinitis Alérgica",
+        symptoms: "Rinitis Alérgica"
+      }
+    ]
+  },
+  { 
+    name: 'Interciliar - Bulbo raquídeo', 
+    point1: 'Interciliar', 
+    point2: 'Bulbo raquidiano', 
+    order: 230, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/12DKRd68e8SUtyImUyhRMj3tEJ9lEV06F',
+    details: [
+      {
+        specification: "Par Especial David",
+        disease: "Caráter",
+        symptoms: "Regula o temperamento da criança, e também o crescimento."
+      }
+    ]
+  },
+  { 
+    name: 'Supraciliar - Bulbo raquídeo', 
+    point1: 'Supraciliar', 
+    point2: 'Bulbo raquidiano', 
+    order: 231, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1y3vZv4LGfiS34CYPSarl8Ko2GaNE6rCZ',
+    details: [
+      {
+        specification: "Par Especial Vivian",
+        disease: "Integridade corporal e crescimento",
+        symptoms: "Alterações da integridade corporal. Dores fantasmas em membros amputados. Inconformidade por perda de membros, ressecção de órgãos e abortamento"
+      }
+    ]
+  },
+  { 
+    name: 'Canto da boca (D) - Canto da boca (E)', 
+    point1: 'Canto da boca (D)', 
+    point2: 'Canto da boca (E)', 
+    order: 232, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1MGj33ZA-8qeZp3EQj_6RDt6bmpTD5SKZ',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Herpes vírus 4",
+        symptoms: "Herpes labial"
+      }
+    ]
+  },
+  { 
+    name: 'Canto do olho (D) - Canto do olho (E)', 
+    point1: 'Canto do olho (D)', 
+    point2: 'Canto do olho (E)', 
+    order: 233, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1ocKgxH3n_VuUxdSskROrAxB5lHP-sFwR',
+    details: [
+      {
+        specification: "Infecção fúngica",
+        disease: "Aspergillus",
+        symptoms: "Glaucoma. Micose de couro cabeludo. Em combinação com outros microorganismos pode provocar enfermedades oftálmicas muito perigosas."
+      }
+    ]
+  },
+  { 
+    name: 'Pálpebra (D) - Pálpebra (E)', 
+    point1: 'Pálpebra (D)', 
+    point2: 'Pálpebra (E)', 
+    order: 234, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1_CyF5jJTzKVvz4wePQqBX7tkw6aQEEdg',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Moraxella Catarrhalis",
+        symptoms: "Se houver associação com N. Gonorrea ocasiona perda de dentes, gengivites, otites... A dor se confunde com sinusite."
+      }
+    ]
+  },
+  { 
+    name: 'Piso orbital (D) - Piso orbital (E)', 
+    point1: 'Piso orbital (D)', 
+    point2: 'Piso orbital (E)', 
+    order: 235, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1SIk61BCG7aO1Wl0WdYS-txffsolQhqr6',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Orf Virus",
+        symptoms: "Transtornos nervosos. Fotofobia. Glaucoma quando existe micose, febre, faringite, diarreia. Conjuntivite."
+      }
+    ]
+  },
+  { 
+    name: 'Quiasma (D) - Quiasma (E)', 
+    point1: 'Quiasma (D)', 
+    point2: 'Quiasma (E)', 
+    order: 236, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1lzcVW1BPBa7F_Uy25Eu_X4da3KaEMzNA',
+    details: [
+      {
+        specification: "Par Especial Lucina",
+        disease: "Drenaje Linfatico",
+        symptoms: "Drenagem Linfatico"
+      }
+    ]
+  },
+  { 
+    name: 'Polígono de Willis (D) - Polígono de Willis (E)', 
+    point1: 'Polígono de Willis (D)', 
+    point2: 'Polígono de Willis (E)', 
+    order: 237, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1IMPXfF1KUHKnHbK1v4qbnAxaVs4ZQIJW',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Reo Virus",
+        symptoms: "Transtornos nervosos. Fotofobia. Glaucoma quando existe micose, febre, faringite, diarreia. Conjuntivite."
+      }
+    ]
+  },
+  { 
+    name: 'Ângulo (D) - Ângulo (E)', 
+    point1: 'Ângulo (D)', 
+    point2: 'Ângulo (E)', 
+    order: 238, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1xjdFqP_lZOjmY0kLdPa3PoXoxxhtsImb',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Bacteroides Fragilis",
+        symptoms: "Infecção bacteriana."
+      }
+    ]
+  },
+  { 
+    name: 'Amígdala palatina(Angina) (D/E) - Amígdala palatina(Angina)', 
+    point1: 'Amígdala palatina (Angina) (D/E)', 
+    point2: 'Amígdala palatina (Angina)', 
+    order: 239, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1kyYe75v-OgnUPPrpyOFsrjMMq1ViPlKP',
+    details: [
+      {
+        specification: "Infecção viral",
+        disease: "Herpes vírus 2",
+        symptoms: "Herpes bucal"
+      }
+    ]
+  },
+  { 
+    name: 'Laringe (S) - Laringe (Inf)', 
+    point1: 'Laringe (S)', 
+    point2: 'Laringe (Inf)', 
+    order: 240, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1ISbH82D4RCNO9ftAg6vPmstNlNR-3vYC',
+    details: [
+      {
+        specification: "Infecção bacteriana",
+        disease: "Bordetella Pertussis",
+        symptoms: "Coqueluche. Tosse crônica enquanto existe o bacilo. Pode afetar a função de glândulas anexas timo, Tireoides e Paratireoides. Problemas da faringe, rouquidão, tosse felina na etapa aguda. Muito agressivo. Muco e flemas no tubo digestivo. Gases. Principal causa de necrose de cabeça de fêmur e de grande parte das enfermidades vasculares das extremidades inferiores. (Varizes). Artrose de quadril. Na mulher fluxo vaginal; diarreia; intolerância a leite."
+      }
+    ]
+  },
+  { 
+    name: 'Esterno cleido mastoideo (D) - Esterno cleido mastoideo (E)', 
+    point1: 'Esterno cleido mastoideo (D)', 
+    point2: 'Esterno cleido mastoideo (E)', 
+    order: 241, 
+    level: 2, 
+    isDefinitive: true, 
+    imageUrl: 'https://lh3.googleusercontent.com/d/1v06W64gOf8K9hXyIwKsCytqE3g8MRGds',
+    details: [
+      {
+        specification: "Disfunção Sistema Nervoso",
+        disease: "Simpatico",
+        symptoms: "Disfunção SNC"
       }
     ]
   }
