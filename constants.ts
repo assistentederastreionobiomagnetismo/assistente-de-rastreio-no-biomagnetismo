@@ -29,7 +29,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Wong",
         disease: "Priones",
-        symptoms: "Por vacinações massivas. Memória de enfermidades. Às vezes, Pericárdio temporo direito. Ataca o SNC. Doenças degenerativas, afeta a pele e o cabelo. Falso sarampo, afeta a produção de CD3, CD4, CD8."
+        symptoms: "Por vacinações massivas. Memória de enfermidades. Às vezes, Pericárdio temporo direito. Ataca o SNC. Doenças compensatórias, afeta a pele e o cabelo. Falso sarampo, afeta a produção de CD3, CD4, CD8."
       }
     ]
   },
@@ -621,7 +621,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção parasitária",
         disease: "Filária",
-        symptoms: "Pode acometer cérebro ou olhos, causando cegueira, atrofia do nervo óptico, danos na córnea, zumbidos, vertigens, surdez, crises comvulsivas, paralisia facial e até tumores intracraneais. Por picada de moscas e larvas. Obstruem os vasos linfáticos (elefantíase)."
+        symptoms: "Pode acometer cérebro or olhos, causando cegueira, atrofia do nervo óptico, danos na córnea, zumbidos, vertigens, surdez, crises comvulsivas, paralisia facial e até tumores intracraneais. Por picada de moscas e larvas. Obstruem os vasos linfáticos (elefantíase)."
       }
     ]
   },
@@ -829,7 +829,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Proteus Mirabilis",
-        symptoms: "Sintomas laríngeos, pulmonares e bronquiais. Por proximidade ao Timo pode provocar falsa imunodeficiência. Pode provocar também, aumento dos níveis de ureia (Gota)."
+        symptoms: "Sintomas laríngeos, pulmorares e bronquiais. Por proximidade ao Timo pode provocar falsa imunodeficiência. Pode provocar também, aumento dos níveis de ureia (Gota)."
       }
     ]
   },
@@ -1021,7 +1021,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Par Especial Ramsés",
         disease: "Par Ramsés",
-        symptoms: "Intoxicação por metais pesados."
+        symptoms: "Intoxicação por metals pesados."
       }
     ]
   },
@@ -1052,8 +1052,8 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
     details: [
       {
         specification: "Par Especial Ramsés",
-        disease: "Pancreatite ou Par Ramsés (Intoxicação por metais pesados)",
-        symptoms: "Intoxicação por metais pesados. Intoxicação medicamentosa or digestiva que gera estados psicóticos no paciente, afetando o SNC. Pancreatite."
+        disease: "Pancreatite ou Par Ramsés (Intoxicação por metals pesados)",
+        symptoms: "Intoxicação por metals pesados. Intoxicação medicamentosa or digestiva que gera estados psicóticos no paciente, afetando o SNC. Pancreatite."
       }
     ]
   },
@@ -1165,7 +1165,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Pasteurela",
-        symptoms: "Linfadenopatia regional, febre, calafrios, sintomas urinários e cerebrais."
+        symptoms: "Linfadenopatia regional, feitre, calafrios, situações urinários e cerebrais."
       }
     ]
   },
@@ -1437,7 +1437,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção parasitária",
         disease: "Malária/Paludismo",
-        symptoms: "Febre, traqueza, hipglicemia, dores abdominais, anemia, edema pulmonar, calafrios, vômitos. Sudorese noturna, feitre verpertina em acessos de 48 horas (feitre terciária) e de 72 horas (feitres quaternárias) causadas por picada de mosquito anópheles. Dores generalizadas. Usado para impedir que reapareçam os sintomas da esclerose múltipla. Sufocos. Confunde-se with artrite or reumatismo. Verdadeira Fibromialgia."
+        symptoms: "Febre, traqueza, hipglicemia, dores abdominais, anemia, edema pulmonar, calafrios, vômitos. Sudorese noturna, feitre verpertina em acessos de 48 horas (feitre terciária) e de 72 horas (feitres quaternárias) causadas por picada de mosquito anópheles. Dores generalizadas. Usado para impedir que reapareçam os situações da esclerose múltipla. Sufocos. Confunde-se with artrite or reumatismo. Verdadeira Fibromialgia."
       }
     ]
   },
@@ -1565,7 +1565,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "Hepatite C",
-        symptoms: "Ocorre por uma intoxicação; medicamentosa, por exemplo."
+        symptoms: "Ocorre por uma comportamento tóxica ou inflamação sistêmica."
       }
     ]
   },
@@ -1933,7 +1933,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Par Especial Leucemia",
         disease: "Leucemia",
-        symptoms: "Infecções, febre, perda de apetite e peso, cansaço, hemorragias, dificuldade para respirar, sudoreses noturna, hematomas."
+        symptoms: "Infecções, febre, para de apetite e peso, cansaço, hemorragias, dificuldade para respirar, sudoreses noturna, hematomas."
       }
     ]
   },
@@ -2077,7 +2077,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Vibrio Cholerae",
-        symptoms: "Cólera. Dor abdominal, diarreia, desidratação, perda rápida de fluidos corporais, anorexia, dor de cabeça, sangramento pelo tubo digestivo. Ingestão de alimentos ou água contaminados."
+        symptoms: "Cólera. Dor abdominal, diarreia, desidratação, para rápida de fluidos corporais, anorexia, dor de cabeça, sangramento pelo tubo digestivo. Ingestão de alimentos ou água contaminados."
       }
     ]
   },
@@ -2125,7 +2125,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Bacteriana",
         disease: "Pasteurella",
-        symptoms: "Linfadenopatia regional (ínguas), febre, calafrios, sintomas urinários e cerebrais"
+        symptoms: "Linfadenopatia regional (ínguas), febre, calafrios, situações urinários e cerebrais"
       }
     ]
   },
@@ -2141,7 +2141,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Par Especial Olazo",
         disease: "Obstrução intestinal",
-        symptoms: "Obstrução e disfunção crônica do tubo digestivo, por disfunção neurológica, alimentação inadequada, estresse, etc. Pode be impactado em caso de emergência (obstrução aguda or crônica) sem a necessidade de rastreio. A impactação normaliza a função intestinal e pode causar a necessidade de evacuar."
+        symptoms: "Obstrução e disfunção crônica do tubo digestivo, por disfunção neuológica, alimentação inadequada, estresse, etc. Pode be impactado em caso de emergência (obstrução aguda or crônica) sem a necessidade de rastreio. A impactação normaliza a função intestinal e pode causar a necessidade de evacuar."
       }
     ]
   },
@@ -2237,7 +2237,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Par Especial Roberta",
         disease: "Falsa gravidez",
-        symptoms: "Causa sintomas de gravidez, mas não é. Pode estar presente também em homens."
+        symptoms: "Causa situações de gravidez, mas não é. Pode estar presente também em homens."
       }
     ]
   },
@@ -2685,7 +2685,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "Roséola Virus",
-        symptoms: "Febre, erupção cutânea or manchas avermelhadas ao londo do corpo, dor de garganta, ingua, fadiga, irritabilidade, diarreia, perda de apetite, corrimento nasal, pálpebras inchadas."
+        symptoms: "Febre, erupção cutânea or manchas avermelhadas ao londo do corpo, dor de garganta, ingua, fadiga, irritabilidade, diarreia, perda de apetite, para nasal, pálpebras inchadas."
       }
     ]
   },
@@ -2893,7 +2893,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Par Especial Magda",
         disease: "Intoxicação por bismuto (medicamentos or inseticidas)",
-        symptoms: "Problemas de coordenação motora, de memória e musculares. Encefalopatia, insônia e sintomas psiquiátricos"
+        symptoms: "Problemas de coordenação motora, de memória e musculares. Encefalopatia, insônia e situações psiquiátricos"
       }
     ]
   },
@@ -2909,7 +2909,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "Polio vírus",
-        symptoms: "Poliomielite. Afeta o SNC. Na fase aguda causa inflamação de neurônios motors na medula espinhal e cérebro e leva a atrofia muscular, paralisias temporárias or permanentes, paralisia diafragmática e deformidades."
+        symptoms: "Poliomielite. Afeta o SNC. Na fase aguda causa inflamação de neurônios motors na medula espinhal e cérebro e leva a atrofia muscular, paralisias temporárias or permanentes, paralisia diafragmática e para de peso"
       }
     ]
   },
@@ -3037,7 +3037,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Par Especial Elena",
         disease: "Disfunção gastrointestinal",
-        symptoms: "Disfunção gastrointestinal e obesidade/sobrepeso que não estão relacionados às disfunções glandulares e nem ao excesso de alimentação. Intestino preso e excessiva absorção intestinal. Pode ser impactado sem rastreio para alívio de desconordo gastrointestinal."
+        symptoms: "Disfunção gastrointestinal e obesidade/sobrepeso que não estão relacionados às disfunções glandulares e nem ao excesso de alimentação. Intestino preso e serviço de absorção excessiva intestinal. Pode ser impactado sem rastreio para alívio de desconordo gastrointestinal."
       }
     ]
   },
@@ -3149,7 +3149,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Doença complexa",
         disease: "Diabetes Mellitus (DM)",
-        symptoms: "Sintomas relacionados à DM. Poliúria, polidipsia, polifagia, para súbita de peso"
+        symptoms: "Situações relacionados à DM. Poliúria, polidipsia, polifagia, para súbita de peso"
       }
     ]
   },
@@ -3197,7 +3197,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Disfunção glandular",
         disease: "Disfunção glandular suprarrenal",
-        symptoms: "Fadiga crônica, cansaço e debilidade muscular, sintomas gastrointestinais, hibeetensão, desidratação, hibeetensão, queda nos níveis do hormônio de crescimento. Doença de Addison"
+        symptoms: "Fadiga crônica, cansaço e debilidade muscular, situações gastrointestinais, hibeetensão, desidratação, hibeetensão, para nos níveis do hormônio de crescimento. Doença de Addison"
       }
     ]
   },
@@ -3309,7 +3309,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção bacteriana",
         disease: "Legionella",
-        symptoms: "Doenças respiratórias, dificuldade de respiração, tosse, febre alta, mialgia, dor de garganta. Dor no peito. É comum nos aparelhos de ar condicionado."
+        symptoms: "Doenças respiratórias, difficulty de respiração, tosse, febre alta, mialgia, dor de garganta. Dor no peito. É comum nos aparelhos de ar condicionado."
       }
     ]
   },
@@ -3469,7 +3469,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Par Especial Chapingo",
         disease: "Crises convulsivas",
-        symptoms: "Pode ser usado para se controlar uma crise convulsiva (fisiológica or por impactação). Pode ser usado também em indivíduos com Parkinson para minimizar os sintomas e facilitar o rastreio."
+        symptoms: "Pode ser usado para se controlar uma crise convulsiva (fisiológica or por impactação). Pode ser usado também em indivíduos com Parkinson para minimizar os situações e facilitar o rastreio."
       }
     ]
   },
@@ -3485,7 +3485,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção viral",
         disease: "Epstein Barr Virus",
-        symptoms: "Irritabilidade, náuseas, confusão mental, sintomas neurológicos, fadiga"
+        symptoms: "Irritabilidade, náuseas, confusão mental, situações neurolológicos, fadiga"
       }
     ]
   },
@@ -4077,7 +4077,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção bacteriana",
         disease: "Proteus Mirabilis",
-        symptoms: "Manifestações pleurais, pulmonares e diafragmáticas. Se o fígado estiver impactado, deve-se esperar o tempo necessário, para depois impactar este par."
+        symptoms: "Manifestações pleurais, pulmonares e diafragmáticas. Si o fígado estiver impactado, deve-se esperar o tempo necessário, para depois impactar este par."
       }
     ]
   },
@@ -4253,7 +4253,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Viral",
         disease: "Paramoxivirus",
-        symptoms: "Afeta os testículos (orquite) (orforite do ovário) e bexiga. Infertilidade (Pode alterar irreversivelmente a produção de semen nas crianças). Sintomatologia nos órgãos sexuais. Coceira, irritação e ressecamento dos órgãos sexuais na mulher. Transtorno sexual na mulher. Papiloma, se lhe atribui câncer intra-uterino."
+        symptoms: "Afeta os testículos (orquite) (orforite do ovário) e bexiga. Infertilidade (Pode alterar irreversivelmente a produção de semen nas crianças). Situatologia nos órgãos sexuais. Coceira, irritação e ressecamento dos órgãos sexuais na mulher. Transtorno sexual na mulher. Papiloma, se lhe atribui câncer intra-uterino."
       }
     ]
   },
@@ -4301,7 +4301,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Viral",
         disease: "Herpes 6",
-        symptoms: "Herpes 6. Roséola. Manchas avermelhadas. Pode dar sintomatologia hepática. (geralmente nervo inguinal direito). Fundo da Rosácea. Dermatite."
+        symptoms: "Herpes 6. Roséola. Manchas avermelhadas. Pode dar situatologia hepática. (geralmente nervo inguinal direito). Fundo da Rosácea. Dermatite."
       }
     ]
   },
@@ -4317,7 +4317,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Viral",
         disease: "Herpes 7",
-        symptoms: "A infecção primária pode ser assintomática ou cursar com febre e convulsão febril. Menos comumente ocorrem sintomas respiratórios altos, vômitos e diarreia. Leucopenia é frequente. Em raros casos é causa de encefalite em imunocompetentes ou imunossuprimidos"
+        symptoms: "A infecção primária pode ser assintomática or cursar com febre e convulsão febril. Menos comumente ocorrem situações respiratórios altos, vômitos e diarreia. Leucopenia é frequente. Em raros casos é causa de encefalite em imunocompetentes ou imunossuprimidos"
       }
     ]
   },
@@ -4349,7 +4349,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Viral",
         disease: "Aftosa Virus 2",
-        symptoms: "Transmitido por lácteos. Provoca inflamação do cárdias, fungos vaginais, é muito comum que este virus suporte fungo da boca e pulmão. Provoca lesões tipo afitas na boca, feridas na pele entre os dedos. Os sintomas são febre alta, dores musculares, dor de cabeça, sede excessiva e pode outros problemas e atingir a garganta e pulmões."
+        symptoms: "Transmitido por lácteos. Provoca inflamação do cárdias, fungos vaginais, é muito comum que este virus suporte fungo da boca e pulmão. Provoca lesões tipo afitas na boca, feridas na pele entre os dedos. Os situações são febre alta, dores musculares, dor de cabeça, sede excessiva e pode outros problemas e atingir a garganta e pulmões."
       }
     ]
   },
@@ -4381,7 +4381,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Viral",
         disease: "Adenovirus 36",
-        symptoms: "Pancreatite, psicose, paranoias, hiperatividade por SNC afetado. Se produz por toxinas ou metais (mercúrio, chumbo). condutas atípicas, hipocalcemia, fadiga extrema por falta de vitamina K, hiperkinesia, diabetes, obesidade extrema (para baixar de peso)."
+        symptoms: "Pancreatite, psicose, paranoias, hiperatividade por SNC afetado. Se produz por toxinas ou metals (mercúrio, chumbo). condutas atípicas, hipocalcemia, fadiga extrema por falta de vitamina K, hiperkinesia, diabetes, obesidade extrema (para baixar de peso)."
       }
     ]
   },
@@ -4397,7 +4397,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Viral",
         disease: "Raiva Virus 2",
-        symptoms: "Sintomas laríngeos, otite, sinusite crônica, contrações musculares. Sintomas neurológicos com problemas do SNC, podendo ocorrer alterações de personalidade."
+        symptoms: "Situatologia laríngeos, otite, sinusite crônica, contrações musculares. Situatologia neurológicos com problemas do SNC, podendo ocorrer alterações de personalidade."
       }
     ]
   },
@@ -4413,7 +4413,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Viral",
         disease: "Raiva Virus 3",
-        symptoms: "Sintomas laríngeos, otite, sinusite crônica, contrações musculares. Sintomas neurológicos com problemas do SNC, podendo ocorrer alterações de personalidade."
+        symptoms: "Situatologia laríngeos, otite, sinusite crônica, contrações musculares. Situatologia neurológicos com problemas do SNC, podendo ocorrer alterações de personalidade."
       }
     ]
   },
@@ -4477,7 +4477,7 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Viral",
         disease: "Ebola Virus",
-        symptoms: "Os sintomas tardios dão febre hemorrágica. Pneumonia; Artrite; Dores nas costas (lumbago); Diarreia; Fadiga; Calafrios; Febre; Dor de cabeça; Mal-estar; Náuseas; Dor de garganta; Vômitos."
+        symptoms: "Os situações tardios dão febre hemorrágica. Pneumonia; Artrite; Dores nas costas (lumbago); Diarreia; Fadiga; Calafrios; Febre; Dor de cabeça; Mal-estar; Náuseas; Dor de garganta; Vômitos."
       }
     ]
   },
@@ -4525,88 +4525,4 @@ export const BIOMAGNETIC_PAIRS: BiomagneticPair[] = [
       {
         specification: "Infecção Viral",
         disease: "Virus BK 2",
-        symptoms: "Virus DNA da familia dos Polyomavirus . Prejudica os rins, a imunidade."
-      }
-    ]
-  },
-  { 
-    name: 'Ligamento do Pâncreas - Colon Descendente', 
-    point1: 'Ligamento do Pâncreas', 
-    point2: 'Colon Descendente', 
-    order: 284, 
-    level: 3, 
-    isDefinitive: true, 
-    imageUrl: 'https://lh3.googleusercontent.com/d/1FkGhCBbM3vjgecFqYy2VXCUVJlahqBw6',
-    details: [
-      {
-        specification: "Infecção Viral",
-        disease: "Febre Amarela B",
-        symptoms: "As primeiras manifestações da doença são repentinas: febre alta, calafrios, cansaço, dor de cabeça, dor muscular, náuseas e vômitos por cerca de três dias. A forma mais grave da doença é rara e costuma aparecer após um breve período de bem-estar (até dois dias), quando podem ocorrer insuficiências hepática e renal, icterícia (olhos e pele amarelados)."
-      }
-    ]
-  },
-  { 
-    name: 'Mesentério (D) - Mesentério (E)', 
-    point1: 'Mesentério (D)', 
-    point2: 'Mesentério (E)', 
-    order: 285, 
-    level: 3, 
-    isDefinitive: true, 
-    imageUrl: 'https://lh3.googleusercontent.com/d/1F3lak2ERk8k5K9gXHbTCcgYdX5HA14jZ',
-    details: [
-      {
-        specification: "Infecção Bacteriana",
-        disease: "Mycobacterium Leprae 2",
-        symptoms: "Hanseníase. Sozinha causa lepromas. Lesões tão agressivas que causam deformidades. Verdadeiro câncer se associada a outros pares e fatores. Lepra. Produz toxina Limosina, destrói a pele e no sistema nervoso causa atrofia nas extremidades, perda de dedos e cegueira se chegar nos olhos. Dedos de tambor, asma, cataratas, hemorroidas, etc. De pais para filhos. Provoca formação de cálculos renais e vesiculares Manchas na pele de cor parda, esbranquiçadas ou eritematosas, às vezes pouco visíveis e com limites imprecisos."
-      }
-    ]
-  },
-  { 
-    name: 'Fossa Ilíaca - Piloro', 
-    point1: 'Fossa Ilíaca', 
-    point2: 'Piloro', 
-    order: 286, 
-    level: 3, 
-    isDefinitive: true, 
-    imageUrl: 'https://lh3.googleusercontent.com/d/1CmaqOrtvA_pUvcmV-_mTe1zKvB6xpI',
-    details: [
-      {
-        specification: "Infecção Bacteriana",
-        disease: "Vibrio Hemophylus",
-        symptoms: "Vibrio Hemophylus"
-      }
-    ]
-  },
-  { 
-    name: 'Retroplantar (D) - Retroplantar (E)', 
-    point1: 'Retroplantar (D)', 
-    point2: 'Retroplantar (E)', 
-    order: 287, 
-    level: 3, 
-    isDefinitive: true, 
-    imageUrl: 'https://lh3.googleusercontent.com/d/1Rf9JdzGXweHKpAMkpl1xi6wd2JD_6b83',
-    details: [
-      {
-        specification: "Infecção Bacteriana",
-        disease: "Mycobacterium Leprae 3",
-        symptoms: "Vibrio Hemophylus"
-      }
-    ]
-  },
-  { 
-    name: 'Conducto Espermático - Conducto Espermático', 
-    point1: 'Conducto Espermático', 
-    point2: 'Conducto Espermático', 
-    order: 288, 
-    level: 3, 
-    isDefinitive: true, 
-    imageUrl: 'https://lh3.googleusercontent.com/d/1y8t10N5D5K1ISQN-3umV4-8GQKN3Cj-P',
-    details: [
-      {
-        specification: "Infecção Bacteriana",
-        disease: "Mycobacterium Tuberculosis 2",
-        symptoms: "Problemas respiratórios, garganta, pulmão, secreção nasal, alterações psicológicas, vaginite, úlceras retais e pele, tuberculose, Bacilo de Koch, TBC. Produz cálculos renais e vesiculares. Ao impactar cessa suas produções. Pode ocasionar fenômeno tumoral malígno. Abscessos no corpo. Ceratocono (córnea fina e projetada para frente). Esterilidade."
-      }
-    ]
-  }
-];
+        symptoms: "Virus DNA da
