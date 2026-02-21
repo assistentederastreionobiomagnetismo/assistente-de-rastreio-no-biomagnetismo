@@ -6,9 +6,11 @@ import { InfoIcon, TrashIcon, PencilIcon } from './icons/Icons';
 interface SessionHistoryProps {
   sessions: Session[];
   onViewDetail: (session: Session) => void;
+  onEdit: (session: Session) => void;
+  onDelete: (id: string, e: React.MouseEvent) => void;
 }
 
-const SessionHistory: React.FC<SessionHistoryProps> = ({ sessions, onViewDetail }) => {
+const SessionHistory: React.FC<SessionHistoryProps> = ({ sessions, onViewDetail, onEdit, onDelete }) => {
   return (
     <div className="pt-8 border-t border-slate-200">
       <h3 className="text-xl font-semibold text-slate-700 text-center mb-6">Histórico de Atendimentos</h3>
@@ -36,11 +38,25 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ sessions, onViewDetail 
 
                   <div className="flex items-center gap-2 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0">
                     <button
+                      onClick={() => onEdit(session)}
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-200"
+                      title="Editar Atendimento"
+                    >
+                      <PencilIcon className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={(e) => onDelete(session.id, e)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
+                      title="Excluir Atendimento"
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
+                    <button
                       onClick={() => onViewDetail(session)}
                       className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm font-bold shadow-sm"
                     >
                       <InfoIcon className="w-5 h-5" />
-                      Ver Detalhes
+                      Detalhes
                     </button>
                   </div>
                 </div>
