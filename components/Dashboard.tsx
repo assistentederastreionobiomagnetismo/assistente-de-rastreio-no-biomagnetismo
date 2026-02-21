@@ -66,16 +66,6 @@ const Dashboard: React.FC<DashboardProps> = ({
           <h2 className="text-2xl md:text-3xl font-bold text-slate-800">Painel Principal</h2>
           <div className="flex flex-col items-center mt-2 gap-2">
             <p className="text-slate-500 italic">Selecione uma ação abaixo.</p>
-            {lastSyncDate ? (
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-teal-50 rounded-full border border-teal-100">
-                <CheckIcon className="w-3 h-3 text-teal-600" />
-                <span className="text-[9px] font-black text-teal-700 uppercase tracking-widest">Base Master Sincronizada</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-full border border-amber-100">
-                <span className="text-[9px] font-black text-amber-700 uppercase tracking-widest">Aguardando Primeira Sincronia</span>
-              </div>
-            )}
           </div>
         </div>
 
