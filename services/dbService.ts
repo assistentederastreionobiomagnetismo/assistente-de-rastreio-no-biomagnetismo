@@ -123,7 +123,12 @@ export const dbService = {
             .select('*')
             .order('order', { ascending: true });
         if (error) throw error;
-        return data;
+        return data.map(p => ({
+            ...p,
+            imageUrl: p.image_url,
+            isCustom: p.is_custom,
+            isDefinitive: p.is_definitive
+        }));
     },
 
     async savePairs(pairs: BiomagneticPair[]): Promise<void> {
@@ -131,9 +136,39 @@ export const dbService = {
         const { error } = await supabase
             .from('biomagnetic_pairs')
             .upsert(pairs.map(p => ({
-                ...p,
-                // Garante mapeamento correto se necessário
+                name: p.name,
+                point1: p.point1,
+                point2: p.point2,
+                description: p.description,
+                image_url: p.imageUrl,
+                is_custom: p.isCustom,
+                is_definitive: p.isDefinitive,
+                level: p.level,
+                order: p.order,
+                details: p.details
             })));
         if (error) throw error;
+    },
+
+    async uploadPairImage(file: File): Promise<string> {
+        if (!supabase) throw new Error("Supabase não configurado");
+
+        // Gerar um nome de arquivo único
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError, data } = await supabase.storage
+            .from('fotos-pares')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // Gerar a URL pública
+        const { data: { publicUrl } } = supabase.storage
+            .from('fotos-pares')
+            .getPublicUrl(filePath);
+
+        return publicUrl;
     }
 };

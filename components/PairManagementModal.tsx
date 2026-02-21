@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BiomagneticPair, PairDetail } from '../types';
 import { TrashIcon, PlusIcon, CheckIcon } from './icons/Icons';
+import { dbService } from '../services/dbService';
 
 interface PairManagementModalProps {
   isOpen: boolean;
@@ -16,19 +17,19 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'basic' | 'details'>('basic');
   const [isProcessingImage, setIsProcessingImage] = useState(false);
-  
+
   const isEditing = initialPair !== null;
   const originalOrder = initialPair?.order;
 
   useEffect(() => {
     if (isOpen) {
       if (initialPair) {
-        setPair({ 
-            ...initialPair, 
-            imageUrl: initialPair.imageUrl || '',
-            details: initialPair.details || [],
-            isDefinitive: initialPair.isDefinitive !== undefined ? initialPair.isDefinitive : true,
-            level: initialPair.level || 1
+        setPair({
+          ...initialPair,
+          imageUrl: initialPair.imageUrl || '',
+          details: initialPair.details || [],
+          isDefinitive: initialPair.isDefinitive !== undefined ? initialPair.isDefinitive : true,
+          level: initialPair.level || 1
         });
       } else {
         setPair(emptyPair);
@@ -52,14 +53,14 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
   const toggleDefinitive = () => {
     setPair(prev => ({ ...prev, isDefinitive: !prev.isDefinitive }));
   };
-  
+
   const handleDetailChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     const newDetails = [...(pair.details || [])];
     newDetails[index] = { ...newDetails[index], [name]: value } as any;
     setPair(prev => ({ ...prev, details: newDetails }));
   };
-  
+
   const addDetailRow = () => {
     const newDetail: PairDetail = { specification: '', disease: '', symptoms: '' };
     setPair(prev => ({ ...prev, details: [...(prev.details || []), newDetail] }));
@@ -79,7 +80,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
         img.src = event.target?.result as string;
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_SIZE = 600; 
+          const MAX_SIZE = 600;
           let width = img.width;
           let height = img.height;
 
@@ -99,7 +100,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, width, height);
-          
+
           const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
           resolve(dataUrl);
         };
@@ -112,11 +113,20 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setIsProcessingImage(true);
+      setError('');
       try {
-        const compressed = await compressImage(e.target.files[0]);
-        setPair(prev => ({ ...prev, imageUrl: compressed }));
-      } catch (err) {
-        setError("Erro ao processar imagem.");
+        const file = e.target.files[0];
+        // Opcional: Ainda podemos restringir o tamanho antes do upload
+        if (file.size > 2 * 1024 * 1024) { // 2MB limit
+          setError("A imagem é muito grande. Use uma foto de até 2MB.");
+          return;
+        }
+
+        const publicUrl = await dbService.uploadPairImage(file);
+        setPair(prev => ({ ...prev, imageUrl: publicUrl }));
+      } catch (err: any) {
+        console.error("Erro no upload:", err);
+        setError("Erro ao enviar imagem para o servidor: " + (err.message || "Tente novamente"));
       } finally {
         setIsProcessingImage(false);
       }
@@ -134,14 +144,14 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
       setActiveTab('basic');
       return;
     }
-    
+
     const anotherPairHasSameName = existingPairs.some(
       p => p.name.trim().toLowerCase() === pair.name.trim().toLowerCase() && p.order !== originalOrder
     );
 
     if (anotherPairHasSameName) {
-        setError('Já existe outro par com este nome. Apenas o mesmo par pode ter o mesmo nome.');
-        return;
+      setError('Já existe outro par com este nome. Apenas o mesmo par pode ter o mesmo nome.');
+      return;
     }
 
     onSave(pair, originalOrder);
@@ -155,57 +165,57 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
           <div className="p-4 border-b bg-slate-50 flex-shrink-0 flex justify-between items-center">
             <h3 className="text-xl font-bold text-teal-700">{isEditing ? 'Editar Par da Base Master' : 'Adicionar Novo Par Definitivo'}</h3>
             <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-teal-200">
-                    <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Base Global</span>
-                    <button 
-                      type="button" 
-                      onClick={toggleDefinitive}
-                      className={`w-10 h-5 rounded-full relative transition-colors duration-300 ${pair.isDefinitive ? 'bg-teal-600' : 'bg-slate-300'}`}
-                    >
-                        <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 ${pair.isDefinitive ? 'left-5' : 'left-0.5'}`}></div>
-                    </button>
-                </div>
+              <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-teal-200">
+                <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Base Global</span>
+                <button
+                  type="button"
+                  onClick={toggleDefinitive}
+                  className={`w-10 h-5 rounded-full relative transition-colors duration-300 ${pair.isDefinitive ? 'bg-teal-600' : 'bg-slate-300'}`}
+                >
+                  <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 ${pair.isDefinitive ? 'left-5' : 'left-0.5'}`}></div>
+                </button>
+              </div>
             </div>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-md">{error}</p>}
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-                <div className="md:col-span-1">
-                  <label htmlFor="name" className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Nome do Par</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={pair.name}
-                    onChange={handleChange}
-                    className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 font-bold text-slate-700"
-                    placeholder="Ex: Timo - Reto"
-                    required
-                  />
-                </div>
-                <div className="md:col-span-1">
-                  <label htmlFor="level" className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Classificação Técnica</label>
-                  <select
-                    id="level"
-                    name="level"
-                    value={pair.level}
-                    onChange={handleChange}
-                    className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 font-bold text-slate-700 cursor-pointer"
-                    required
-                  >
-                    <option value={1}>Reservatórios</option>
-                    <option value={2}>Nível I - Básico</option>
-                    <option value={3}>Nível II - Específicos</option>
-                    <option value={4}>Nível III - Patógenos Nome</option>
-                  </select>
-                </div>
-                <div className="p-4 bg-teal-50 rounded-xl border border-teal-100 md:col-span-1">
-                    <p className="text-[10px] text-teal-700 font-bold leading-snug">
-                        {isProcessingImage ? 'Otimizando imagem...' : '* Fotos enviadas agora são otimizadas para economizar memória do navegador.'}
-                    </p>
-                </div>
+              <div className="md:col-span-1">
+                <label htmlFor="name" className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Nome do Par</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={pair.name}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 font-bold text-slate-700"
+                  placeholder="Ex: Timo - Reto"
+                  required
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label htmlFor="level" className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Classificação Técnica</label>
+                <select
+                  id="level"
+                  name="level"
+                  value={pair.level}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-4 py-3 bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 font-bold text-slate-700 cursor-pointer"
+                  required
+                >
+                  <option value={1}>Reservatórios</option>
+                  <option value={2}>Nível I - Básico</option>
+                  <option value={3}>Nível II - Específicos</option>
+                  <option value={4}>Nível III - Patógenos Nome</option>
+                </select>
+              </div>
+              <div className="p-4 bg-teal-50 rounded-xl border border-teal-100 md:col-span-1">
+                <p className="text-[10px] text-teal-700 font-bold leading-snug">
+                  {isProcessingImage ? 'Enviando imagem...' : '* Fotos enviadas agora são armazenadas de forma segura no Supabase Storage.'}
+                </p>
+              </div>
             </div>
 
             <div className="border-b border-gray-200 flex-shrink-0">
@@ -213,22 +223,20 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                 <button
                   type="button"
                   onClick={() => setActiveTab('basic')}
-                  className={`whitespace-nowrap py-3 px-1 border-b-2 font-black text-xs uppercase tracking-widest focus:outline-none transition-colors ${
-                    activeTab === 'basic'
-                      ? 'border-teal-500 text-teal-600'
-                      : 'border-transparent text-gray-400 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`whitespace-nowrap py-3 px-1 border-b-2 font-black text-xs uppercase tracking-widest focus:outline-none transition-colors ${activeTab === 'basic'
+                    ? 'border-teal-500 text-teal-600'
+                    : 'border-transparent text-gray-400 hover:text-gray-700 hover:border-gray-300'
+                    }`}
                 >
                   Identificação e Imagem
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('details')}
-                  className={`whitespace-nowrap py-3 px-1 border-b-2 font-black text-xs uppercase tracking-widest focus:outline-none transition-colors ${
-                    activeTab === 'details'
-                      ? 'border-teal-500 text-teal-600'
-                      : 'border-transparent text-gray-400 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`whitespace-nowrap py-3 px-1 border-b-2 font-black text-xs uppercase tracking-widest focus:outline-none transition-colors ${activeTab === 'details'
+                    ? 'border-teal-500 text-teal-600'
+                    : 'border-transparent text-gray-400 hover:text-gray-700 hover:border-gray-300'
+                    }`}
                 >
                   Planilha de Dados Clínicos
                 </button>
@@ -239,14 +247,14 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
               {activeTab === 'basic' && (
                 <div className="space-y-6 animate-fade-in">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                          <label htmlFor="point1" className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Ponto 1 (Negativo)</label>
-                          <input type="text" id="point1" name="point1" value={pair.point1} onChange={handleChange} className="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 font-medium" placeholder="Ex: Timo" required />
-                      </div>
-                      <div>
-                          <label htmlFor="point2" className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Ponto 2 (Positivo)</label>
-                          <input type="text" id="point2" name="point2" value={pair.point2} onChange={handleChange} className="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 font-medium" placeholder="Ex: Reto" required />
-                      </div>
+                    <div>
+                      <label htmlFor="point1" className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Ponto 1 (Negativo)</label>
+                      <input type="text" id="point1" name="point1" value={pair.point1} onChange={handleChange} className="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 font-medium" placeholder="Ex: Timo" required />
+                    </div>
+                    <div>
+                      <label htmlFor="point2" className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Ponto 2 (Positivo)</label>
+                      <input type="text" id="point2" name="point2" value={pair.point2} onChange={handleChange} className="mt-1 block w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 font-medium" placeholder="Ex: Reto" required />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Imagem Técnica de Referência</label>
@@ -262,8 +270,8 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                         </div>
                       )}
                       <div className="flex-1">
-                          <input id="image-upload" type="file" accept="image/*" onChange={handleImageChange} className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-teal-600 file:text-white hover:file:bg-teal-700 cursor-pointer" />
-                          <p className="mt-2 text-[10px] text-slate-400 font-bold uppercase">PNG ou JPG. O sistema comprimirá fotos pesadas automaticamente para garantir a sincronia rápida.</p>
+                        <input id="image-upload" type="file" accept="image/*" onChange={handleImageChange} className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-teal-600 file:text-white hover:file:bg-teal-700 cursor-pointer" />
+                        <p className="mt-2 text-[10px] text-slate-400 font-bold uppercase">PNG ou JPG. Upload direto para o servidor.</p>
                       </div>
                     </div>
                   </div>
@@ -273,12 +281,12 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
               {activeTab === 'details' && (
                 <div className="animate-fade-in space-y-4">
                   <div className="flex justify-between items-center bg-teal-50 p-4 rounded-xl border border-teal-100">
-                      <div className="text-[11px] text-teal-800 font-bold uppercase tracking-tight">Conteúdo técnico disponível para todos os terapeutas.</div>
-                      <button type="button" onClick={addDetailRow} className="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md text-white bg-teal-600 hover:bg-teal-700 transition-all">
-                          <PlusIcon className="w-4 h-4" /> Adicionar Linha
-                      </button>
+                    <div className="text-[11px] text-teal-800 font-bold uppercase tracking-tight">Conteúdo técnico disponível para todos os terapeutas.</div>
+                    <button type="button" onClick={addDetailRow} className="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md text-white bg-teal-600 hover:bg-teal-700 transition-all">
+                      <PlusIcon className="w-4 h-4" /> Adicionar Linha
+                    </button>
                   </div>
-                  
+
                   <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-sm">
                     <table className="min-w-full divide-y divide-slate-200">
                       <thead className="bg-slate-50">
@@ -303,7 +311,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                             </td>
                             <td className="px-2 py-2 align-middle text-center">
                               <button type="button" onClick={() => removeDetailRow(index)} className="text-slate-300 hover:text-red-600 p-2 rounded-xl hover:bg-red-50 transition-all">
-                                <TrashIcon className="w-5 h-5"/>
+                                <TrashIcon className="w-5 h-5" />
                               </button>
                             </td>
                           </tr>
@@ -315,7 +323,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
               )}
             </div>
           </div>
-          
+
           <div className="p-6 border-t bg-slate-50 flex justify-end space-x-3 flex-shrink-0">
             <button type="button" onClick={onClose} className="px-8 py-3 bg-white text-slate-400 border border-slate-200 rounded-xl hover:bg-slate-100 transition-all font-black uppercase text-xs tracking-widest">Cancelar</button>
             <button type="submit" disabled={isProcessingImage} className="px-12 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 shadow-xl transition-all font-black uppercase text-xs tracking-widest disabled:bg-slate-300">
