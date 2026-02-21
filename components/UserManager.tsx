@@ -11,7 +11,6 @@ interface UserManagerProps {
 }
 
 const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticPairs, onBack }) => {
-    const [syncCode, setSyncCode] = useState<string | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
 
     const [pendingExpiries, setPendingExpiries] = useState<{ [key: string]: ApprovalPeriod }>({});
@@ -149,18 +148,6 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         }
     };
 
-    const handleExportSync = async () => {
-        setIsGenerating(true);
-        try {
-            const code = await generateCompressedCode(users);
-            setSyncCode(code);
-        } catch (e) {
-            alert('Erro ao gerar código de sincronização.');
-        } finally {
-            setIsGenerating(false);
-        }
-    };
-
     const shareInstructions = (user: User) => {
         const appUrl = "https://assistente-de-rastreio-no-biomagnet.vercel.app";
         const message = `Olá ${user.fullName}! Seu acesso ao aplicativo Assistente de Rastreios no Biomagnetismo foi liberado.\n\n👤 USUÁRIO: ${user.username}\n🔑 SENHA PROVISÓRIA: ${user.password}\n\nINSTRUÇÕES DE ACESSO:\n1. Abra o aplicativo pelo link abaixo.\n2. Clique em 'Sincronizar Dispositivo'.\n3. Cole o código que enviarei na próxima mensagem.\n4. Após o primeiro login, o sistema solicitará que você crie uma senha definitiva.\n\n🔗 LINK DO APP:\n${appUrl}\n\nCódigo sincronizador a seguir:`;
@@ -201,22 +188,6 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
-                    <div className="relative group">
-                        <button
-                            onClick={handleExportSync}
-                            disabled={isGenerating}
-                            className="px-8 py-4 bg-sky-600 text-white font-black rounded-2xl shadow-lg hover:bg-sky-700 transition-all uppercase text-xs tracking-widest disabled:opacity-50 flex items-center gap-3"
-                        >
-                            <ClipboardIcon className="w-5 h-5" />
-                            {isGenerating ? 'PROCESSANDO...' : 'Gerar Sincronia Global'}
-                        </button>
-                        {syncCode && (
-                            <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl p-4 border border-sky-100 z-50 animate-fade-in">
-                                <p className="text-[8px] font-mono break-all text-slate-400 h-20 overflow-y-auto bg-slate-50 p-2 rounded-lg mb-2">{syncCode}</p>
-                                <button onClick={() => { navigator.clipboard.writeText(syncCode!); alert('Código mestre copiado!'); }} className="w-full py-2 bg-sky-50 text-sky-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-sky-100 transition-all">Copiar Código Master</button>
-                            </div>
-                        )}
-                    </div>
                     <button onClick={onBack} className="px-8 py-4 bg-slate-100 text-slate-600 font-black rounded-2xl hover:bg-slate-200 transition-all border border-slate-200 uppercase text-xs tracking-widest">Voltar</button>
                 </div>
             </div>
