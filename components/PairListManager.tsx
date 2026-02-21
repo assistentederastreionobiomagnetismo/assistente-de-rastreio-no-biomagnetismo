@@ -36,7 +36,7 @@ const PairListManager: React.FC<PairListManagerProps> = ({
                 newList = biomagneticPairs.map(p => p.order === originalOrder ? { ...savedPair, order: originalOrder } : p);
             } else {
                 const newOrder = biomagneticPairs.length > 0 ? Math.max(...biomagneticPairs.map(p => p.order || 0)) + 1 : 1;
-                newList = [...biomagneticPairs, { ...savedPair, order: newOrder }];
+                newList = [...biomagneticPairs, { ...savedPair, order: newOrder, id: crypto.randomUUID() }];
             }
 
             await dbService.savePairs(newList);
