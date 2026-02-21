@@ -146,12 +146,21 @@ const App: React.FC = () => {
     return { success: true };
   };
 
-  const handleUpdatePassword = (newPassword: string) => {
+  const handleUpdatePassword = async (newPassword: string) => {
     if (!currentUser) return;
-    const updatedUsers = allUsers.map(u => u.username === currentUser.username ? { ...u, password: newPassword, requiresPasswordChange: false } : u);
-    setAllUsers(updatedUsers);
-    setCurrentUser(prev => prev ? { ...prev, password: newPassword, requiresPasswordChange: false } : null);
-    setAppView('dashboard');
+    try {
+      const updatedUser: User = { ...currentUser, password: newPassword, requiresPasswordChange: false };
+
+      await dbService.updateUser(updatedUser);
+
+      const updatedUsers = allUsers.map(u => u.username === currentUser.username ? updatedUser : u);
+      setAllUsers(updatedUsers);
+      setCurrentUser(updatedUser);
+      setAppView('dashboard');
+    } catch (error) {
+      console.error("Erro ao atualizar senha no Supabase:", error);
+      alert("Erro ao salvar nova senha no banco de dados. Tente novamente.");
+    }
   };
 
   const handleLogout = () => {

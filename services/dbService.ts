@@ -28,11 +28,13 @@ export const dbService = {
                 username: user.username,
                 password: user.password,
                 full_name: user.fullName,
+                email: user.email,
+                whatsapp: user.whatsapp,
                 is_approved: user.isApproved,
                 approval_type: user.approvalType,
                 approval_expiry: user.approvalExpiry,
                 requires_password_change: user.requiresPasswordChange
-            });
+            }, { onConflict: 'username' });
         if (error) throw error;
     },
 
@@ -147,7 +149,7 @@ export const dbService = {
                 level: p.level,
                 order: p.order,
                 details: p.details
-            })));
+            })), { onConflict: 'name' });
         if (error) throw error;
     },
 

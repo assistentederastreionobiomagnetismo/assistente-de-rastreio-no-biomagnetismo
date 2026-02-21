@@ -10,8 +10,9 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onUpdate, onLogout }) =
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -25,7 +26,13 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onUpdate, onLogout }) =
       return;
     }
 
-    onUpdate(newPassword);
+    setIsSaving(true);
+    try {
+      await onUpdate(newPassword);
+    } catch (err) {
+      setError('Erro ao salvar senha. Tente novamente.');
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -40,7 +47,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onUpdate, onLogout }) =
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-xs font-black border border-red-100">{error}</div>}
-          
+
           <div>
             <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Nova Senha</label>
             <input
@@ -50,6 +57,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onUpdate, onLogout }) =
               onChange={e => setNewPassword(e.target.value)}
               className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium transition-all"
               required
+              disabled={isSaving}
             />
           </div>
 
@@ -62,14 +70,15 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onUpdate, onLogout }) =
               onChange={e => setConfirmPassword(e.target.value)}
               className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium transition-all"
               required
+              disabled={isSaving}
             />
           </div>
 
-          <button type="submit" className="w-full py-5 bg-teal-600 text-white font-black rounded-2xl shadow-xl hover:bg-teal-700 transition-all uppercase tracking-widest text-sm">
-            Salvar e Continuar
+          <button type="submit" disabled={isSaving} className="w-full py-5 bg-teal-600 text-white font-black rounded-2xl shadow-xl hover:bg-teal-700 transition-all uppercase tracking-widest text-sm disabled:bg-slate-300">
+            {isSaving ? 'Salvando...' : 'Salvar e Continuar'}
           </button>
-          
-          <button type="button" onClick={onLogout} className="w-full text-xs font-black text-slate-400 uppercase tracking-widest hover:text-red-600 transition-colors">
+
+          <button type="button" onClick={onLogout} disabled={isSaving} className="w-full text-xs font-black text-slate-400 uppercase tracking-widest hover:text-red-600 transition-colors disabled:opacity-50">
             Cancelar e Sair
           </button>
         </form>
