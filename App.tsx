@@ -245,7 +245,18 @@ const App: React.FC = () => {
   };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-100 font-bold text-teal-600">Carregando Banco de Dados...</div>;
-  if (!isAuthenticated) return <Login onLogin={handleTherapistLogin} onRequestReset={() => ({ success: false, message: '' })} onImportSync={handleImportSync} debugUserCount={allUsers.length} />;
+  if (!isAuthenticated) {
+    const hasKeys = !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
+    return (
+      <Login
+        onLogin={handleTherapistLogin}
+        onRequestReset={() => ({ success: false, message: '' })}
+        onImportSync={handleImportSync}
+        debugUserCount={allUsers.length}
+        hasKeys={hasKeys}
+      />
+    );
+  }
   if (appView === 'changePassword') return <ChangePassword onUpdate={handleUpdatePassword} onLogout={handleLogout} />;
 
   return (

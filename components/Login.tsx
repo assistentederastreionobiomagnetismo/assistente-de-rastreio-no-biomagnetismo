@@ -6,11 +6,12 @@ interface LoginProps {
   onRequestReset: (username: string, newPass: string) => { success: boolean; message: string };
   onImportSync: (code: string) => Promise<boolean>;
   debugUserCount: number;
+  hasKeys: boolean;
 }
 
 type ViewMode = 'login' | 'sync' | 'forgot';
 
-const Login: React.FC<LoginProps> = ({ onLogin, onImportSync, debugUserCount }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, onImportSync, debugUserCount, hasKeys }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [syncCode, setSyncCode] = useState('');
@@ -70,8 +71,14 @@ const Login: React.FC<LoginProps> = ({ onLogin, onImportSync, debugUserCount }) 
             <p className="text-slate-400 mt-2 text-[10px] uppercase font-black tracking-[0.2em]">
               {viewMode === 'login' ? 'Identificação do Terapeuta' : viewMode === 'sync' ? 'Sincronizar Dispositivo' : 'Recuperar Acesso'}
             </p>
-            <div className="mt-2 text-[8px] font-black uppercase text-slate-300">
-              Banco: {debugUserCount > 0 ? <span className="text-teal-500">CONECTADO ({debugUserCount} usuários)</span> : <span className="text-red-400">AGUARDANDO DADOS...</span>}
+            <div className="mt-2 text-[8px] font-black uppercase tracking-widest">
+              {!hasKeys ? (
+                <span className="text-red-500 bg-red-50 px-2 py-1 rounded">⚠️ Erro: Chaves Faltando na Vercel</span>
+              ) : debugUserCount > 0 ? (
+                <span className="text-teal-500 bg-teal-50 px-2 py-1 rounded">✅ Conectado ({debugUserCount} usuários)</span>
+              ) : (
+                <span className="text-amber-500 bg-amber-50 px-2 py-1 rounded">⏳ Banco Vazio / Carregando...</span>
+              )}
             </div>
           </header>
 
