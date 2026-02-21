@@ -137,19 +137,22 @@ export const dbService = {
         if (!supabase) return;
         const { error } = await supabase
             .from('biomagnetic_pairs')
-            .upsert(pairs.map(p => ({
-                id: p.id,
-                name: p.name,
-                point1: p.point1,
-                point2: p.point2,
-                description: p.description,
-                image_url: p.imageUrl,
-                is_custom: p.isCustom,
-                is_definitive: p.isDefinitive,
-                level: p.level,
-                order: p.order,
-                details: p.details
-            })), { onConflict: 'name' });
+            .upsert(pairs.map(p => {
+                const data: any = {
+                    name: p.name,
+                    point1: p.point1,
+                    point2: p.point2,
+                    description: p.description,
+                    image_url: p.imageUrl,
+                    is_custom: p.isCustom,
+                    is_definitive: p.isDefinitive,
+                    level: p.level,
+                    order: p.order,
+                    details: p.details
+                };
+                if (p.id) data.id = p.id;
+                return data;
+            }), { onConflict: 'name' });
         if (error) throw error;
     },
 
