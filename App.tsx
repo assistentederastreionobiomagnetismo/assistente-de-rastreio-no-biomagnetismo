@@ -268,12 +268,6 @@ const App: React.FC = () => {
           <div className="flex flex-col items-center mt-4">
             <p className="text-slate-600 text-sm font-medium">Terapeuta: <span className="text-lg font-black text-slate-800 uppercase">{currentUser?.fullName || currentUser?.username}</span></p>
             {currentUser && <ValidityHeader user={currentUser} />}
-            {lastSyncDate && (
-              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 bg-white border border-teal-100 rounded-full shadow-sm">
-                <CheckIcon className="w-3 h-3 text-teal-600" />
-                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Base Sincronizada</span>
-              </div>
-            )}
           </div>
         </header>
 
