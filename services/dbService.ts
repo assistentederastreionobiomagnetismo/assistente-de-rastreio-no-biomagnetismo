@@ -61,6 +61,7 @@ export const dbService = {
         const { error } = await supabase
             .from('patients')
             .upsert({
+                id: patient.id,
                 therapist_username: therapistUsername,
                 name: patient.name,
                 birth_date: patient.birthDate,
