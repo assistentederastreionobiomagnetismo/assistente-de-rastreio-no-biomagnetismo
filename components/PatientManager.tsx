@@ -71,7 +71,7 @@ const PatientManager: React.FC<PatientManagerProps> = ({ patients, setPatients, 
     if (!id) return;
     if (window.confirm('Tem certeza que deseja excluir este paciente? Esta ação é irreversível.')) {
       try {
-        await dbService.deletePatient(id);
+        await dbService.deletePatient(id, therapistUsername);
         setPatients(prev => prev.filter(p => p.id !== id));
       } catch (error) {
         console.error("Erro ao excluir paciente:", error);

@@ -323,7 +323,7 @@ const App: React.FC = () => {
               </nav>
             </div>
             <main className="p-6 md:p-10">
-              {currentStep === Step.PATIENT_INFO && <PatientForm patient={patient} setPatient={setPatient} onNext={nextStep} patientsList={patients} setPatientsList={setPatients} />}
+              {currentStep === Step.PATIENT_INFO && <PatientForm patient={patient} setPatient={setPatient} onNext={nextStep} patientsList={patients} setPatientsList={setPatients} therapistUsername={currentUser!.username} />}
               {currentStep === Step.START_PROTOCOL && <StartProtocol data={protocolData} setData={setProtocolData} notes={protocolNotes} setNotes={setProtocolNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PATIENT_INFO)} patientName={patient.name} />}
               {currentStep === Step.SCANNING_RESERVATORIOS && <Scanning levelTitle="Reservatórios" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={reservatoriosNotes} setNotes={setReservatoriosNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.START_PROTOCOL)} biomagneticPairs={biomagneticPairs} />}
               {currentStep === Step.SCANNING_LEVEL_I && <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelINotes} setNotes={setLevelINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_RESERVATORIOS)} biomagneticPairs={biomagneticPairs} />}

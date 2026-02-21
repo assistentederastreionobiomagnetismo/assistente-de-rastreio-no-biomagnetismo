@@ -73,12 +73,13 @@ export const dbService = {
         if (error) throw error;
     },
 
-    async deletePatient(id: string): Promise<void> {
+    async deletePatient(id: string, therapistUsername: string): Promise<void> {
         if (!supabase) return;
         const { error } = await supabase
             .from('patients')
             .delete()
-            .eq('id', id);
+            .eq('id', id)
+            .eq('therapist_username', therapistUsername);
         if (error) throw error;
     },
 
@@ -106,7 +107,7 @@ export const dbService = {
             .upsert({
                 id: session.id,
                 therapist_username: therapistUsername,
-                patient_id: session.patient.id, // Supondo que o paciente já tenha um ID UUID
+                patient_id: session.patient.id,
                 data: session,
                 start_time: session.startTime,
                 end_time: session.endTime
