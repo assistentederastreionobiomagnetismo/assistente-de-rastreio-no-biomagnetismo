@@ -343,4 +343,4 @@ const App: React.FC = () => {
 };
 
 export default App; // atualizando para ler variaveis
-// Redeploy para ativar chaves
+// Tentativa final para conectar banco
