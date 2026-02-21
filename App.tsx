@@ -297,14 +297,6 @@ const App: React.FC = () => {
 
         {appView === 'sessionWorkflow' && (
           <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden relative">
-            {currentUser?.username === 'Vbsjunior.Biomagnetismo' && (
-              <button
-                onClick={() => setAppView('dashboard')}
-                className="absolute top-6 right-6 z-20 px-4 py-2 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm border border-slate-200 flex items-center gap-2 print:hidden"
-              >
-                Voltar ao Painel
-              </button>
-            )}
             <div className="p-4 md:p-6 border-b border-slate-200 overflow-x-auto print:hidden">
               <nav aria-label="Progress">
                 <ol role="list" className="flex items-center min-w-[1000px]">
@@ -333,7 +325,7 @@ const App: React.FC = () => {
                 </ol>
               </nav>
             </div>
-            <main className="p-6 md:p-10">
+            <main className="p-6 md:p-10 relative">
               {currentStep === Step.PATIENT_INFO && <PatientForm patient={patient} setPatient={setPatient} onNext={nextStep} patientsList={patients} setPatientsList={setPatients} therapistUsername={currentUser!.username} />}
               {currentStep === Step.START_PROTOCOL && <StartProtocol data={protocolData} setData={setProtocolData} notes={protocolNotes} setNotes={setProtocolNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PATIENT_INFO)} patientName={patient.name} />}
               {currentStep === Step.SCANNING_RESERVATORIOS && <Scanning levelTitle="Reservatórios" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={reservatoriosNotes} setNotes={setReservatoriosNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.START_PROTOCOL)} biomagneticPairs={biomagneticPairs} />}
@@ -344,11 +336,22 @@ const App: React.FC = () => {
               {currentStep === Step.EMOTIONAL && <Emocional selectedEmotions={selectedEmotions} setSelectedEmotions={setSelectedEmotions} selectedSensations={selectedSensations} setSelectedSensations={setSelectedSensations} emotionsNotes={emotionsNotes} setEmotionsNotes={setEmotionsNotes} sensationsNotes={sensationsNotes} setSensationsNotes={setSensationsNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PHENOMENA)} />}
               {currentStep === Step.TREATMENT && <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.EMOTIONAL)} sessionType={protocolData.sessionType} />}
               {currentStep === Step.SUMMARY && <SessionSummary patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} emotions={selectedEmotions} sensations={selectedSensations} emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes} protocolNotes={protocolNotes} reservatoriosNotes={reservatoriosNotes} levelINotes={levelINotes} levelIINotes={levelIINotes} levelIIINotes={levelIIINotes} phenomenaNotes={phenomenaNotes} impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} onFinish={handleFinishSession} onBack={() => setCurrentStep(Step.TREATMENT)} />}
+
+              {currentUser?.username === 'Vbsjunior.Biomagnetismo' && (
+                <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 print:hidden">
+                  <button
+                    onClick={() => setAppView('dashboard')}
+                    className="px-6 py-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm border border-slate-200"
+                  >
+                    Voltar ao Painel
+                  </button>
+                </div>
+              )}
             </main>
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 
