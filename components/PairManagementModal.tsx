@@ -258,20 +258,41 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Imagem Técnica de Referência</label>
-                    <div className="mt-2 flex items-center gap-4 p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50">
-                      {pair.imageUrl ? (
-                        <div className="relative">
-                          <img src={pair.imageUrl} alt="Preview" className="w-32 h-32 rounded-xl object-cover shadow-xl border-4 border-white" />
-                          <button type="button" onClick={removeImage} className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-lg transition-all"><TrashIcon className="w-4 h-4" /></button>
+                    <div className="mt-2 grid grid-cols-1 md:grid-cols-12 gap-6 p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50">
+                      <div className="md:col-span-3 flex justify-center items-center">
+                        {pair.imageUrl ? (
+                          <div className="relative">
+                            <img src={pair.imageUrl} alt="Preview" className="w-32 h-32 rounded-xl object-cover shadow-xl border-4 border-white" />
+                            <button type="button" onClick={removeImage} className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-lg transition-all"><TrashIcon className="w-4 h-4" /></button>
+                          </div>
+                        ) : (
+                          <div className="w-32 h-32 bg-slate-200 rounded-xl flex items-center justify-center text-slate-400 text-[10px] font-black uppercase text-center p-2 tracking-widest">
+                            {isProcessingImage ? 'Otimizando...' : 'Sem Imagem'}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="md:col-span-9 flex flex-col gap-4">
+                        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                          <label htmlFor="image-url" className="block text-[9px] font-black text-teal-600 uppercase mb-2 tracking-widest">Link Externo (Google Drive, etc.)</label>
+                          <input
+                            type="text"
+                            id="image-url"
+                            name="imageUrl"
+                            value={pair.imageUrl}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:ring-2 focus:ring-teal-500 outline-none"
+                            placeholder="Cole o link da imagem aqui..."
+                          />
                         </div>
-                      ) : (
-                        <div className="w-32 h-32 bg-slate-200 rounded-xl flex items-center justify-center text-slate-400 text-[10px] font-black uppercase text-center p-2 tracking-widest">
-                          {isProcessingImage ? 'Otimizando...' : 'Sem Imagem'}
+
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1">
+                            <label className="block text-[9px] font-black text-teal-600 uppercase mb-2 tracking-widest">Ou escolha um arquivo</label>
+                            <input id="image-upload" type="file" accept="image/*" onChange={handleImageChange} className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-teal-600 file:text-white hover:file:bg-teal-700 cursor-pointer" />
+                            <p className="mt-2 text-[10px] text-slate-400 font-bold uppercase">PNG ou JPG até 2MB.</p>
+                          </div>
                         </div>
-                      )}
-                      <div className="flex-1">
-                        <input id="image-upload" type="file" accept="image/*" onChange={handleImageChange} className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-teal-600 file:text-white hover:file:bg-teal-700 cursor-pointer" />
-                        <p className="mt-2 text-[10px] text-slate-400 font-bold uppercase">PNG ou JPG. Upload direto para o servidor.</p>
                       </div>
                     </div>
                   </div>
