@@ -14,51 +14,10 @@ import ChangePassword from './components/ChangePassword';
 import SessionDetailModal from './components/SessionDetailModal';
 import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon, BrainIcon, SuccessIcon, ReportIcon, CheckIcon } from './components/icons/Icons';
 import { BIOMAGNETIC_PAIRS } from './constants';
+import { dbService } from './services/dbService';
 
-// --- DATABASE UTILS ---
-const DB_NAME = 'BiomagDB_v20';
-const DB_VERSION = 1;
-const STORES = {
-  PAIRS: 'pairs',
-  USERS: 'users',
-  SESSIONS: 'sessions',
-  PATIENTS: 'patients',
-  CONFIG: 'config'
-};
-
-const openDB = (): Promise<IDBDatabase> => {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = (event: any) => {
-      const db = request.result;
-      Object.values(STORES).forEach(store => {
-        if (!db.objectStoreNames.contains(store)) db.createObjectStore(store);
-      });
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-};
-
-const dbSave = async (storeName: string, key: string, data: any) => {
-  const db = await openDB();
-  return new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(storeName, 'readwrite');
-    tx.objectStore(storeName).put(data, key);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-};
-
-const dbLoad = async (storeName: string, key: string): Promise<any> => {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, 'readonly');
-    const request = tx.objectStore(storeName).get(key);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-};
+// --- SUPABASE MIGRATION IN PROGRESS ---
+// IndexedDB utils will be removed after full verification.
 
 enum Step {
   PATIENT_INFO,
@@ -122,42 +81,20 @@ const App: React.FC = () => {
   useEffect(() => {
     const initAppData = async () => {
       try {
-        const storedSync = await dbLoad(STORES.CONFIG, 'lastSync') || '';
-        setLastSyncDate(storedSync);
+        // Carrega pares do Supabase
+        let localPairs: BiomagneticPair[] = await dbService.getPairs();
 
-        let localPairs: BiomagneticPair[] = await dbLoad(STORES.PAIRS, 'masterList') || [];
-        const pairMap = new Map<number, BiomagneticPair>();
-        
-        localPairs.forEach((p) => {
-            if (p.order !== undefined) pairMap.set(p.order, p);
-        });
-
-        BIOMAGNETIC_PAIRS.forEach(masterPair => {
-            if (masterPair.order === undefined) return;
-            if (masterPair.isDefinitive === true) {
-                pairMap.set(masterPair.order, masterPair);
-            } else if (!pairMap.has(masterPair.order)) {
-                pairMap.set(masterPair.order, masterPair);
-            }
-        });
-        
-        const mergedPairsList = Array.from(pairMap.values());
-        await dbSave(STORES.PAIRS, 'masterList', mergedPairsList);
-        setBiomagneticPairs(mergedPairsList);
-
-        let users = await dbLoad(STORES.USERS, 'list') || [];
-        const adminExists = users.some((u: any) => u.username.toLowerCase() === 'vbsjunior.biomagnetismo');
-        if (!adminExists) {
-          users.push({
-            username: 'Vbsjunior.Biomagnetismo',
-            password: '@Va135482',
-            fullName: 'Administrador Mestre',
-            isApproved: true,
-            approvalType: 'permanent'
-          });
+        if (localPairs.length === 0) {
+          // Se o banco estiver vazio, inicializa com os pares constantes
+          localPairs = BIOMAGNETIC_PAIRS.filter(p => p.order !== undefined);
+          await dbService.savePairs(localPairs);
         }
+
+        setBiomagneticPairs(localPairs);
+
+        // Carrega usuários para login (inicialmente necessário para o componente Login)
+        const users = await dbService.getUsers();
         setAllUsers(users);
-        await dbSave(STORES.USERS, 'list', users);
 
         setIsLoading(false);
       } catch (e) {
@@ -168,94 +105,41 @@ const App: React.FC = () => {
     initAppData();
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && biomagneticPairs.length > 0) {
-      dbSave(STORES.PAIRS, 'masterList', biomagneticPairs);
-    }
-  }, [biomagneticPairs, isLoading]);
-
-  useEffect(() => {
-    if (!isLoading && allUsers.length > 0) {
-      dbSave(STORES.USERS, 'list', allUsers);
-    }
-  }, [allUsers, isLoading]);
+  // Os efeitos de salvamento automático foram removidos para evitar inconsistências.
+  // O salvamento agora é feito explicitamente pelo dbService em ações do usuário.
 
   useEffect(() => {
     if (currentUser && !isLoading) {
       const loadUserBoundData = async () => {
-        const storedSessions = await dbLoad(STORES.SESSIONS, currentUser.username);
-        const storedPatients = await dbLoad(STORES.PATIENTS, currentUser.username);
-        
-        setSessions(storedSessions ? storedSessions.map((s:any) => ({
-            ...s, 
-            startTime: s.startTime ? new Date(s.startTime) : null, 
-            endTime: s.endTime ? new Date(s.endTime) : null
-        })) : []);
-        setPatients(storedPatients ? storedPatients : []);
+        const storedSessions = await dbService.getSessions(currentUser.username);
+        const storedPatients = await dbService.getPatients(currentUser.username);
+
+        setSessions(storedSessions);
+        setPatients(storedPatients);
       };
       loadUserBoundData();
     }
   }, [currentUser, isLoading]);
 
   const handleImportSync = async (syncCode: string): Promise<boolean> => {
-    try {
-        const code = syncCode.trim();
-        let decodedData: any;
-        try {
-            const binaryString = atob(code);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            try {
-                const stream = new Blob([bytes]).stream();
-                const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'));
-                const response = new Response(decompressedStream);
-                const buffer = await response.arrayBuffer();
-                const jsonStr = new TextDecoder().decode(buffer);
-                decodedData = JSON.parse(jsonStr);
-            } catch (decompError) {
-                const legacyStr = new TextDecoder().decode(bytes);
-                decodedData = JSON.parse(legacyStr);
-            }
-        } catch (atobError) {
-            console.error("Código de sincronização corrompido.");
-            return false;
-        }
-        
-        if (decodedData && typeof decodedData === 'object') {
-            if (decodedData.users) {
-              setAllUsers(decodedData.users);
-              await dbSave(STORES.USERS, 'list', decodedData.users);
-            }
-            if (decodedData.pairs) {
-                setBiomagneticPairs(decodedData.pairs);
-                await dbSave(STORES.PAIRS, 'masterList', decodedData.pairs);
-                const syncTime = new Date().toLocaleString('pt-BR');
-                setLastSyncDate(syncTime);
-                await dbSave(STORES.CONFIG, 'lastSync', syncTime);
-            }
-            return true;
-        } 
-    } catch (e) { 
-        console.error("Erro fatal na importação:", e); 
-    }
+    // Sincronização offline desativada em favor da persistência em nuvem (Supabase).
+    console.warn("Sincronização por código não é mais necessária com o Supabase.");
     return false;
   };
 
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
     const foundUser = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     if (!foundUser) return { success: false, message: 'Usuário ou senha inválidos.' };
-    
+
     if (foundUser.approvalExpiry) {
-        const expiry = new Date(foundUser.approvalExpiry);
-        if (expiry < new Date()) {
-            return { success: false, message: `Seu acesso expirou em ${expiry.toLocaleDateString('pt-BR')}. Entre em contato com o administrador.` };
-        }
+      const expiry = new Date(foundUser.approvalExpiry);
+      if (expiry < new Date()) {
+        return { success: false, message: `Seu acesso expirou em ${expiry.toLocaleDateString('pt-BR')}. Entre em contato com o administrador.` };
+      }
     }
 
     if (!foundUser.isApproved) return { success: false, message: 'Seu cadastro está bloqueado. Entre em contato com o administrador.' };
-    
+
     setIsAuthenticated(true);
     setCurrentUser(foundUser);
     setAppView(foundUser.requiresPasswordChange ? 'changePassword' : 'dashboard');
@@ -288,43 +172,49 @@ const App: React.FC = () => {
     if (currentStep < Step.SUMMARY) setCurrentStep(currentStep + 1);
   };
 
-  const handleFinishSession = () => {
+  const handleFinishSession = async () => {
     const newSession: Session = {
-        id: new Date().toISOString(),
-        patient,
-        protocolData,
-        pairs: selectedPairs,
-        phenomena,
-        emotions: selectedEmotions,
-        sensations: selectedSensations,
-        emotionsNotes,
-        sensationsNotes,
-        impactionTime,
-        notes: sessionNotes,
-        protocolNotes,
-        reservatoriosNotes,
-        levelINotes,
-        levelIINotes,
-        levelIIINotes,
-        phenomenaNotes,
-        startTime: sessionStartTime,
-        endTime: sessionEndTime
+      id: new Date().toISOString(),
+      patient,
+      protocolData,
+      pairs: selectedPairs,
+      phenomena,
+      emotions: selectedEmotions,
+      sensations: selectedSensations,
+      emotionsNotes,
+      sensationsNotes,
+      impactionTime,
+      notes: sessionNotes,
+      protocolNotes,
+      reservatoriosNotes,
+      levelINotes,
+      levelIINotes,
+      levelIIINotes,
+      phenomenaNotes,
+      startTime: sessionStartTime,
+      endTime: sessionEndTime
     };
-    const newSessions = [newSession, ...sessions];
-    setSessions(newSessions);
-    dbSave(STORES.SESSIONS, currentUser!.username, newSessions);
-    setAppView('dashboard');
-    setPatient({ name: '', mainComplaint: '' });
-    setSelectedPairs([]);
-    setCurrentStep(Step.PATIENT_INFO);
+
+    try {
+      await dbService.saveSession(currentUser!.username, newSession);
+      const newSessions = [newSession, ...sessions];
+      setSessions(newSessions);
+      setAppView('dashboard');
+      setPatient({ name: '', mainComplaint: '' });
+      setSelectedPairs([]);
+      setCurrentStep(Step.PATIENT_INFO);
+    } catch (error) {
+      console.error("Erro ao salvar sessão:", error);
+      alert("Erro ao salvar sessão no Supabase. Verifique sua conexão.");
+    }
   };
 
   const ValidityHeader = ({ user }: { user: User }) => {
     if (!user.approvalExpiry || user.approvalType === 'permanent') {
       return (
         <div className="flex flex-col items-center mt-1">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Validade</p>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Seu acesso é Vitalício</p>
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Validade</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Seu acesso é Vitalício</p>
         </div>
       );
     }
@@ -332,7 +222,7 @@ const App: React.FC = () => {
     const expiry = new Date(user.approvalExpiry);
     const diff = expiry.getTime() - currentTime.getTime();
     const formattedExpiry = expiry.toLocaleDateString('pt-BR') + ' às ' + expiry.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    
+
     if (diff <= 0) return <p className="text-[10px] font-black text-red-600 uppercase tracking-widest mt-1">Seu acesso expirou em {formattedExpiry}.</p>;
 
     const minutesRemaining = diff / (1000 * 60);
@@ -340,7 +230,7 @@ const App: React.FC = () => {
 
     const isTest = user.approvalType === '5min';
     const isStandardTerm = ['1month', '3months', '6months', '1year'].includes(user.approvalType || '');
-    
+
     const isUrgent = (isTest && minutesRemaining <= 2) || (isStandardTerm && daysRemaining <= 5);
 
     return (
@@ -354,7 +244,7 @@ const App: React.FC = () => {
   };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-100 font-bold text-teal-600">Carregando Banco de Dados...</div>;
-  if (!isAuthenticated) return <Login onLogin={handleTherapistLogin} onRequestReset={() => ({success: false, message: ''})} onImportSync={handleImportSync} />;
+  if (!isAuthenticated) return <Login onLogin={handleTherapistLogin} onRequestReset={() => ({ success: false, message: '' })} onImportSync={handleImportSync} />;
   if (appView === 'changePassword') return <ChangePassword onUpdate={handleUpdatePassword} onLogout={handleLogout} />;
 
   return (
@@ -370,16 +260,16 @@ const App: React.FC = () => {
             <p className="text-slate-600 text-sm font-medium">Terapeuta: <span className="text-lg font-black text-slate-800 uppercase">{currentUser?.fullName || currentUser?.username}</span></p>
             {currentUser && <ValidityHeader user={currentUser} />}
             {lastSyncDate && (
-                <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 bg-white border border-teal-100 rounded-full shadow-sm">
-                    <CheckIcon className="w-3 h-3 text-teal-600" />
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Base Sincronizada</span>
-                </div>
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 bg-white border border-teal-100 rounded-full shadow-sm">
+                <CheckIcon className="w-3 h-3 text-teal-600" />
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Base Sincronizada</span>
+              </div>
             )}
           </div>
         </header>
-        
+
         {appView === 'dashboard' && (
-          <Dashboard 
+          <Dashboard
             currentUser={currentUser}
             onStartNewSession={() => { setSessionStartTime(new Date()); setAppView('sessionWorkflow'); }}
             sessions={sessions}
@@ -392,16 +282,16 @@ const App: React.FC = () => {
             lastSyncDate={lastSyncDate}
           />
         )}
-        
+
         {appView === 'userManager' && (
-          <UserManager 
-            users={allUsers} 
-            setUsers={setAllUsers} 
+          <UserManager
+            users={allUsers}
+            setUsers={setAllUsers}
             biomagneticPairs={biomagneticPairs}
-            onBack={() => setAppView('dashboard')} 
+            onBack={() => setAppView('dashboard')}
           />
         )}
-        
+
         {appView === 'sessionWorkflow' && (
           <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden relative">
             <div className="p-4 md:p-6 border-b border-slate-200 overflow-x-auto print:hidden">
