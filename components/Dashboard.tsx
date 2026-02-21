@@ -16,6 +16,8 @@ interface DashboardProps {
   currentUser: User | null;
   onManageUsers: () => void;
   onViewSessionDetail: (session: Session) => void;
+  onEditSession: (session: Session) => void;
+  onDeleteSession: (id: string, e: React.MouseEvent) => void;
   lastSyncDate: string;
 }
 
@@ -29,6 +31,8 @@ const Dashboard: React.FC<DashboardProps> = ({
   currentUser,
   onManageUsers,
   onViewSessionDetail,
+  onEditSession,
+  onDeleteSession,
   lastSyncDate
 }) => {
   const [view, setView] = useState<'main' | 'pairManagement' | 'patientManagement'>('main');
@@ -107,7 +111,12 @@ const Dashboard: React.FC<DashboardProps> = ({
           )}
         </div>
 
-        <SessionHistory sessions={sessions} onViewDetail={onViewSessionDetail} />
+        <SessionHistory
+          sessions={sessions}
+          onViewDetail={onViewSessionDetail}
+          onEdit={onEditSession}
+          onDelete={onDeleteSession}
+        />
       </div>
     </div>
   );

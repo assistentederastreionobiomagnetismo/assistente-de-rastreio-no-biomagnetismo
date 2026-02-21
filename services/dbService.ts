@@ -117,6 +117,16 @@ export const dbService = {
         if (error) throw error;
     },
 
+    async deleteSession(id: string, therapistUsername: string): Promise<void> {
+        if (!supabase) return;
+        const { error } = await supabase
+            .from('sessions')
+            .delete()
+            .eq('id', id)
+            .eq('therapist_username', therapistUsername);
+        if (error) throw error;
+    },
+
     // Biomagnetic Pairs
     async getPairs(): Promise<BiomagneticPair[]> {
         if (!supabase) return [];

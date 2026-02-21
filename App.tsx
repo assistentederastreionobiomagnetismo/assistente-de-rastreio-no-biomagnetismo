@@ -218,6 +218,49 @@ const App: React.FC = () => {
     }
   };
 
+  const handleDeleteSession = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!currentUser) return;
+    if (window.confirm('Tem certeza que deseja excluir este atendimento? Esta ação é irreversível.')) {
+      try {
+        await dbService.deleteSession(id, currentUser.username);
+        setSessions(prev => prev.filter(s => s.id !== id));
+      } catch (error) {
+        console.error("Erro ao excluir sessão:", error);
+        alert("Erro ao excluir sessão no banco de dados.");
+      }
+    }
+  };
+
+  const handleEditSession = (session: Session) => {
+    // Carregar dados da sessão no estado global
+    setPatient(session.patient);
+    setProtocolData(session.protocolData || { protocolType: 'completo', sessionType: 'presencial' });
+    setSelectedPairs(session.pairs || []);
+    setPhenomena(session.phenomena || {
+      torre: false, cavidade: false, inversao: false, katar: false,
+      malignidade: false, reservatorio: false, mutacao: false, transformacao: false
+    });
+    setSelectedEmotions(session.emotions || []);
+    setSelectedSensations(session.sensations || []);
+    setEmotionsNotes(session.emotionsNotes || '');
+    setSensationsNotes(session.sensationsNotes || '');
+    setImpactionTime(session.impactionTime || 15);
+    setSessionNotes(session.notes || '');
+    setProtocolNotes(session.protocolNotes || '');
+    setReservatoriosNotes(session.reservatoriosNotes || '');
+    setLevelINotes(session.levelINotes || '');
+    setLevelIINotes(session.levelIINotes || '');
+    setLevelIIINotes(session.levelIIINotes || '');
+    setPhenomenaNotes(session.phenomenaNotes || '');
+    setSessionStartTime(session.startTime || new Date());
+    setSessionEndTime(session.endTime || null);
+
+    // Mudar para o fluxo de sessão
+    setAppView('sessionWorkflow');
+    setCurrentStep(Step.PATIENT_INFO);
+  };
+
   const ValidityHeader = ({ user }: { user: User }) => {
     if (!user.approvalExpiry || user.approvalType === 'permanent') {
       return (
@@ -282,6 +325,8 @@ const App: React.FC = () => {
             setBiomagneticPairs={setBiomagneticPairs}
             onManageUsers={() => setAppView('userManager')}
             onViewSessionDetail={(s) => setViewingHistoricalSession(s)}
+            onEditSession={handleEditSession}
+            onDeleteSession={handleDeleteSession}
             lastSyncDate={lastSyncDate}
           />
         )}

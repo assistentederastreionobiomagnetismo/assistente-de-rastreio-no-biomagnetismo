@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Session } from '../types';
-import { InfoIcon } from './icons/Icons';
+import { InfoIcon, TrashIcon, PencilIcon } from './icons/Icons';
 
 interface SessionHistoryProps {
   sessions: Session[];
@@ -33,9 +33,9 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ sessions, onViewDetail 
                       {session.startTime ? new Date(session.startTime).toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' }) : 'Data Indisponível'}
                     </p>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0">
-                    <button 
+                    <button
                       onClick={() => onViewDetail(session)}
                       className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm font-bold shadow-sm"
                     >
