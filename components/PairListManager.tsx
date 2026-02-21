@@ -57,8 +57,10 @@ const PairListManager: React.FC<PairListManagerProps> = ({
         const pairToDelete = biomagneticPairs.find(p => p.order === order);
         if (window.confirm(`Tem certeza que deseja EXCLUIR permanentemente o par "${pairToDelete?.name}" da base master?`)) {
             try {
+                if (pairToDelete?.id) {
+                    await dbService.deletePair(pairToDelete.id);
+                }
                 const newList = biomagneticPairs.filter(p => p.order !== order);
-                await dbService.savePairs(newList); // Re-salva a lista sem o par. Nota: Seria melhor deletar especificamente, mas savePairs sobrescreve.
                 setBiomagneticPairs(newList);
                 alert("Par removido com sucesso do Supabase!");
             } catch (error) {

@@ -136,6 +136,7 @@ export const dbService = {
         const { error } = await supabase
             .from('biomagnetic_pairs')
             .upsert(pairs.map(p => ({
+                id: p.id,
                 name: p.name,
                 point1: p.point1,
                 point2: p.point2,
@@ -147,6 +148,15 @@ export const dbService = {
                 order: p.order,
                 details: p.details
             })));
+        if (error) throw error;
+    },
+
+    async deletePair(id: string): Promise<void> {
+        if (!supabase) return;
+        const { error } = await supabase
+            .from('biomagnetic_pairs')
+            .delete()
+            .eq('id', id);
         if (error) throw error;
     },
 

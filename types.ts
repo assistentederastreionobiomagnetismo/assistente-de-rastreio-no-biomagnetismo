@@ -15,6 +15,7 @@ export interface PairDetail {
 }
 
 export interface BiomagneticPair {
+  id?: string;
   name: string;
   point1: string;
   point2: string;
@@ -39,7 +40,7 @@ export type ApprovalPeriod = '5min' | '1month' | '3months' | '6months' | '1year'
 
 export interface User {
   username: string;
-  password: string; 
+  password: string;
   fullName?: string;
   email?: string;
   whatsapp?: string;
@@ -58,23 +59,23 @@ export interface ProtocolData {
 }
 
 export interface Session {
-    id: string;
-    patient: Patient;
-    protocolData?: ProtocolData;
-    pairs: BiomagneticPair[];
-    phenomena?: PhenomenaData;
-    emotions?: string[];
-    sensations?: string[];
-    emotionsNotes?: string;
-    sensationsNotes?: string;
-    impactionTime?: string;
-    notes: string;
-    protocolNotes?: string;
-    reservatoriosNotes?: string;
-    levelINotes?: string;
-    levelIINotes?: string;
-    levelIIINotes?: string;
-    phenomenaNotes?: string;
-    startTime: Date | null;
-    endTime: Date | null;
+  id: string;
+  patient: Patient;
+  protocolData?: ProtocolData;
+  pairs: BiomagneticPair[];
+  phenomena?: PhenomenaData;
+  emotions?: string[];
+  sensations?: string[];
+  emotionsNotes?: string;
+  sensationsNotes?: string;
+  impactionTime?: string;
+  notes: string;
+  protocolNotes?: string;
+  reservatoriosNotes?: string;
+  levelINotes?: string;
+  levelIINotes?: string;
+  levelIIINotes?: string;
+  phenomenaNotes?: string;
+  startTime: Date | null;
+  endTime: Date | null;
 }
