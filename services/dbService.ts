@@ -4,6 +4,7 @@ import { Patient, Session, BiomagneticPair, User } from '../types';
 export const dbService = {
     // Profiles / Auth
     async getUsers(): Promise<User[]> {
+        if (!supabase) return [];
         const { data, error } = await supabase
             .from('profiles')
             .select('*');
@@ -20,6 +21,7 @@ export const dbService = {
     },
 
     async updateUser(user: User): Promise<void> {
+        if (!supabase) return;
         const { error } = await supabase
             .from('profiles')
             .upsert({
@@ -35,6 +37,7 @@ export const dbService = {
     },
 
     async deleteUser(username: string): Promise<void> {
+        if (!supabase) return;
         const { error } = await supabase
             .from('profiles')
             .delete()
@@ -44,6 +47,7 @@ export const dbService = {
 
     // Patients
     async getPatients(therapistUsername: string): Promise<Patient[]> {
+        if (!supabase) return [];
         const { data, error } = await supabase
             .from('patients')
             .select('*')
@@ -53,6 +57,7 @@ export const dbService = {
     },
 
     async savePatient(therapistUsername: string, patient: Patient): Promise<void> {
+        if (!supabase) return;
         const { error } = await supabase
             .from('patients')
             .upsert({
@@ -68,6 +73,7 @@ export const dbService = {
     },
 
     async deletePatient(id: string): Promise<void> {
+        if (!supabase) return;
         const { error } = await supabase
             .from('patients')
             .delete()
@@ -77,6 +83,7 @@ export const dbService = {
 
     // Sessions
     async getSessions(therapistUsername: string): Promise<Session[]> {
+        if (!supabase) return [];
         const { data, error } = await supabase
             .from('sessions')
             .select('*')
@@ -92,6 +99,7 @@ export const dbService = {
     },
 
     async saveSession(therapistUsername: string, session: Session): Promise<void> {
+        if (!supabase) return;
         const { error } = await supabase
             .from('sessions')
             .upsert({
@@ -107,6 +115,7 @@ export const dbService = {
 
     // Biomagnetic Pairs
     async getPairs(): Promise<BiomagneticPair[]> {
+        if (!supabase) return [];
         const { data, error } = await supabase
             .from('biomagnetic_pairs')
             .select('*')
@@ -116,6 +125,7 @@ export const dbService = {
     },
 
     async savePairs(pairs: BiomagneticPair[]): Promise<void> {
+        if (!supabase) return;
         const { error } = await supabase
             .from('biomagnetic_pairs')
             .upsert(pairs.map(p => ({
