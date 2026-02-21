@@ -94,6 +94,7 @@ const App: React.FC = () => {
 
         // Carrega usuários para login (inicialmente necessário para o componente Login)
         const users = await dbService.getUsers();
+        console.log("Usuários carregados:", users.length);
         setAllUsers(users);
 
         setIsLoading(false);
@@ -244,7 +245,7 @@ const App: React.FC = () => {
   };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-100 font-bold text-teal-600">Carregando Banco de Dados...</div>;
-  if (!isAuthenticated) return <Login onLogin={handleTherapistLogin} onRequestReset={() => ({ success: false, message: '' })} onImportSync={handleImportSync} />;
+  if (!isAuthenticated) return <Login onLogin={handleTherapistLogin} onRequestReset={() => ({ success: false, message: '' })} onImportSync={handleImportSync} debugUserCount={allUsers.length} />;
   if (appView === 'changePassword') return <ChangePassword onUpdate={handleUpdatePassword} onLogout={handleLogout} />;
 
   return (
