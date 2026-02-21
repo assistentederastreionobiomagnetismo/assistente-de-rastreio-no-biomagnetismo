@@ -149,7 +149,7 @@ export const dbService = {
                 level: p.level,
                 order: p.order,
                 details: p.details
-            })), { onConflict: 'name' });
+            })), { onConflict: 'id' });
         if (error) throw error;
     },
 

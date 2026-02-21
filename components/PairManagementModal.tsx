@@ -145,14 +145,6 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
       return;
     }
 
-    const anotherPairHasSameName = existingPairs.some(
-      p => p.name.trim().toLowerCase() === pair.name.trim().toLowerCase() && p.order !== originalOrder
-    );
-
-    if (anotherPairHasSameName) {
-      setError('Já existe outro par com este nome. Apenas o mesmo par pode ter o mesmo nome.');
-      return;
-    }
 
     onSave(pair, originalOrder);
     onClose();
