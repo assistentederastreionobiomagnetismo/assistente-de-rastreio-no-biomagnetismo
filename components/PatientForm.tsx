@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Patient } from '../types';
-import { SearchIcon, UserIcon, PlusIcon } from './icons/Icons';
+import { SearchIcon, UserIcon, PlusIcon, TrashIcon, PencilIcon } from './icons/Icons';
 import { dbService } from '../services/dbService';
 
 interface PatientFormProps {
@@ -109,26 +109,55 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
     setShowDropdown(true);
   };
 
+  const handleEditInSearch = (p: Patient, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setNewPatientData(p);
+    setIsRegisterModalOpen(true);
+    setShowDropdown(false);
+  };
+
+  const handleDeleteInSearch = async (id: string | undefined, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!id) return;
+    if (window.confirm('Tem certeza que deseja excluir este paciente? Esta ação removerá o cadastro permanentemente.')) {
+      try {
+        await dbService.deletePatient(id, therapistUsername);
+        setPatientsList(prev => prev.filter(p => p.id !== id));
+        if (patient.id === id) {
+          setPatient({ name: '', birthDate: '', email: '', phone: '', mainComplaint: '' });
+          setSearchTerm('');
+        }
+        setShowDropdown(false);
+      } catch (error) {
+        console.error("Erro ao excluir paciente:", error);
+        alert("Erro ao excluir paciente no banco de dados.");
+      }
+    }
+  };
+
   const handleRegisterNewPatient = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newId = Date.now().toString();
-    const createdPatient = { ...newPatientData, id: newId };
+    const isEditing = !!newPatientData.id;
+    const patientToSave = {
+      ...newPatientData,
+      id: newPatientData.id || Date.now().toString(),
+      age: calculateAge(newPatientData.birthDate || '')
+    };
 
     try {
-      // Salvar no Supabase IMEDIATAMENTE ao cadastrar novo paciente
-      await dbService.savePatient(therapistUsername, createdPatient);
+      await dbService.savePatient(therapistUsername, patientToSave);
 
-      // Update global list
-      setPatientsList(prev => [...prev, createdPatient]);
+      if (isEditing) {
+        setPatientsList(prev => prev.map(p => p.id === patientToSave.id ? patientToSave : p));
+      } else {
+        setPatientsList(prev => [...prev, patientToSave]);
+      }
 
-      // Select for current session
-      selectExistingPatient(createdPatient);
-
-      // Close modal and reset
+      selectExistingPatient(patientToSave);
       setIsRegisterModalOpen(false);
       setNewPatientData({ name: '', birthDate: '', email: '', phone: '', mainComplaint: '' });
     } catch (error) {
-      console.error("Erro ao cadastrar novo paciente:", error);
+      console.error("Erro ao salvar paciente:", error);
       alert("Erro ao salvar paciente no banco de dados.");
     }
   };
@@ -143,7 +172,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
       {isRegisterModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-60 z-[60] flex justify-center items-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-fade-in">
-            <h3 className="text-xl font-bold text-teal-700 mb-6">Cadastrar Novo Paciente</h3>
+            <h3 className="text-xl font-bold text-teal-700 mb-6">{newPatientData.id ? 'Editar Paciente' : 'Cadastrar Novo Paciente'}</h3>
             <form onSubmit={handleRegisterNewPatient} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-600">Nome Completo</label>
@@ -237,12 +266,28 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
                 <div
                   key={p.id || idx}
                   onClick={() => selectExistingPatient(p)}
-                  className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-teal-50 text-slate-900"
+                  className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-teal-50 text-slate-900 flex items-center justify-between group"
                 >
                   <div className="flex items-center">
-                    <UserIcon className="h-4 w-4 mr-2 text-slate-400" />
+                    <UserIcon className="h-4 w-4 mr-2 text-slate-400 group-hover:text-teal-500 transition-colors" />
                     <span className="font-medium">{p.name}</span>
                     <span className="ml-2 text-xs text-slate-400">{p.phone}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={(e) => handleEditInSearch(p, e)}
+                      className="p-1 text-blue-500 hover:bg-blue-100 rounded transition-all"
+                      title="Editar"
+                    >
+                      <PencilIcon className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteInSearch(p.id, e)}
+                      className="p-1 text-red-500 hover:bg-red-100 rounded transition-all"
+                      title="Excluir"
+                    >
+                      <TrashIcon className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
               ))}
