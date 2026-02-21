@@ -354,4 +354,4 @@ const App: React.FC = () => {
 };
 
 export default App; // atualizando para ler variaveis
-// Tentativa final para conectar banco
+// Tentativa final para conectar banco.
