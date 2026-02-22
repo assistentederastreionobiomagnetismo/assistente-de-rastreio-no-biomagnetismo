@@ -95,6 +95,7 @@ const App: React.FC = () => {
 
         // Carregar sessão persistente
         const savedUser = localStorage.getItem('biomagnetismo_user');
+        let authenticatedUser: User | null = null;
         if (savedUser) {
           try {
             const user = JSON.parse(savedUser) as User;
@@ -102,22 +103,59 @@ const App: React.FC = () => {
             if (user.approvalExpiry) {
               const expiry = new Date(user.approvalExpiry);
               if (expiry > new Date()) {
-                setIsAuthenticated(true);
-                setCurrentUser(user);
-                if (user.requiresPasswordChange) setAppView('changePassword');
+                authenticatedUser = user;
               } else {
                 localStorage.removeItem('biomagnetismo_user');
+                localStorage.removeItem('biomagnetismo_active_session');
               }
             } else {
               // Sem data de expiração ( Vitalício )
-              setIsAuthenticated(true);
-              setCurrentUser(user);
-              if (user.requiresPasswordChange) setAppView('changePassword');
+              authenticatedUser = user;
             }
           } catch (e) {
             console.error("Erro ao recuperar sessão do localStorage:", e);
             localStorage.removeItem('biomagnetismo_user');
           }
+        }
+
+        if (authenticatedUser) {
+          setIsAuthenticated(true);
+          setCurrentUser(authenticatedUser);
+
+          // Tentar recuperar atendimento em curso
+          const savedActiveSession = localStorage.getItem('biomagnetismo_active_session');
+          if (savedActiveSession) {
+            try {
+              const data = JSON.parse(savedActiveSession);
+              if (data.appView === 'sessionWorkflow') {
+                setCurrentStep(data.currentStep);
+                setPatient(data.patient);
+                setProtocolData(data.protocolData);
+                setSelectedPairs(data.selectedPairs);
+                setPhenomena(data.phenomena);
+                setSelectedEmotions(data.selectedEmotions);
+                setSelectedSensations(data.selectedSensations);
+                setEmotionsNotes(data.emotionsNotes);
+                setSensationsNotes(data.sensationsNotes);
+                setImpactionTime(data.impactionTime);
+                setSessionNotes(data.sessionNotes);
+                setProtocolNotes(data.protocolNotes);
+                setReservatoriosNotes(data.reservatoriosNotes);
+                setLevelINotes(data.levelINotes);
+                setLevelIINotes(data.levelIINotes);
+                setLevelIIINotes(data.levelIIINotes);
+                setPhenomenaNotes(data.phenomenaNotes);
+                setSessionStartTime(data.sessionStartTime ? new Date(data.sessionStartTime) : null);
+                setSessionEndTime(data.sessionEndTime ? new Date(data.sessionEndTime) : null);
+                setAppView('sessionWorkflow');
+              }
+            } catch (e) {
+              console.error("Erro ao recuperar atendimento ativo:", e);
+              localStorage.removeItem('biomagnetismo_active_session');
+            }
+          }
+
+          if (authenticatedUser.requiresPasswordChange) setAppView('changePassword');
         }
 
         // Carrega usuários para login (inicialmente necessário para o componente Login)
@@ -133,8 +171,39 @@ const App: React.FC = () => {
     initAppData();
   }, []);
 
-  // Os efeitos de salvamento automático foram removidos para evitar inconsistências.
-  // O salvamento agora é feito explicitamente pelo dbService em ações do usuário.
+  // Efeito de Auto-Save do Atendimento Ativo
+  useEffect(() => {
+    if (isAuthenticated && appView === 'sessionWorkflow') {
+      const activeSessionData = {
+        currentStep,
+        patient,
+        protocolData,
+        selectedPairs,
+        phenomena,
+        selectedEmotions,
+        selectedSensations,
+        emotionsNotes,
+        sensationsNotes,
+        impactionTime,
+        sessionNotes,
+        protocolNotes,
+        reservatoriosNotes,
+        levelINotes,
+        levelIINotes,
+        levelIIINotes,
+        phenomenaNotes,
+        sessionStartTime,
+        sessionEndTime,
+        appView
+      };
+      localStorage.setItem('biomagnetismo_active_session', JSON.stringify(activeSessionData));
+    }
+  }, [
+    isAuthenticated, appView, currentStep, patient, protocolData, selectedPairs,
+    phenomena, selectedEmotions, selectedSensations, emotionsNotes, sensationsNotes,
+    impactionTime, sessionNotes, protocolNotes, reservatoriosNotes, levelINotes,
+    levelIINotes, levelIIINotes, phenomenaNotes, sessionStartTime, sessionEndTime
+  ]);
 
   useEffect(() => {
     if (currentUser && !isLoading) {
@@ -196,6 +265,7 @@ const App: React.FC = () => {
     setIsAuthenticated(false);
     setCurrentUser(null);
     localStorage.removeItem('biomagnetismo_user');
+    localStorage.removeItem('biomagnetismo_active_session');
     setAppView('dashboard');
     setSessions([]);
     setPatients([]);
@@ -228,6 +298,7 @@ const App: React.FC = () => {
     setSessionStartTime(null);
     setSessionEndTime(null);
     setSessionKey(Date.now().toString()); // Força remontagem de todos os componentes de sessão
+    localStorage.removeItem('biomagnetismo_active_session');
   }, []);
 
   const jumpToStep = (step: Step) => {
