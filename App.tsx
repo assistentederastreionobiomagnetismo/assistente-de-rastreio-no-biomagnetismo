@@ -12,7 +12,7 @@ import Dashboard from './components/Dashboard';
 import UserManager from './components/UserManager';
 import ChangePassword from './components/ChangePassword';
 import SessionDetailModal from './components/SessionDetailModal';
-import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon, BrainIcon, SuccessIcon, ReportIcon, CheckIcon } from './components/icons/Icons';
+import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon, BrainIcon, SuccessIcon, ReportIcon, CheckIcon, DropletIcon, LayerOneIcon, LayerTwoIcon, LayerThreeIcon, HeartPulseIcon } from './components/icons/Icons';
 import { BIOMAGNETIC_PAIRS } from './constants';
 import { dbService } from './services/dbService';
 
@@ -533,29 +533,29 @@ const App: React.FC = () => {
 
         {appView === 'sessionWorkflow' && (
           <div key={sessionKey} className="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden relative">
-            <div className="p-4 md:p-6 border-b border-slate-200 overflow-x-auto print:hidden">
+            <div className="p-3 md:p-6 border-b border-slate-200 overflow-x-auto print:hidden">
               <nav aria-label="Progress">
-                <ol role="list" className="flex items-center min-w-[1000px]">
+                <ol role="list" className="flex items-center min-w-[720px] md:min-w-0">
                   {[
                     { name: 'Paciente', icon: <UserIcon />, step: Step.PATIENT_INFO },
                     { name: 'Início', icon: <InfoIcon />, step: Step.START_PROTOCOL },
-                    { name: 'Reserv.', icon: <ClipboardIcon />, step: Step.SCANNING_RESERVATORIOS },
-                    { name: 'Nível I', icon: <ClipboardIcon />, step: Step.SCANNING_LEVEL_I },
-                    { name: 'Nível II', icon: <ClipboardIcon />, step: Step.SCANNING_LEVEL_II },
-                    { name: 'Nível III', icon: <ClipboardIcon />, step: Step.SCANNING_LEVEL_III },
-                    { name: 'Fenômenos', icon: <SparklesIcon />, step: Step.PHENOMENA },
-                    { name: 'Emocionais', icon: <BrainIcon />, step: Step.EMOTIONAL },
+                    { name: 'Reserv.', icon: <DropletIcon />, step: Step.SCANNING_RESERVATORIOS },
+                    { name: 'Nível I', icon: <LayerOneIcon />, step: Step.SCANNING_LEVEL_I },
+                    { name: 'Nível II', icon: <LayerTwoIcon />, step: Step.SCANNING_LEVEL_II },
+                    { name: 'Nível III', icon: <LayerThreeIcon />, step: Step.SCANNING_LEVEL_III },
+                    { name: 'Fenôm.', icon: <SparklesIcon />, step: Step.PHENOMENA },
+                    { name: 'Emoc.', icon: <HeartPulseIcon />, step: Step.EMOTIONAL },
                     { name: 'Final', icon: <SuccessIcon />, step: Step.TREATMENT },
                     { name: 'Relatório', icon: <ReportIcon />, step: Step.SUMMARY }
                   ].map((s, idx) => (
                     <li key={s.name} className={`relative ${idx !== 9 ? 'flex-1' : ''}`}>
                       <button onClick={() => jumpToStep(s.step)} className="flex flex-col items-center text-sm w-full group">
-                        <span className={`flex h-10 w-10 items-center justify-center rounded-full z-10 transition-all duration-300 transform group-hover:scale-110 ${currentStep >= s.step ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-500'} ${currentStep === s.step ? 'ring-4 ring-teal-100 scale-110' : ''}`}>
-                          {React.cloneElement(s.icon as React.ReactElement<any>, { className: "w-6 h-6" })}
+                        <span className={`flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full z-10 transition-all duration-300 transform group-hover:scale-110 ${currentStep >= s.step ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-500'} ${currentStep === s.step ? 'ring-4 ring-teal-100 scale-110' : ''}`}>
+                          {React.cloneElement(s.icon as React.ReactElement<any>, { className: "w-5 h-5 md:w-6 md:h-6" })}
                         </span>
-                        <span className={`mt-2 text-[10px] font-bold ${currentStep >= s.step ? 'text-teal-600 font-bold' : 'text-slate-400'}`}>{s.name}</span>
+                        <span className={`mt-1 text-[9px] md:text-[10px] font-bold ${currentStep >= s.step ? 'text-teal-600 font-bold' : 'text-slate-400'}`}>{s.name}</span>
                       </button>
-                      {idx !== 9 && <div className="absolute inset-x-0 top-5 left-1/2 -z-0 h-0.5 w-full bg-slate-200" />}
+                      {idx !== 9 && <div className="absolute inset-x-0 top-4 md:top-5 left-1/2 -z-0 h-0.5 w-full bg-slate-200" />}
                     </li>
                   ))}
                 </ol>
