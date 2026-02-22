@@ -74,6 +74,46 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const handleLogout = useCallback(() => {
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    localStorage.removeItem('biomagnetismo_user');
+    localStorage.removeItem('biomagnetismo_active_session');
+    setAppView('dashboard');
+    setSessions([]);
+    setPatients([]);
+  }, []);
+
+  const resetSessionState = useCallback(() => {
+    setCurrentStep(Step.PATIENT_INFO);
+    setPatient({ name: '', mainComplaint: '' });
+    setProtocolData({ legResponse: '', antennaResponse: '', sessionType: '' });
+    setSelectedPairs([]);
+    setPhenomena({
+      vascularAccidents: [],
+      tumoralPhenomena: [],
+      tumoralGenesis: [],
+      traumas: [],
+      portalPairs: []
+    });
+    setSelectedEmotions([]);
+    setSelectedSensations([]);
+    setEmotionsNotes('');
+    setSensationsNotes('');
+    setImpactionTime('');
+    setSessionNotes('');
+    setProtocolNotes('');
+    setReservatoriosNotes('');
+    setLevelINotes('');
+    setLevelIINotes('');
+    setLevelIIINotes('');
+    setPhenomenaNotes('');
+    setSessionStartTime(null);
+    setSessionEndTime(null);
+    setSessionKey(Date.now().toString()); // Força remontagem de todos os componentes de sessão
+    localStorage.removeItem('biomagnetismo_active_session');
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 30000);
     return () => clearInterval(timer);
@@ -205,6 +245,21 @@ const App: React.FC = () => {
     levelIINotes, levelIIINotes, phenomenaNotes, sessionStartTime, sessionEndTime
   ]);
 
+  // Efeito para monitorar expiração de acesso + 5 minutos de carência
+  useEffect(() => {
+    if (isAuthenticated && currentUser && currentUser.approvalExpiry && currentUser.approvalType !== 'permanent') {
+      const expiry = new Date(currentUser.approvalExpiry);
+      const gracePeriodMs = 5 * 60 * 1000;
+      const logoutTimeLimit = expiry.getTime() + gracePeriodMs;
+
+      if (currentTime.getTime() >= logoutTimeLimit) {
+        console.warn("Acesso expirado há mais de 5 minutos. Logout automático realizado.");
+        handleLogout();
+        window.location.reload(); // Refresh automático solicitado pelo usuário
+      }
+    }
+  }, [currentTime, isAuthenticated, currentUser, handleLogout]);
+
   useEffect(() => {
     if (currentUser && !isLoading) {
       const loadUserBoundData = async () => {
@@ -261,45 +316,6 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setCurrentUser(null);
-    localStorage.removeItem('biomagnetismo_user');
-    localStorage.removeItem('biomagnetismo_active_session');
-    setAppView('dashboard');
-    setSessions([]);
-    setPatients([]);
-  };
-
-  const resetSessionState = useCallback(() => {
-    setCurrentStep(Step.PATIENT_INFO);
-    setPatient({ name: '', mainComplaint: '' });
-    setProtocolData({ legResponse: '', antennaResponse: '', sessionType: '' });
-    setSelectedPairs([]);
-    setPhenomena({
-      vascularAccidents: [],
-      tumoralPhenomena: [],
-      tumoralGenesis: [],
-      traumas: [],
-      portalPairs: []
-    });
-    setSelectedEmotions([]);
-    setSelectedSensations([]);
-    setEmotionsNotes('');
-    setSensationsNotes('');
-    setImpactionTime('');
-    setSessionNotes('');
-    setProtocolNotes('');
-    setReservatoriosNotes('');
-    setLevelINotes('');
-    setLevelIINotes('');
-    setLevelIIINotes('');
-    setPhenomenaNotes('');
-    setSessionStartTime(null);
-    setSessionEndTime(null);
-    setSessionKey(Date.now().toString()); // Força remontagem de todos os componentes de sessão
-    localStorage.removeItem('biomagnetismo_active_session');
-  }, []);
 
   const jumpToStep = (step: Step) => {
     if (step === Step.SUMMARY && currentStep < Step.TREATMENT) return;
@@ -404,9 +420,26 @@ const App: React.FC = () => {
 
     const expiry = new Date(user.approvalExpiry);
     const diff = expiry.getTime() - currentTime.getTime();
-    const formattedExpiry = expiry.toLocaleDateString('pt-BR') + ' às ' + expiry.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const formattedExpiryDay = expiry.toLocaleDateString('pt-BR');
+    const formattedExpiryTime = expiry.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-    if (diff <= 0) return <p className="text-[10px] font-black text-red-600 uppercase tracking-widest mt-1">Seu acesso expirou em {formattedExpiry}.</p>;
+    // Período de carência de 5 minutos solicitado
+    const gracePeriodMs = 5 * 60 * 1000;
+    const timeSinceExpiry = currentTime.getTime() - expiry.getTime();
+    const remainingGraceMs = gracePeriodMs - timeSinceExpiry;
+
+    if (diff <= 0) {
+      const minutesRemaining = Math.max(0, Math.ceil(remainingGraceMs / (1000 * 60)));
+      return (
+        <div className="flex flex-col items-center mt-1 bg-red-50 p-3 rounded-2xl border border-red-100 shadow-sm animate-pulse">
+          <p className="text-xs font-black text-red-600 uppercase tracking-widest">Acesso Expirado</p>
+          <p className="text-[11px] font-bold text-red-500 mt-1">
+            Logout automático em aproximadamente {minutesRemaining} minuto{minutesRemaining !== 1 ? 's' : ''}.
+          </p>
+          <p className="text-[9px] font-medium text-red-400 uppercase tracking-widest mt-1">Procure o administrador para revalidar agora.</p>
+        </div>
+      );
+    }
 
     const minutesRemaining = diff / (1000 * 60);
     const daysRemaining = diff / (1000 * 60 * 60 * 24);
@@ -420,7 +453,7 @@ const App: React.FC = () => {
       <div className="flex flex-col items-center mt-1">
         <p className={`text-xs font-bold uppercase tracking-widest ${isUrgent ? 'text-red-600' : 'text-slate-500'}`}>Validade</p>
         <p className={`text-sm font-black text-center max-w-xl ${isUrgent ? 'text-red-600 animate-pulse' : 'text-slate-500'}`}>
-          Seu acesso expira em {formattedExpiry}. {isUrgent && 'Por favor, procure o administrador para revalidar seu acesso.'}
+          Seu acesso expira em {formattedExpiryDay} às {formattedExpiryTime}. {isUrgent && 'Por favor, procure o administrador para revalidar seu acesso.'}
         </p>
       </div>
     );
