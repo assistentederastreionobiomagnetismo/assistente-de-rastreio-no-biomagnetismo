@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, BiomagneticPair, ApprovalPeriod } from '../types';
-import { TrashIcon, ClipboardIcon, WhatsAppIcon, UserIcon, PlusIcon, InfoIcon, CheckIcon } from './icons/Icons';
+import { TrashIcon, ClipboardIcon, WhatsAppIcon, UserIcon, PlusIcon, InfoIcon, CheckIcon, KeyIcon } from './icons/Icons';
 import { dbService } from '../services/dbService';
 
 interface UserManagerProps {
@@ -148,20 +148,17 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         }
     };
 
-    const shareInstructions = (user: User) => {
-        const appUrl = "https://assistente-de-rastreio-no-biomagnet.vercel.app";
-        const message = `Olá ${user.fullName}! Seu acesso ao aplicativo Assistente de Rastreios no Biomagnetismo foi liberado.\n\n👤 USUÁRIO: ${user.username}\n🔑 SENHA PROVISÓRIA: ${user.password}\n\nINSTRUÇÕES DE ACESSO:\n1. Abra o aplicativo pelo link abaixo.\n2. Clique em 'Sincronizar Dispositivo'.\n3. Cole o código que enviarei na próxima mensagem.\n4. Após o primeiro login, o sistema solicitará que você crie uma senha definitiva.\n\n🔗 LINK DO APP:\n${appUrl}\n\nCódigo sincronizador a seguir:`;
-
-        const phone = (user.whatsapp || "").replace(/\D/g, '');
-        if (!phone) { alert("WhatsApp não cadastrado para este terapeuta."); return; }
-        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-    };
-
-    const shareOnlyCode = async (user: User) => {
-        const code = await generateCompressedCode(users);
-        const phone = (user.whatsapp || "").replace(/\D/g, '');
-        if (!phone) { alert("WhatsApp não cadastrado para este terapeuta."); return; }
-        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(code)}`, '_blank');
+    const handleResetPassword = async (username: string, fullName: string) => {
+        const tempPassword = Math.random().toString(36).substring(2, 8).toUpperCase();
+        if (window.confirm(`Deseja resetar a senha de "${fullName}"? \n\nA nova senha temporária será: ${tempPassword}\n\nO terapeuta deverá alterá-la no próximo login.`)) {
+            try {
+                await dbService.resetUserPassword(username, tempPassword);
+                alert(`Senha de ${fullName} resetada com sucesso!\n\nSenha temporária: ${tempPassword}`);
+            } catch (error) {
+                console.error("Erro ao resetar senha:", error);
+                alert("Erro ao resetar senha no Supabase.");
+            }
+        }
     };
 
     const deleteUser = async (username: string) => {
@@ -300,7 +297,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                                 <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Terapeuta / Login</th>
                                 <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Status de Acesso</th>
                                 <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Validade / Alteração</th>
-                                <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Enviar Acesso (WhatsApp)</th>
+                                <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Ações de Gestão</th>
                                 <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Ações</th>
                             </tr>
                         </thead>
@@ -384,20 +381,12 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                                             {!isAdmin ? (
                                                 <div className="flex justify-center gap-3">
                                                     <button
-                                                        onClick={() => shareInstructions(user)}
-                                                        className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm flex flex-col items-center gap-1 group"
-                                                        title="Enviar Instruções via WhatsApp"
+                                                        onClick={() => handleResetPassword(user.username, user.fullName)}
+                                                        className="px-4 py-2 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-600 hover:text-white transition-all shadow-sm flex flex-col items-center gap-1 group"
+                                                        title="Resetar Senha de Acesso"
                                                     >
-                                                        <InfoIcon className="w-5 h-5" />
-                                                        <span className="text-[7px] font-black uppercase">Instruções</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={() => shareOnlyCode(user)}
-                                                        className="px-4 py-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all shadow-sm flex flex-col items-center gap-1"
-                                                        title="Enviar Apenas Código via WhatsApp"
-                                                    >
-                                                        <ClipboardIcon className="w-5 h-5" />
-                                                        <span className="text-[7px] font-black uppercase">Só Código</span>
+                                                        <KeyIcon className="w-5 h-5" />
+                                                        <span className="text-[7px] font-black uppercase">Resetar Senha</span>
                                                     </button>
                                                 </div>
                                             ) : (

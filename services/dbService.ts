@@ -49,6 +49,18 @@ export const dbService = {
         if (error) throw error;
     },
 
+    async resetUserPassword(username: string, tempPassword: string): Promise<void> {
+        if (!supabase) return;
+        const { error } = await supabase
+            .from('profiles')
+            .update({
+                password: tempPassword,
+                requires_password_change: true
+            })
+            .eq('username', username);
+        if (error) throw error;
+    },
+
     // Patients
     async getPatients(therapistUsername: string): Promise<Patient[]> {
         if (!supabase) return [];
