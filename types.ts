@@ -78,4 +78,5 @@ export interface Session {
   phenomenaNotes?: string;
   startTime: Date | null;
   endTime: Date | null;
+  editedAt?: string; // ISO date string — preenchido quando a sessão é editada
 }

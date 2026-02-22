@@ -30,10 +30,20 @@ const SessionHistory: React.FC<SessionHistoryProps> = ({ sessions, onViewDetail,
                       <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full uppercase font-bold">
                         {session.pairs.length} pares
                       </span>
+                      {session.editedAt && (
+                        <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full uppercase font-black border border-amber-200" title={`Editado em ${new Date(session.editedAt).toLocaleString('pt-BR')}`}>
+                          ✏ Editado
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-slate-500 font-medium">
                       {session.startTime ? new Date(session.startTime).toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' }) : 'Data Indisponível'}
                     </p>
+                    {session.editedAt && (
+                      <p className="text-xs text-amber-600 font-medium mt-0.5">
+                        Última edição: {new Date(session.editedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0">

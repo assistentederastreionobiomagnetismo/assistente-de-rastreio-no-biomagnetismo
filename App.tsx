@@ -73,6 +73,7 @@ const App: React.FC = () => {
   const [appView, setAppView] = useState<AppView>('dashboard');
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
 
   const handleLogout = useCallback(() => {
     setIsAuthenticated(false);
@@ -110,6 +111,7 @@ const App: React.FC = () => {
     setPhenomenaNotes('');
     setSessionStartTime(null);
     setSessionEndTime(null);
+    setEditingSessionId(null); // Limpar modo de edição
     setSessionKey(Date.now().toString()); // Força remontagem de todos os componentes de sessão
     localStorage.removeItem('biomagnetismo_active_session');
   }, []);
@@ -341,8 +343,9 @@ const App: React.FC = () => {
   };
 
   const handleFinishSession = async () => {
+    const isEditing = !!editingSessionId;
     const newSession: Session = {
-      id: new Date().toISOString(),
+      id: isEditing ? editingSessionId! : new Date().toISOString(),
       patient,
       protocolData,
       pairs: selectedPairs,
@@ -360,13 +363,21 @@ const App: React.FC = () => {
       levelIIINotes,
       phenomenaNotes,
       startTime: sessionStartTime,
-      endTime: sessionEndTime
+      endTime: sessionEndTime,
+      ...(isEditing ? { editedAt: new Date().toISOString() } : {})
     };
 
     try {
       await dbService.saveSession(currentUser!.username, newSession);
-      const newSessions = [newSession, ...sessions];
-      setSessions(newSessions);
+
+      if (isEditing) {
+        // Substituir a sessão existente no array (sem duplicar)
+        setSessions(prev => prev.map(s => s.id === editingSessionId ? newSession : s));
+      } else {
+        // Nova sessão: adicionar ao topo do histórico
+        setSessions(prev => [newSession, ...prev]);
+      }
+
       setAppView('dashboard');
       resetSessionState();
     } catch (error) {
@@ -390,6 +401,9 @@ const App: React.FC = () => {
   };
 
   const handleEditSession = (session: Session) => {
+    // Salvar o ID da sessão sendo editada para não criar duplicata
+    setEditingSessionId(session.id);
+
     // Carregar dados da sessão no estado global
     setPatient(session.patient);
     setProtocolData(session.protocolData || { legResponse: '', antennaResponse: '', sessionType: '' });
