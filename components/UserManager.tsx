@@ -149,11 +149,17 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
     };
 
     const handleResetPassword = async (username: string, fullName: string) => {
-        const tempPassword = Math.random().toString(36).substring(2, 8).toUpperCase();
-        if (window.confirm(`Deseja resetar a senha de "${fullName}"? \n\nA nova senha temporária será: ${tempPassword}\n\nO terapeuta deverá alterá-la no próximo login.`)) {
+        const generatedPassword = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const tempPassword = window.prompt(`Defina a senha provisória para "${fullName}":\n(Sugestão gerada abaixo)`, generatedPassword);
+
+        if (tempPassword === null) return; // Cancelado pelo usuário
+
+        const finalPassword = tempPassword.trim() || generatedPassword;
+
+        if (window.confirm(`Confirmar reset de senha para "${fullName}"?\n\nNova senha: ${finalPassword}\n\nO terapeuta deverá alterá-la no próximo login.`)) {
             try {
-                await dbService.resetUserPassword(username, tempPassword);
-                alert(`Senha de ${fullName} resetada com sucesso!\n\nSenha temporária: ${tempPassword}`);
+                await dbService.resetUserPassword(username, finalPassword);
+                alert(`Senha de ${fullName} resetada com sucesso!\n\nSenha provisória: ${finalPassword}`);
             } catch (error) {
                 console.error("Erro ao resetar senha:", error);
                 alert("Erro ao resetar senha no Supabase.");
