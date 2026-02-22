@@ -16,7 +16,9 @@ export const dbService = {
             isApproved: u.is_approved,
             approvalType: u.approval_type,
             approvalExpiry: u.approval_expiry,
-            requiresPasswordChange: u.requires_password_change
+            requiresPasswordChange: u.requires_password_change,
+            email: u.email,
+            whatsapp: u.whatsapp
         }));
     },
 
