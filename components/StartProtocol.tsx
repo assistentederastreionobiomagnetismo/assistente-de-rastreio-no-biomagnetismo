@@ -31,12 +31,12 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
         <h2 className="text-2xl font-bold text-slate-700 uppercase tracking-widest">
           {isDistancia ? 'PREPARAÇÃO PARA INICIAR O TRATAMENTO - SESSÃO A DISTÂNCIA' : 'PREPARAÇÃO PARA INICIAR O TRATAMENTO'}
         </h2>
-        
+
         <div className="mt-6 mb-2">
-            <p className="text-red-600 font-extrabold text-base uppercase tracking-tighter">IMPORTANTE!</p>
-            <p className="text-slate-600 text-sm max-w-2xl mx-auto font-medium leading-relaxed">
-              Antes de iniciar o tratamento, realizar a anamnese do paciente para identificar a(s) queixa(s), identificar se não se enquadra em nenhuma das contra-indicações ou se não possui nenhuma restrição ao tratamento.
-            </p>
+          <p className="text-red-600 font-extrabold text-base uppercase tracking-tighter">IMPORTANTE!</p>
+          <p className="text-slate-600 text-sm max-w-2xl mx-auto font-medium leading-relaxed">
+            Antes de iniciar o tratamento, realizar a anamnese do paciente para identificar a(s) queixa(s), identificar se não se enquadra em nenhuma das contra-indicações ou se não possui nenhuma restrição ao tratamento.
+          </p>
         </div>
 
         {/* Seleção de Tipo de Sessão */}
@@ -65,7 +65,7 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
 
       <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
         <div className="p-8 space-y-6 text-sm text-slate-700 leading-relaxed">
-          
+
           {/* ITEM 1 */}
           <div className="flex gap-4 items-start border-b pb-6">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">1</span>
@@ -73,12 +73,12 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
               <p className="mb-3">
                 Polarizar os 3 planos corporais (terapeuta e paciente) e em seguida fazer o risco no pé direito, transferindo para o pé esquerdo para obter o SIM.
               </p>
-              <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <span className="text-sm font-black text-teal-700 uppercase tracking-tight">Sim do paciente:</span>
+              <div className="flex flex-wrap items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <span className="text-sm font-black text-teal-700 uppercase tracking-tight w-full sm:w-auto">Sim do paciente:</span>
                 <label className="flex items-center gap-2 cursor-pointer group">
-                  <input 
-                    type="radio" 
-                    name="legResponse" 
+                  <input
+                    type="radio"
+                    name="legResponse"
                     value="Encurtado"
                     checked={data.legResponse === 'Encurtado'}
                     onChange={() => handleLegResponseChange('Encurtado')}
@@ -87,9 +87,9 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
                   <span className={`text-sm font-bold transition-colors ${data.legResponse === 'Encurtado' ? 'text-teal-700' : 'text-slate-500 group-hover:text-slate-700'}`}>Encurtado</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer group">
-                  <input 
-                    type="radio" 
-                    name="legResponse" 
+                  <input
+                    type="radio"
+                    name="legResponse"
                     value="Estendido"
                     checked={data.legResponse === 'Estendido'}
                     onChange={() => handleLegResponseChange('Estendido')}
@@ -115,14 +115,14 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
               <span className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">3</span>
               <div className="flex-1 space-y-4">
                 <p className="font-bold text-indigo-900 uppercase text-xs tracking-widest border-b border-indigo-200 pb-2">Protocolo de Conexão (Antena)</p>
-                
+
                 {/* CAIXAS DE SELEÇÃO SOLICITADAS NO ITEM 3 */}
-                <div className="flex items-center gap-6 p-4 bg-white rounded-xl border border-indigo-200 shadow-sm">
-                  <span className="text-sm font-black text-indigo-700 uppercase tracking-tight">Sim da Antena:</span>
+                <div className="flex flex-wrap items-center gap-4 p-4 bg-white rounded-xl border border-indigo-200 shadow-sm">
+                  <span className="text-sm font-black text-indigo-700 uppercase tracking-tight w-full sm:w-auto">Sim da Antena:</span>
                   <label className="flex items-center gap-2 cursor-pointer group">
-                    <input 
-                      type="radio" 
-                      name="antennaResponse" 
+                    <input
+                      type="radio"
+                      name="antennaResponse"
                       value="Encurtado"
                       checked={data.antennaResponse === 'Encurtado'}
                       onChange={() => handleAntennaResponseChange('Encurtado')}
@@ -131,9 +131,9 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
                     <span className={`text-sm font-bold transition-colors ${data.antennaResponse === 'Encurtado' ? 'text-indigo-800' : 'text-slate-500 group-hover:text-indigo-700'}`}>Encurtado</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer group">
-                    <input 
-                      type="radio" 
-                      name="antennaResponse" 
+                    <input
+                      type="radio"
+                      name="antennaResponse"
                       value="Estendido"
                       checked={data.antennaResponse === 'Estendido'}
                       onChange={() => handleAntennaResponseChange('Estendido')}
@@ -144,11 +144,11 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
                 </div>
 
                 <p className="text-indigo-900 leading-relaxed text-sm">
-                  <strong>Pedir permissão:</strong> Organismo, você aceita ser antena para <span className="bg-indigo-200 px-2 py-0.5 rounded font-black text-indigo-900">{patientName || 'O PACIENTE'}</span>? 
+                  <strong>Pedir permissão:</strong> Organismo, você aceita ser antena para <span className="bg-indigo-200 px-2 py-0.5 rounded font-black text-indigo-900">{patientName || 'O PACIENTE'}</span>?
                   Se a antena responder sim, dar o comando: <br />
                   <span className="italic font-medium text-indigo-700 block my-2">"Declaro então que, a partir de agora, você é o(a) {patientName || 'O PACIENTE'}!"</span>
                   Confirmar com o sim do organismo se a conexão aconteceu: <br />
-                  <span className="italic font-medium text-indigo-700">"Organismo, você é o(a) {patientName || 'O PACIENTE'}?"</span>. 
+                  <span className="italic font-medium text-indigo-700">"Organismo, você é o(a) {patientName || 'O PACIENTE'}?"</span>.
                   <br />Em caso positivo, dar continuidade à sessão.
                 </p>
                 <p className="text-red-600 font-black text-[10px] uppercase italic tracking-tighter pt-2 border-t border-indigo-100">A partir de agora, seguem-se os mesmos passos já descritos abaixo nos passos 4 até 10.</p>
@@ -208,7 +208,7 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
       {/* OBSERVAÇÕES DA PREPARAÇÃO */}
       <div className="max-w-4xl mx-auto">
         <label htmlFor="protocolNotes" className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-tight">Observações da Preparação</label>
-        <textarea 
+        <textarea
           id="protocolNotes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
