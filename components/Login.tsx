@@ -61,6 +61,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     value={username}
                     onChange={e => setUsername(e.target.value)}
                     className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-bold transition-all"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    autoComplete="username"
+                    spellCheck={false}
                     required
                   />
                 </div>
@@ -75,6 +79,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium transition-all"
+                    autoComplete="current-password"
+                    autoCorrect="off"
+                    autoCapitalize="none"
                     required
                   />
                 </div>
