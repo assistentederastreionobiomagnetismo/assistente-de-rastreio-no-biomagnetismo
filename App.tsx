@@ -171,6 +171,34 @@ const App: React.FC = () => {
     setPatients([]);
   };
 
+  const resetSessionState = useCallback(() => {
+    setCurrentStep(Step.PATIENT_INFO);
+    setPatient({ name: '', mainComplaint: '' });
+    setProtocolData({ legResponse: '', antennaResponse: '', sessionType: '' });
+    setSelectedPairs([]);
+    setPhenomena({
+      vascularAccidents: [],
+      tumoralPhenomena: [],
+      tumoralGenesis: [],
+      traumas: [],
+      portalPairs: []
+    });
+    setSelectedEmotions([]);
+    setSelectedSensations([]);
+    setEmotionsNotes('');
+    setSensationsNotes('');
+    setImpactionTime('');
+    setSessionNotes('');
+    setProtocolNotes('');
+    setReservatoriosNotes('');
+    setLevelINotes('');
+    setLevelIINotes('');
+    setLevelIIINotes('');
+    setPhenomenaNotes('');
+    setSessionStartTime(null);
+    setSessionEndTime(null);
+  }, []);
+
   const jumpToStep = (step: Step) => {
     if (step === Step.SUMMARY && currentStep < Step.TREATMENT) return;
     setCurrentStep(step);
@@ -209,9 +237,7 @@ const App: React.FC = () => {
       const newSessions = [newSession, ...sessions];
       setSessions(newSessions);
       setAppView('dashboard');
-      setPatient({ name: '', mainComplaint: '' });
-      setSelectedPairs([]);
-      setCurrentStep(Step.PATIENT_INFO);
+      resetSessionState();
     } catch (error) {
       console.error("Erro ao salvar sessão:", error);
       alert("Erro ao salvar sessão no Supabase. Verifique sua conexão.");
@@ -235,17 +261,20 @@ const App: React.FC = () => {
   const handleEditSession = (session: Session) => {
     // Carregar dados da sessão no estado global
     setPatient(session.patient);
-    setProtocolData(session.protocolData || { protocolType: 'completo', sessionType: 'presencial' });
+    setProtocolData(session.protocolData || { legResponse: '', antennaResponse: '', sessionType: '' });
     setSelectedPairs(session.pairs || []);
     setPhenomena(session.phenomena || {
-      torre: false, cavidade: false, inversao: false, katar: false,
-      malignidade: false, reservatorio: false, mutacao: false, transformacao: false
+      vascularAccidents: [],
+      tumoralPhenomena: [],
+      tumoralGenesis: [],
+      traumas: [],
+      portalPairs: []
     });
     setSelectedEmotions(session.emotions || []);
     setSelectedSensations(session.sensations || []);
     setEmotionsNotes(session.emotionsNotes || '');
     setSensationsNotes(session.sensationsNotes || '');
-    setImpactionTime(session.impactionTime || 15);
+    setImpactionTime(session.impactionTime || '');
     setSessionNotes(session.notes || '');
     setProtocolNotes(session.protocolNotes || '');
     setReservatoriosNotes(session.reservatoriosNotes || '');
@@ -253,8 +282,8 @@ const App: React.FC = () => {
     setLevelIINotes(session.levelIINotes || '');
     setLevelIIINotes(session.levelIIINotes || '');
     setPhenomenaNotes(session.phenomenaNotes || '');
-    setSessionStartTime(session.startTime || new Date());
-    setSessionEndTime(session.endTime || null);
+    setSessionStartTime(session.startTime ? new Date(session.startTime) : new Date());
+    setSessionEndTime(session.endTime ? new Date(session.endTime) : null);
 
     // Mudar para o fluxo de sessão
     setAppView('sessionWorkflow');
@@ -317,7 +346,7 @@ const App: React.FC = () => {
         {appView === 'dashboard' && (
           <Dashboard
             currentUser={currentUser}
-            onStartNewSession={() => { setSessionStartTime(new Date()); setAppView('sessionWorkflow'); }}
+            onStartNewSession={() => { resetSessionState(); setSessionStartTime(new Date()); setAppView('sessionWorkflow'); }}
             sessions={sessions}
             patients={patients}
             setPatients={setPatients}
@@ -385,7 +414,7 @@ const App: React.FC = () => {
               {currentStep === Step.PATIENT_INFO && (
                 <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 print:hidden">
                   <button
-                    onClick={() => setAppView('dashboard')}
+                    onClick={() => { resetSessionState(); setAppView('dashboard'); }}
                     className="px-6 py-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm border border-slate-200"
                   >
                     Voltar ao Painel
