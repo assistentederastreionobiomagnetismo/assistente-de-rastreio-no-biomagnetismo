@@ -60,6 +60,7 @@ const App: React.FC = () => {
   const [phenomenaNotes, setPhenomenaNotes] = useState<string>('');
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const [sessionEndTime, setSessionEndTime] = useState<Date | null>(null);
+  const [sessionKey, setSessionKey] = useState<string>(Date.now().toString());
 
   const [sessions, setSessions] = useState<Session[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -91,6 +92,33 @@ const App: React.FC = () => {
         }
 
         setBiomagneticPairs(localPairs);
+
+        // Carregar sessão persistente
+        const savedUser = localStorage.getItem('biomagnetismo_user');
+        if (savedUser) {
+          try {
+            const user = JSON.parse(savedUser) as User;
+            // Validar se o acesso ainda é válido
+            if (user.approvalExpiry) {
+              const expiry = new Date(user.approvalExpiry);
+              if (expiry > new Date()) {
+                setIsAuthenticated(true);
+                setCurrentUser(user);
+                if (user.requiresPasswordChange) setAppView('changePassword');
+              } else {
+                localStorage.removeItem('biomagnetismo_user');
+              }
+            } else {
+              // Sem data de expiração ( Vitalício )
+              setIsAuthenticated(true);
+              setCurrentUser(user);
+              if (user.requiresPasswordChange) setAppView('changePassword');
+            }
+          } catch (e) {
+            console.error("Erro ao recuperar sessão do localStorage:", e);
+            localStorage.removeItem('biomagnetismo_user');
+          }
+        }
 
         // Carrega usuários para login (inicialmente necessário para o componente Login)
         const users = await dbService.getUsers();
@@ -142,6 +170,7 @@ const App: React.FC = () => {
 
     setIsAuthenticated(true);
     setCurrentUser(foundUser);
+    localStorage.setItem('biomagnetismo_user', JSON.stringify(foundUser));
     setAppView(foundUser.requiresPasswordChange ? 'changePassword' : 'dashboard');
     return { success: true };
   };
@@ -166,6 +195,7 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setCurrentUser(null);
+    localStorage.removeItem('biomagnetismo_user');
     setAppView('dashboard');
     setSessions([]);
     setPatients([]);
@@ -197,6 +227,7 @@ const App: React.FC = () => {
     setPhenomenaNotes('');
     setSessionStartTime(null);
     setSessionEndTime(null);
+    setSessionKey(Date.now().toString()); // Força remontagem de todos os componentes de sessão
   }, []);
 
   const jumpToStep = (step: Step) => {
@@ -370,7 +401,7 @@ const App: React.FC = () => {
         )}
 
         {appView === 'sessionWorkflow' && (
-          <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden relative">
+          <div key={sessionKey} className="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden relative">
             <div className="p-4 md:p-6 border-b border-slate-200 overflow-x-auto print:hidden">
               <nav aria-label="Progress">
                 <ol role="list" className="flex items-center min-w-[1000px]">
