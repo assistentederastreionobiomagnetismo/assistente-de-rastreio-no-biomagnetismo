@@ -280,9 +280,24 @@ const App: React.FC = () => {
   };
 
   const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
+    // 1. Verificar se o usuário e senha existem (case-insensitive no username)
     const foundUser = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     if (!foundUser) return { success: false, message: 'Usuário ou senha inválidos.' };
 
+    // 2. Verificar se está bloqueado manualmente
+    if (!foundUser.isApproved) return { success: false, message: 'Seu cadastro está bloqueado. Entre em contato com o administrador.' };
+
+    // 3. Se precisa trocar senha (resultado de reset), deixar entrar independentemente de expiração
+    //    Assim o fluxo de reset funciona mesmo que o acesso esteja expirado
+    if (foundUser.requiresPasswordChange) {
+      setIsAuthenticated(true);
+      setCurrentUser(foundUser);
+      localStorage.setItem('biomagnetismo_user', JSON.stringify(foundUser));
+      setAppView('changePassword');
+      return { success: true };
+    }
+
+    // 4. Verificar expiração (apenas para usuários que já trocaram a senha)
     if (foundUser.approvalExpiry) {
       const expiry = new Date(foundUser.approvalExpiry);
       if (expiry < new Date()) {
@@ -290,12 +305,10 @@ const App: React.FC = () => {
       }
     }
 
-    if (!foundUser.isApproved) return { success: false, message: 'Seu cadastro está bloqueado. Entre em contato com o administrador.' };
-
     setIsAuthenticated(true);
     setCurrentUser(foundUser);
     localStorage.setItem('biomagnetismo_user', JSON.stringify(foundUser));
-    setAppView(foundUser.requiresPasswordChange ? 'changePassword' : 'dashboard');
+    setAppView('dashboard');
     return { success: true };
   };
 

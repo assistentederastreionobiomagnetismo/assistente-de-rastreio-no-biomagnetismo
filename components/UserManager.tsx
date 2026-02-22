@@ -159,6 +159,14 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         if (window.confirm(`Confirmar reset de senha para "${fullName}"?\n\nNova senha: ${finalPassword}\n\nO terapeuta deverá alterá-la no próximo login.`)) {
             try {
                 await dbService.resetUserPassword(username, finalPassword);
+
+                // Atualiza o estado local para que o login funcione imediatamente sem reload
+                setUsers(prev => prev.map(u =>
+                    u.username === username
+                        ? { ...u, password: finalPassword, requiresPasswordChange: true }
+                        : u
+                ));
+
                 alert(`Senha de ${fullName} resetada com sucesso!\n\nSenha provisória: ${finalPassword}`);
             } catch (error) {
                 console.error("Erro ao resetar senha:", error);
