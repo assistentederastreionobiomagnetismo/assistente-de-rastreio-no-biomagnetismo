@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BiomagneticPair, PairDetail } from '../types';
 import { TrashIcon, PlusIcon, CheckIcon } from './icons/Icons';
 import { dbService } from '../services/dbService';
+import { getDirectImageUrl } from '../utils';
 
 interface PairManagementModalProps {
   isOpen: boolean;
@@ -254,7 +255,7 @@ const PairManagementModal: React.FC<PairManagementModalProps> = ({ isOpen, onClo
                       <div className="md:col-span-3 flex justify-center items-center">
                         {pair.imageUrl ? (
                           <div className="relative">
-                            <img src={pair.imageUrl} alt="Preview" className="w-32 h-32 rounded-xl object-cover shadow-xl border-4 border-white" />
+                            <img src={getDirectImageUrl(pair.imageUrl)} alt="Preview" className="w-32 h-32 rounded-xl object-cover shadow-xl border-4 border-white" />
                             <button type="button" onClick={removeImage} className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-lg transition-all"><TrashIcon className="w-4 h-4" /></button>
                           </div>
                         ) : (
