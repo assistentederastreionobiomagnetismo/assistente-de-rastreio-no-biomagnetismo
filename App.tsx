@@ -292,9 +292,10 @@ const App: React.FC = () => {
     // 3. Se precisa trocar senha (resultado de reset), deixar entrar independentemente de expiração
     //    Assim o fluxo de reset funciona mesmo que o acesso esteja expirado
     if (foundUser.requiresPasswordChange) {
+      const normalizedUser = { ...foundUser, username: foundUser.username.toLowerCase() };
       setIsAuthenticated(true);
-      setCurrentUser(foundUser);
-      localStorage.setItem('biomagnetismo_user', JSON.stringify(foundUser));
+      setCurrentUser(normalizedUser);
+      localStorage.setItem('biomagnetismo_user', JSON.stringify(normalizedUser));
       setAppView('changePassword');
       return { success: true };
     }
@@ -307,9 +308,10 @@ const App: React.FC = () => {
       }
     }
 
+    const normalizedUser = { ...foundUser, username: foundUser.username.toLowerCase() };
     setIsAuthenticated(true);
-    setCurrentUser(foundUser);
-    localStorage.setItem('biomagnetismo_user', JSON.stringify(foundUser));
+    setCurrentUser(normalizedUser);
+    localStorage.setItem('biomagnetismo_user', JSON.stringify(normalizedUser));
     setAppView('dashboard');
     return { success: true };
   };
@@ -317,11 +319,16 @@ const App: React.FC = () => {
   const handleUpdatePassword = async (newPassword: string) => {
     if (!currentUser) return;
     try {
-      const updatedUser: User = { ...currentUser, password: newPassword, requiresPasswordChange: false };
+      const updatedUser: User = {
+        ...currentUser,
+        username: currentUser.username.toLowerCase(),
+        password: newPassword,
+        requiresPasswordChange: false
+      };
 
       await dbService.updateUser(updatedUser);
 
-      const updatedUsers = allUsers.map(u => u.username === currentUser.username ? updatedUser : u);
+      const updatedUsers = allUsers.map(u => u.username.toLowerCase() === currentUser.username.toLowerCase() ? updatedUser : u);
       setAllUsers(updatedUsers);
       setCurrentUser(updatedUser);
       setAppView('dashboard');
