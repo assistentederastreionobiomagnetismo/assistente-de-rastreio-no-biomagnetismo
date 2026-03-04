@@ -64,21 +64,31 @@ export const dbService = {
     // Patients
     async getPatients(therapistUsername: string): Promise<Patient[]> {
         if (!supabase) return [];
+        const normalizedUsername = therapistUsername.toLowerCase();
         const { data, error } = await supabase
             .from('patients')
             .select('*')
-            .eq('therapist_username', therapistUsername);
+            .ilike('therapist_username', normalizedUsername);
         if (error) throw error;
-        return data;
+        return (data || []).map(p => ({
+            id: p.id,
+            name: p.name,
+            birthDate: p.birth_date,
+            age: p.age,
+            email: p.email,
+            phone: p.phone,
+            mainComplaint: p.main_complaint
+        }));
     },
 
     async savePatient(therapistUsername: string, patient: Patient): Promise<void> {
         if (!supabase) return;
+        const normalizedUsername = therapistUsername.toLowerCase();
         const { error } = await supabase
             .from('patients')
             .upsert({
                 id: patient.id,
-                therapist_username: therapistUsername,
+                therapist_username: normalizedUsername,
                 name: patient.name,
                 birth_date: patient.birthDate,
                 age: patient.age,
@@ -91,24 +101,26 @@ export const dbService = {
 
     async deletePatient(id: string, therapistUsername: string): Promise<void> {
         if (!supabase) return;
+        const normalizedUsername = therapistUsername.toLowerCase();
         const { error } = await supabase
             .from('patients')
             .delete()
             .eq('id', id)
-            .eq('therapist_username', therapistUsername);
+            .ilike('therapist_username', normalizedUsername);
         if (error) throw error;
     },
 
     // Sessions
     async getSessions(therapistUsername: string): Promise<Session[]> {
         if (!supabase) return [];
+        const normalizedUsername = therapistUsername.toLowerCase();
         const { data, error } = await supabase
             .from('sessions')
             .select('*')
-            .eq('therapist_username', therapistUsername)
+            .ilike('therapist_username', normalizedUsername)
             .order('created_at', { ascending: false });
         if (error) throw error;
-        return data.map(s => ({
+        return (data || []).map(s => ({
             ...s.data,
             id: s.id,
             startTime: s.start_time ? new Date(s.start_time) : null,
@@ -118,11 +130,12 @@ export const dbService = {
 
     async saveSession(therapistUsername: string, session: Session): Promise<void> {
         if (!supabase) return;
+        const normalizedUsername = therapistUsername.toLowerCase();
         const { error } = await supabase
             .from('sessions')
             .upsert({
                 id: session.id,
-                therapist_username: therapistUsername,
+                therapist_username: normalizedUsername,
                 patient_id: session.patient.id,
                 data: session,
                 start_time: session.startTime,
@@ -133,11 +146,12 @@ export const dbService = {
 
     async deleteSession(id: string, therapistUsername: string): Promise<void> {
         if (!supabase) return;
+        const normalizedUsername = therapistUsername.toLowerCase();
         const { error } = await supabase
             .from('sessions')
             .delete()
             .eq('id', id)
-            .eq('therapist_username', therapistUsername);
+            .ilike('therapist_username', normalizedUsername);
         if (error) throw error;
     },
 

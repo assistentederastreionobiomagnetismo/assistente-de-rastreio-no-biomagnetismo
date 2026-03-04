@@ -176,7 +176,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
     };
 
     const deleteUser = async (username: string) => {
-        if (username === 'Vbsjunior.Biomagnetismo') return;
+        if (username.toLowerCase() === 'vbsjunior.biomagnetismo') return;
         if (window.confirm(`Remover acesso do terapeuta "${username}"?`)) {
             try {
                 await dbService.deleteUser(username);
@@ -317,7 +317,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {users.map(user => {
-                                const isAdmin = user.username === 'Vbsjunior.Biomagnetismo';
+                                const isAdmin = user.username.toLowerCase() === 'vbsjunior.biomagnetismo';
                                 const expiryDate = user.approvalExpiry ? new Date(user.approvalExpiry) : null;
                                 const isExpired = expiryDate && expiryDate < new Date();
                                 // O status é considerado bloqueado se não estiver aprovado OU se estiver expirado
