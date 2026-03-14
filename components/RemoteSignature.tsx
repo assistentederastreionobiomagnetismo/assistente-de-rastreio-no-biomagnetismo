@@ -179,18 +179,18 @@ export const RemoteSignature: React.FC<RemoteSignatureProps> = ({ signatureId })
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
                   <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1">Seu Nome Completo</label>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Seu Nome Completo (Paciente ou Responsável Legal)</label>
                       <input type="text" value={signatureName} onChange={(e) => setSignatureName(e.target.value)} placeholder="Digite seu nome completo" className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-teal-500 focus:border-teal-500 bg-white" />
                   </div>
                   <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1">CPF (Opcional)</label>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">CPF do Assinante (Opcional)</label>
                       <input type="tel" value={signatureCpf} onChange={(e) => setSignatureCpf(e.target.value)} placeholder="000.000.000-00" className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-teal-500 focus:border-teal-500 bg-white" />
                   </div>
               </div>
 
               <div className="mt-6">
                   <label className="block text-sm font-bold text-slate-700 mb-2 flex justify-between items-end">
-                      <span>Assinatura (Desenhe no espaço abaixo)</span>
+                      <span>Assinatura <span className="font-normal text-slate-500">- Pelo Paciente ou Responsável Legal</span></span>
                       <button type="button" onClick={clearSignature} className="text-teal-600 hover:text-teal-800 text-xs font-semibold underline">Limpar Assinatura</button>
                   </label>
                   <div className="border-2 border-slate-300 rounded-xl bg-slate-50 overflow-hidden shadow-inner relative">

@@ -71,6 +71,7 @@ const App: React.FC = () => {
   const [phenomenaNotes, setPhenomenaNotes] = useState<string>('');
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const [sessionEndTime, setSessionEndTime] = useState<Date | null>(null);
+  const [therapistSignature, setTherapistSignature] = useState<string>('');
   const [sessionKey, setSessionKey] = useState<string>(Date.now().toString());
 
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -132,6 +133,7 @@ const App: React.FC = () => {
     setPhenomenaNotes('');
     setSessionStartTime(null);
     setSessionEndTime(null);
+    setTherapistSignature('');
     setEditingSessionId(null); // Limpar modo de edição
     setSessionKey(Date.now().toString()); // Força remontagem de todos os componentes de sessão
     localStorage.removeItem('biomagnetismo_active_session');
@@ -220,6 +222,7 @@ const App: React.FC = () => {
                 setPhenomenaNotes(data.phenomenaNotes);
                 setSessionStartTime(data.sessionStartTime ? new Date(data.sessionStartTime) : null);
                 setSessionEndTime(data.sessionEndTime ? new Date(data.sessionEndTime) : null);
+                setTherapistSignature(data.therapistSignature || '');
                 setAppView('sessionWorkflow');
               }
             } catch (e) {
@@ -279,6 +282,7 @@ const App: React.FC = () => {
         phenomenaNotes,
         sessionStartTime,
         sessionEndTime,
+        therapistSignature,
         appView
       };
       localStorage.setItem('biomagnetismo_active_session', JSON.stringify(activeSessionData));
@@ -287,7 +291,7 @@ const App: React.FC = () => {
     isAuthenticated, appView, currentStep, patient, safetyCheck, consentForm, scalesBefore, scalesAfter, protocolData, selectedPairs,
     phenomena, selectedEmotions, selectedSensations, emotionsNotes, sensationsNotes,
     impactionTime, sessionNotes, protocolNotes, reservatoriosNotes, levelINotes,
-    levelIINotes, levelIIINotes, phenomenaNotes, sessionStartTime, sessionEndTime
+    levelIINotes, levelIIINotes, phenomenaNotes, sessionStartTime, sessionEndTime, therapistSignature
   ]);
 
   // Efeito para monitorar expiração de acesso + 5 minutos de carência
@@ -418,6 +422,7 @@ const App: React.FC = () => {
       phenomenaNotes,
       startTime: sessionStartTime,
       endTime: sessionEndTime,
+      therapistSignature,
       ...(isEditing ? { editedAt: new Date().toISOString() } : {})
     };
 
@@ -493,6 +498,7 @@ const App: React.FC = () => {
     setPhenomenaNotes(session.phenomenaNotes || '');
     setSessionStartTime(session.startTime ? new Date(session.startTime) : new Date());
     setSessionEndTime(session.endTime ? new Date(session.endTime) : null);
+    setTherapistSignature(session.therapistSignature || '');
 
     // Mudar para o fluxo de sessão
     setAppView('sessionWorkflow');
@@ -684,7 +690,7 @@ const App: React.FC = () => {
               {currentStep === Step.PHENOMENA && <Phenomena data={phenomena} setData={setPhenomena} notes={phenomenaNotes} setNotes={setPhenomenaNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_III)} />}
               {currentStep === Step.EMOTIONAL && <Emocional selectedEmotions={selectedEmotions} setSelectedEmotions={setSelectedEmotions} selectedSensations={selectedSensations} setSelectedSensations={setSelectedSensations} emotionsNotes={emotionsNotes} setEmotionsNotes={setEmotionsNotes} sensationsNotes={sensationsNotes} setSensationsNotes={setSensationsNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PHENOMENA)} />}
               {currentStep === Step.TREATMENT && <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} scalesBefore={scalesBefore} scalesAfter={scalesAfter} setScalesAfter={setScalesAfter} onNext={nextStep} onBack={() => setCurrentStep(Step.EMOTIONAL)} sessionType={protocolData.sessionType} />}
-              {currentStep === Step.SUMMARY && <SessionSummary patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} emotions={selectedEmotions} sensations={selectedSensations} emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes} protocolNotes={protocolNotes} reservatoriosNotes={reservatoriosNotes} levelINotes={levelINotes} levelIINotes={levelIINotes} levelIIINotes={levelIIINotes} phenomenaNotes={phenomenaNotes} impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} safetyCheck={safetyCheck} consentForm={consentForm} scalesBefore={scalesBefore} scalesAfter={scalesAfter} onFinish={handleFinishSession} onBack={() => setCurrentStep(Step.TREATMENT)} />}
+              {currentStep === Step.SUMMARY && <SessionSummary patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} emotions={selectedEmotions} sensations={selectedSensations} emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes} protocolNotes={protocolNotes} reservatoriosNotes={reservatoriosNotes} levelINotes={levelINotes} levelIINotes={levelIINotes} levelIIINotes={levelIIINotes} phenomenaNotes={phenomenaNotes} impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} safetyCheck={safetyCheck} consentForm={consentForm} scalesBefore={scalesBefore} scalesAfter={scalesAfter} therapistSignature={therapistSignature} setTherapistSignature={setTherapistSignature} onFinish={handleFinishSession} onBack={() => setCurrentStep(Step.TREATMENT)} />}
 
               {currentStep === Step.PATIENT_INFO && (
                 <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 print:hidden">

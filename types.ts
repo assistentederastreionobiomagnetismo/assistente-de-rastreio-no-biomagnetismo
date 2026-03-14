@@ -111,4 +111,5 @@ export interface Session {
   startTime: Date | null;
   endTime: Date | null;
   editedAt?: string; // ISO date string — preenchido quando a sessão é editada
+  therapistSignature?: string; // base64 da assinatura do terapeuta
 }

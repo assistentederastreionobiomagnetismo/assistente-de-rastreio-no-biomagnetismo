@@ -338,7 +338,15 @@ const PatientForm: React.FC<PatientFormProps> = ({
   };
 
   const openSignatureModal = () => {
-    setSignatureName(patient.name);
+    if (consentForm.status !== 'pending') {
+      setSignatureName(consentForm.signedName || patient.name);
+      setSignatureCpf(consentForm.cpf || '');
+      setHasAgreement(true);
+    } else {
+      setSignatureName(patient.name);
+      setSignatureCpf('');
+      setHasAgreement(false);
+    }
     setIsSignatureModalOpen(true);
   };
 
@@ -627,8 +635,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
                         <p>O paciente deve manter seus exames, consultas e tratamentos em dia com os profissionais de saúde responsáveis.</p>
                     </div>
 
-                    <label className="flex items-start gap-3 bg-teal-50 p-3 rounded border border-teal-200 cursor-pointer">
-                        <input type="checkbox" className="mt-1 w-4 h-4 text-teal-600 rounded" checked={hasAgreement} onChange={(e) => setHasAgreement(e.target.checked)} />
+                    <label className={`flex items-start gap-3 bg-teal-50 p-3 rounded border border-teal-200 ${consentForm.status === 'pending' ? 'cursor-pointer' : 'opacity-80 cursor-default'}`}>
+                        <input type="checkbox" disabled={consentForm.status !== 'pending'} className="mt-1 w-4 h-4 text-teal-600 rounded disabled:opacity-70 disabled:cursor-default" checked={hasAgreement} onChange={(e) => setHasAgreement(e.target.checked)} />
                         <span className="text-sm font-medium text-teal-900 leading-tight">
                             Li e declaro estar ciente de que o Biomagnetismo é uma terapia complementar e não substitui tratamento médico, terapêutico ou qualquer outro tratamento legalmente reconhecido. Não me foram feitas promessas de cura, resultados podem variar de pessoa para pessoa e ainda, que devo manter meus exames, consultas e tratamentos em dia com os profissionais de saúde responsáveis.
                         </span>
@@ -636,18 +644,18 @@ const PatientForm: React.FC<PatientFormProps> = ({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         <div>
-                            <label className="block text-xs font-bold text-slate-600 mb-1">Nome Completo</label>
-                            <input type="text" value={signatureName} onChange={(e) => setSignatureName(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-teal-500 text-sm" />
+                            <label className="block text-xs font-bold text-slate-600 mb-1">Nome Completo (Paciente ou Responsável Legal)</label>
+                            <input type="text" disabled={consentForm.status !== 'pending'} value={signatureName} onChange={(e) => setSignatureName(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-teal-500 text-sm disabled:bg-slate-100 disabled:text-slate-600" />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-600 mb-1">CPF (Opcional)</label>
-                            <input type="text" value={signatureCpf} onChange={(e) => setSignatureCpf(e.target.value)} placeholder="000.000.000-00" className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-teal-500 text-sm" />
+                            <label className="block text-xs font-bold text-slate-600 mb-1">CPF do Assinante (Opcional)</label>
+                            <input type="text" disabled={consentForm.status !== 'pending'} value={signatureCpf} onChange={(e) => setSignatureCpf(e.target.value)} placeholder="000.000.000-00" className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-teal-500 text-sm disabled:bg-slate-100 disabled:text-slate-600" />
                         </div>
                     </div>
 
-                    <div>
+                    <div className="mt-4">
                         <label className="block text-xs font-bold text-slate-600 mb-1 flex justify-between items-end">
-                            <span>Assinatura (Desenhe no espaço abaixo)</span>
+                            <span>Assinatura (Desenhe no espaço abaixo) <span className="font-normal text-slate-500">- Pelo Paciente ou Responsável Legal</span></span>
                             {consentForm.status !== 'pending' && consentForm.signatureImage ? (
                                <button type="button" onClick={() => setConsentForm({status: 'pending'})} className="text-teal-600 hover:text-teal-800 underline">Refazer Assinatura</button>
                             ) : (

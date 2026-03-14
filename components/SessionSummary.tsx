@@ -26,6 +26,8 @@ interface SessionSummaryProps {
   consentForm?: ConsentForm;
   scalesBefore?: SessionScales;
   scalesAfter?: SessionScales;
+  therapistSignature?: string;
+  setTherapistSignature?: (val: string) => void;
   onFinish: () => void;
   onBack: () => void;
   isHistorical?: boolean;
@@ -54,10 +56,94 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
     consentForm,
     scalesBefore,
     scalesAfter,
+    therapistSignature,
+    setTherapistSignature,
     onFinish, 
     onBack,
     isHistorical = false
 }) => {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = React.useState(false);
+
+  // Focus effect for signature to ensure consistency if it re-renders
+  React.useEffect(() => {
+     if (canvasRef.current && therapistSignature) {
+         const ctx = canvasRef.current.getContext('2d');
+         const img = new Image();
+         img.onload = () => {
+             ctx?.clearRect(0,0, canvasRef.current!.width, canvasRef.current!.height);
+             ctx?.drawImage(img, 0, 0);
+         };
+         img.src = therapistSignature;
+     }
+  }, []); // Only once on mount to restore if navigating back
+
+  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    if (isHistorical) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.beginPath();
+    const rect = canvas.getBoundingClientRect();
+    const x = 'touches' in e ? e.touches[0].clientX - rect.left : (e as React.MouseEvent).clientX - rect.left;
+    const y = 'touches' in e ? e.touches[0].clientY - rect.top : (e as React.MouseEvent).clientY - rect.top;
+    
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDrawing || isHistorical) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = 'touches' in e ? e.touches[0].clientX - rect.left : (e as React.MouseEvent).clientX - rect.left;
+    const y = 'touches' in e ? e.touches[0].clientY - rect.top : (e as React.MouseEvent).clientY - rect.top;
+    
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    if (isHistorical) return;
+    setIsDrawing(false);
+    saveSignature();
+  };
+
+  const clearSignature = () => {
+    if (isHistorical) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (setTherapistSignature) setTherapistSignature('');
+  };
+
+  const saveSignature = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const pixelBuffer = new Uint32Array(ctx!.getImageData(0,0, canvas.width, canvas.height).data.buffer);
+    const hasDrawn = pixelBuffer.some(color => color !== 0);
+    
+    if (hasDrawn && setTherapistSignature) {
+        setTherapistSignature(canvas.toDataURL('image/png'));
+    } else if (setTherapistSignature) {
+        setTherapistSignature('');
+    }
+  };
+
+  const handleFinish = () => {
+      // Re-evaluate signature before saving
+      saveSignature();
+      onFinish();
+  };
 
   const formatDuration = (start: Date | null, end: Date | null) => {
     if (!start || !end) return 'N/A';
@@ -342,12 +428,56 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
         <div className="pb-6">
           <h3 className="text-lg font-bold text-teal-700 mb-4">Considerações Finais</h3>
           {notes ? (
-            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 text-slate-700 text-sm italic whitespace-pre-wrap leading-relaxed">
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 text-slate-700 text-sm italic whitespace-pre-wrap leading-relaxed mb-6">
                 {notes}
             </div>
           ) : (
-            <p className="text-slate-400 italic text-sm">Nenhuma consideração adicional registrada.</p>
+            <p className="text-slate-400 italic text-sm mb-6">Nenhuma consideração adicional registrada.</p>
           )}
+
+          {/* Therapist Signature Canvas Block (Visible in UI before saving) */}
+          <div className="mt-8 print:hidden">
+            <h4 className="text-sm font-bold text-slate-700 mb-2 flex justify-between items-end border-b pb-2">
+                <span>Assinatura do Terapeuta</span>
+                {!isHistorical && (
+                    <button type="button" onClick={clearSignature} className="text-teal-600 hover:text-teal-800 text-xs font-semibold underline">Limpar Assinatura</button>
+                )}
+            </h4>
+            
+            {isHistorical && therapistSignature ? (
+                <div className="w-full max-w-sm h-32 border-2 border-slate-200 rounded-lg bg-slate-50 flex items-center justify-center p-2 mx-auto md:mx-0">
+                   <img src={therapistSignature} alt="Assinatura do Terapeuta" className="max-h-full max-w-full object-contain" />
+                </div>
+            ) : isHistorical && !therapistSignature ? (
+                <div className="w-full max-w-sm h-32 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50 flex items-center justify-center p-2 mx-auto md:mx-0">
+                    <span className="text-sm text-slate-400 italic">Atendimento salvo sem assinatura do terapeuta.</span>
+                </div>
+            ) : (
+                <div className="max-w-sm relative">
+                    {!therapistSignature && !isDrawing && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
+                           <span className="text-slate-400 font-medium">Assine Aqui</span>
+                        </div>
+                    )}
+                    <canvas 
+                        ref={canvasRef}
+                        width={400}
+                        height={120}
+                        onMouseDown={startDrawing}
+                        onMouseMove={draw}
+                        onMouseUp={stopDrawing}
+                        onMouseOut={stopDrawing}
+                        onTouchStart={startDrawing}
+                        onTouchMove={draw}
+                        onTouchEnd={stopDrawing}
+                        className="w-full h-32 border-2 border-slate-300 rounded-lg bg-white shadow-inner cursor-crosshair touch-none"
+                    />
+                </div>
+            )}
+            {!isHistorical && (
+               <p className="text-xs text-slate-400 mt-2">Assine no quadro acima antes de concluir o atendimento.</p>
+            )}
+          </div>
         </div>
 
         {/* Disclaimer Impressão */}
@@ -358,12 +488,23 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
         {/* Espaço para assinatura em Impressão */}
         <div className="hidden print:block mt-16 pt-8">
             <div className="flex justify-around items-end">
-                <div className="text-center w-64">
-                    <div className="border-t border-slate-400 pt-2">
-                        <p className="text-sm font-bold text-slate-700">Assinatura do Terapeuta</p>
-                        <p className="text-[10px] text-slate-400 uppercase">Especialista em Biomagnetismo</p>
+                {therapistSignature ? (
+                    <div className="text-center w-64 flex flex-col items-center">
+                        <img src={therapistSignature} alt="Assinatura Terapeuta" className="h-16 object-contain mb-1" />
+                        <div className="w-full border-t border-slate-400 pt-1">
+                            <p className="text-sm font-bold text-slate-700">Assinatura do Terapeuta</p>
+                            <p className="text-[10px] text-slate-400 uppercase">Especialista em Biomagnetismo</p>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="text-center w-64">
+                        <div className="border-t border-slate-400 pt-2">
+                            <p className="text-sm font-bold text-slate-700">Assinatura do Terapeuta</p>
+                            <p className="text-[10px] text-slate-400 uppercase">Especialista em Biomagnetismo</p>
+                        </div>
+                    </div>
+                )}
+                
                 {!consentForm?.signatureImage ? (
                     <div className="text-center w-64">
                         <div className="border-t border-slate-400 pt-2">
@@ -401,7 +542,7 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
             </button>
             <div className="flex flex-col md:flex-row items-center space-y-3 md:space-y-0 md:space-x-4 w-full md:w-auto">
               <button
-                onClick={onFinish}
+                onClick={handleFinish}
                 className="w-full md:w-auto inline-flex justify-center items-center px-8 py-3 border border-transparent text-base font-black rounded-xl shadow-lg text-white bg-teal-600 hover:bg-teal-700 transition-all transform hover:scale-105"
               >
                 Concluir e Salvar Atendimento
