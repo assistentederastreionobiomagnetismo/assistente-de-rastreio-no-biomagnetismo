@@ -58,9 +58,41 @@ export interface ProtocolData {
   sessionType: 'presencial' | 'distancia' | '';
 }
 
+export interface SafetyCheck {
+  hasMedicalFollowUp: 'Sim' | 'Não' | '';
+  medicalSpecialty?: string;
+  usesContinuousMedication: 'Sim' | 'Não' | '';
+  medications?: string;
+  hasPacemakerOrDevice: 'Sim' | 'Não' | '';
+  deviceDetails?: string;
+  isPregnantOrSuspected: 'Sim' | 'Não' | '';
+  hasRelevantDiagnoses: 'Sim' | 'Não' | '';
+  diagnosesDetails?: string;
+}
+
+export interface ConsentForm {
+  status: 'pending' | 'signed_local' | 'signed_remote';
+  dateSigned?: string; // ISO date
+  signedName?: string;
+  cpf?: string;
+  signatureImage?: string; // base64 ou URL Supabase
+  ipAddress?: string; // Para a assinatura remota
+}
+
+export interface SessionScales {
+  pain: number | '';
+  anxiety: number | '';
+  tiredness: number | '';
+}
+
+
 export interface Session {
   id: string;
   patient: Patient;
+  safetyCheck?: SafetyCheck;
+  consentForm?: ConsentForm;
+  scalesBefore?: SessionScales;
+  scalesAfter?: SessionScales;
   protocolData?: ProtocolData;
   pairs: BiomagneticPair[];
   phenomena?: PhenomenaData;

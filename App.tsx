@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Patient, BiomagneticPair, User, Session, PhenomenaData, ProtocolData } from './types';
+import { Patient, BiomagneticPair, User, Session, PhenomenaData, ProtocolData, SafetyCheck, ConsentForm, SessionScales } from './types';
 import PatientForm from './components/PatientForm';
 import StartProtocol from './components/StartProtocol';
 import Scanning from './components/Scanning';
@@ -37,6 +37,16 @@ type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager' | 'changePassword
 const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<Step>(Step.PATIENT_INFO);
   const [patient, setPatient] = useState<Patient>({ name: '', mainComplaint: '' });
+  const [safetyCheck, setSafetyCheck] = useState<SafetyCheck>({
+    hasMedicalFollowUp: '',
+    usesContinuousMedication: '',
+    hasPacemakerOrDevice: '',
+    isPregnantOrSuspected: '',
+    hasRelevantDiagnoses: ''
+  });
+  const [consentForm, setConsentForm] = useState<ConsentForm>({ status: 'pending' });
+  const [scalesBefore, setScalesBefore] = useState<SessionScales>({ pain: '', anxiety: '', tiredness: '' });
+  const [scalesAfter, setScalesAfter] = useState<SessionScales>({ pain: '', anxiety: '', tiredness: '' });
   const [protocolData, setProtocolData] = useState<ProtocolData>({ legResponse: '', antennaResponse: '', sessionType: '' });
   const [selectedPairs, setSelectedPairs] = useState<BiomagneticPair[]>([]);
   const [phenomena, setPhenomena] = useState<PhenomenaData>({
@@ -88,6 +98,16 @@ const App: React.FC = () => {
   const resetSessionState = useCallback(() => {
     setCurrentStep(Step.PATIENT_INFO);
     setPatient({ name: '', mainComplaint: '' });
+    setSafetyCheck({
+      hasMedicalFollowUp: '',
+      usesContinuousMedication: '',
+      hasPacemakerOrDevice: '',
+      isPregnantOrSuspected: '',
+      hasRelevantDiagnoses: ''
+    });
+    setConsentForm({ status: 'pending' });
+    setScalesBefore({ pain: '', anxiety: '', tiredness: '' });
+    setScalesAfter({ pain: '', anxiety: '', tiredness: '' });
     setProtocolData({ legResponse: '', antennaResponse: '', sessionType: '' });
     setSelectedPairs([]);
     setPhenomena({
@@ -172,6 +192,16 @@ const App: React.FC = () => {
               if (data.appView === 'sessionWorkflow') {
                 setCurrentStep(data.currentStep);
                 setPatient(data.patient);
+                setSafetyCheck(data.safetyCheck || {
+                  hasMedicalFollowUp: '',
+                  usesContinuousMedication: '',
+                  hasPacemakerOrDevice: '',
+                  isPregnantOrSuspected: '',
+                  hasRelevantDiagnoses: ''
+                });
+                setConsentForm(data.consentForm || { status: 'pending' });
+                setScalesBefore(data.scalesBefore || { pain: '', anxiety: '', tiredness: '' });
+                setScalesAfter(data.scalesAfter || { pain: '', anxiety: '', tiredness: '' });
                 setProtocolData(data.protocolData);
                 setSelectedPairs(data.selectedPairs);
                 setPhenomena(data.phenomena);
@@ -219,6 +249,10 @@ const App: React.FC = () => {
       const activeSessionData = {
         currentStep,
         patient,
+        safetyCheck,
+        consentForm,
+        scalesBefore,
+        scalesAfter,
         protocolData,
         selectedPairs,
         phenomena,
@@ -241,7 +275,7 @@ const App: React.FC = () => {
       localStorage.setItem('biomagnetismo_active_session', JSON.stringify(activeSessionData));
     }
   }, [
-    isAuthenticated, appView, currentStep, patient, protocolData, selectedPairs,
+    isAuthenticated, appView, currentStep, patient, safetyCheck, consentForm, scalesBefore, scalesAfter, protocolData, selectedPairs,
     phenomena, selectedEmotions, selectedSensations, emotionsNotes, sensationsNotes,
     impactionTime, sessionNotes, protocolNotes, reservatoriosNotes, levelINotes,
     levelIINotes, levelIIINotes, phenomenaNotes, sessionStartTime, sessionEndTime
@@ -354,6 +388,10 @@ const App: React.FC = () => {
     const newSession: Session = {
       id: isEditing ? editingSessionId! : new Date().toISOString(),
       patient,
+      safetyCheck,
+      consentForm,
+      scalesBefore,
+      scalesAfter,
       protocolData,
       pairs: selectedPairs,
       phenomena,
@@ -413,6 +451,16 @@ const App: React.FC = () => {
 
     // Carregar dados da sessão no estado global
     setPatient(session.patient);
+    setSafetyCheck(session.safetyCheck || {
+      hasMedicalFollowUp: '',
+      usesContinuousMedication: '',
+      hasPacemakerOrDevice: '',
+      isPregnantOrSuspected: '',
+      hasRelevantDiagnoses: ''
+    });
+    setConsentForm(session.consentForm || { status: 'pending' });
+    setScalesBefore(session.scalesBefore || { pain: '', anxiety: '', tiredness: '' });
+    setScalesAfter(session.scalesAfter || { pain: '', anxiety: '', tiredness: '' });
     setProtocolData(session.protocolData || { legResponse: '', antennaResponse: '', sessionType: '' });
     setSelectedPairs(session.pairs || []);
     setPhenomena(session.phenomena || {
@@ -569,7 +617,56 @@ const App: React.FC = () => {
               </nav>
             </div>
             <main className="p-6 md:p-10 relative">
-              {currentStep === Step.PATIENT_INFO && <PatientForm patient={patient} setPatient={setPatient} onNext={nextStep} patientsList={patients} setPatientsList={setPatients} therapistUsername={currentUser!.username} />}
+              {currentStep === Step.PATIENT_INFO && (
+                <PatientForm 
+                  patient={patient} 
+                  setPatient={setPatient} 
+                  safetyCheck={safetyCheck}
+                  setSafetyCheck={setSafetyCheck}
+                  consentForm={consentForm}
+                  setConsentForm={setConsentForm}
+                  scalesBefore={scalesBefore}
+                  setScalesBefore={setScalesBefore}
+                  onNext={nextStep} 
+                  patientsList={patients} 
+                  setPatientsList={setPatients} 
+                  therapistUsername={currentUser!.username} 
+                  onLoadLastSessionAdminData={async () => {
+                     try {
+                       const sessionsRecord = await dbService.getSessions(currentUser!.username);
+                       const patientSessions = sessionsRecord.filter(s => s.patient.id === patient.id).sort((a, b) => {
+                          const dateA = a.startTime ? new Date(a.startTime).getTime() : 0;
+                          const dateB = b.startTime ? new Date(b.startTime).getTime() : 0;
+                          return dateB - dateA;
+                       });
+
+                       if (patientSessions.length > 0) {
+                         const lastSession = patientSessions[0];
+                         
+                         // Fill Safety Check
+                         if (lastSession.safetyCheck) {
+                           setSafetyCheck(lastSession.safetyCheck);
+                         }
+
+                         // Fill Protocol Type / Session Type
+                         if (lastSession.protocolData) {
+                           setProtocolData(prev => ({
+                             ...prev,
+                             sessionType: lastSession.protocolData?.sessionType || prev.sessionType,
+                           }));
+                         }
+                         
+                         alert("Dados administrativos da última sessão carregados. Verifique e atualize se necessário antes de prosseguir.");
+                       } else {
+                         alert("Nenhuma sessão anterior encontrada para este paciente.");
+                       }
+                     } catch (error) {
+                       console.error("Erro ao buscar a última sessão:", error);
+                       alert("Não foi possível carregar os dados da última sessão.");
+                     }
+                  }}
+                />
+              )}
               {currentStep === Step.START_PROTOCOL && <StartProtocol data={protocolData} setData={setProtocolData} notes={protocolNotes} setNotes={setProtocolNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PATIENT_INFO)} patientName={patient.name} />}
               {currentStep === Step.SCANNING_RESERVATORIOS && <Scanning levelTitle="Reservatórios" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={reservatoriosNotes} setNotes={setReservatoriosNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.START_PROTOCOL)} biomagneticPairs={biomagneticPairs} />}
               {currentStep === Step.SCANNING_LEVEL_I && <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelINotes} setNotes={setLevelINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_RESERVATORIOS)} biomagneticPairs={biomagneticPairs} />}
@@ -577,8 +674,8 @@ const App: React.FC = () => {
               {currentStep === Step.SCANNING_LEVEL_III && <Scanning levelTitle="Nível III" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIIINotes} setNotes={setLevelIIINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_II)} biomagneticPairs={biomagneticPairs} />}
               {currentStep === Step.PHENOMENA && <Phenomena data={phenomena} setData={setPhenomena} notes={phenomenaNotes} setNotes={setPhenomenaNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_III)} />}
               {currentStep === Step.EMOTIONAL && <Emocional selectedEmotions={selectedEmotions} setSelectedEmotions={setSelectedEmotions} selectedSensations={selectedSensations} setSelectedSensations={setSelectedSensations} emotionsNotes={emotionsNotes} setEmotionsNotes={setEmotionsNotes} sensationsNotes={sensationsNotes} setSensationsNotes={setSensationsNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PHENOMENA)} />}
-              {currentStep === Step.TREATMENT && <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.EMOTIONAL)} sessionType={protocolData.sessionType} />}
-              {currentStep === Step.SUMMARY && <SessionSummary patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} emotions={selectedEmotions} sensations={selectedSensations} emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes} protocolNotes={protocolNotes} reservatoriosNotes={reservatoriosNotes} levelINotes={levelINotes} levelIINotes={levelIINotes} levelIIINotes={levelIIINotes} phenomenaNotes={phenomenaNotes} impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} onFinish={handleFinishSession} onBack={() => setCurrentStep(Step.TREATMENT)} />}
+              {currentStep === Step.TREATMENT && <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} scalesBefore={scalesBefore} scalesAfter={scalesAfter} setScalesAfter={setScalesAfter} onNext={nextStep} onBack={() => setCurrentStep(Step.EMOTIONAL)} sessionType={protocolData.sessionType} />}
+              {currentStep === Step.SUMMARY && <SessionSummary patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} emotions={selectedEmotions} sensations={selectedSensations} emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes} protocolNotes={protocolNotes} reservatoriosNotes={reservatoriosNotes} levelINotes={levelINotes} levelIINotes={levelIINotes} levelIIINotes={levelIIINotes} phenomenaNotes={phenomenaNotes} impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} safetyCheck={safetyCheck} consentForm={consentForm} scalesBefore={scalesBefore} scalesAfter={scalesAfter} onFinish={handleFinishSession} onBack={() => setCurrentStep(Step.TREATMENT)} />}
 
               {currentStep === Step.PATIENT_INFO && (
                 <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 print:hidden">

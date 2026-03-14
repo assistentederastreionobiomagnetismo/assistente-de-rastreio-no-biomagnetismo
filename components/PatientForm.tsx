@@ -1,22 +1,40 @@
-
-import React, { useState, useMemo } from 'react';
-import { Patient } from '../types';
-import { SearchIcon, UserIcon, PlusIcon, TrashIcon, PencilIcon } from './icons/Icons';
+import React, { useState, useMemo, useRef } from 'react';
+import { Patient, SafetyCheck, ConsentForm, SessionScales } from '../types';
+import { SearchIcon, UserIcon, PlusIcon, TrashIcon, PencilIcon, CheckIcon } from './icons/Icons';
 import { dbService } from '../services/dbService';
 
 interface PatientFormProps {
   patient: Patient;
   setPatient: React.Dispatch<React.SetStateAction<Patient>>;
+  safetyCheck: SafetyCheck;
+  setSafetyCheck: React.Dispatch<React.SetStateAction<SafetyCheck>>;
+  consentForm: ConsentForm;
+  setConsentForm: React.Dispatch<React.SetStateAction<ConsentForm>>;
+  scalesBefore: SessionScales;
+  setScalesBefore: React.Dispatch<React.SetStateAction<SessionScales>>;
   patientsList: Patient[];
   setPatientsList: React.Dispatch<React.SetStateAction<Patient[]>>;
   therapistUsername: string;
   onNext: () => void;
+  onLoadLastSessionAdminData?: () => void;
 }
 
-const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patientsList, setPatientsList, therapistUsername, onNext }) => {
+const PatientForm: React.FC<PatientFormProps> = ({ 
+  patient, setPatient, 
+  safetyCheck, setSafetyCheck,
+  consentForm, setConsentForm,
+  scalesBefore, setScalesBefore,
+  patientsList, setPatientsList, therapistUsername, onNext, onLoadLastSessionAdminData 
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [signatureName, setSignatureName] = useState('');
+  const [signatureCpf, setSignatureCpf] = useState('');
+  const [hasAgreement, setHasAgreement] = useState(false);
 
   // New Patient Modal State
   const [newPatientData, setNewPatientData] = useState<Patient>({
@@ -162,11 +180,123 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
     }
   };
 
-  const isFormValid = patient.name.trim() !== '' && (patient.birthDate || '').length === 10;
+  const handleSafetyChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setSafetyCheck(prev => ({ ...prev, [name]: value }));
+  };
+
+  const isSafetyCheckComplete = [
+    safetyCheck.hasMedicalFollowUp,
+    safetyCheck.usesContinuousMedication,
+    safetyCheck.hasPacemakerOrDevice,
+    safetyCheck.isPregnantOrSuspected,
+    safetyCheck.hasRelevantDiagnoses
+  ].every(v => v === 'Sim' || v === 'Não');
+
+  const showSafetyWarning = safetyCheck.hasPacemakerOrDevice === 'Sim' || safetyCheck.isPregnantOrSuspected === 'Sim';
+
+  const isFormValid = patient.name.trim() !== '' 
+                      && (patient.birthDate || '').length === 10 
+                      && isSafetyCheckComplete 
+                      && (consentForm.status === 'signed_local' || consentForm.status === 'signed_remote');
+
+  // --- Signature Canvas Logic ---
+  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.beginPath();
+    const rect = canvas.getBoundingClientRect();
+    const x = 'touches' in e ? e.touches[0].clientX - rect.left : (e as React.MouseEvent).clientX - rect.left;
+    const y = 'touches' in e ? e.touches[0].clientY - rect.top : (e as React.MouseEvent).clientY - rect.top;
+    
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = 'touches' in e ? e.touches[0].clientX - rect.left : (e as React.MouseEvent).clientX - rect.left;
+    const y = 'touches' in e ? e.touches[0].clientY - rect.top : (e as React.MouseEvent).clientY - rect.top;
+    
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
+  const clearSignature = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  const confirmSignature = () => {
+    if (!hasAgreement) {
+      alert("Você precisa marcar a caixa de seleção concordando com os termos.");
+      return;
+    }
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    // Simplification check for blank canvas (heuristic)
+    const ctx = canvas.getContext('2d');
+    const pixelBuffer = new Uint32Array(ctx!.getImageData(0,0, canvas.width, canvas.height).data.buffer);
+    const hasDrawn = pixelBuffer.some(color => color !== 0);
+    
+    if (!hasDrawn) {
+      alert("Por favor, assine no campo indicado.");
+      return;
+    }
+
+    const dataUrl = canvas.toDataURL('image/png');
+    
+    setConsentForm({
+      status: 'signed_local',
+      dateSigned: new Date().toISOString(),
+      signedName: signatureName || patient.name,
+      cpf: signatureCpf,
+      signatureImage: dataUrl
+    });
+    
+    setIsSignatureModalOpen(false);
+  };
+
+  const handleSendWhatsApp = () => {
+     alert("Enviando link via WhatsApp e aguardando assinatura...(Funcionalidade Backend a ser implementada)");
+     // Implementaremos o fluxo do whatsapp e do poll na proxima iteracao,
+     // por enquanto o usuario pode testar a assinatura local.
+  };
+
+  const openSignatureModal = () => {
+    setSignatureName(patient.name);
+    setIsSignatureModalOpen(true);
+  };
 
   return (
     <div className="animate-fade-in">
-      <h2 className="text-2xl font-bold text-slate-700 mb-6">Informações do Atendimento</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-slate-700">Informações do Atendimento</h2>
+        <button 
+          onClick={onLoadLastSessionAdminData} 
+          className="text-xs font-bold text-teal-600 border border-teal-600 px-3 py-1.5 rounded hover:bg-teal-50 shadow-sm flex items-center gap-1 transition-colors"
+          type="button"
+        >
+          <span>↺</span> Carregar última sessão do paciente
+        </button>
+      </div>
 
       {/* Registration Modal */}
       {isRegisterModalOpen && (
@@ -343,20 +473,231 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, setPatient, patients
           />
         </div>
 
-        <div>
-          <label htmlFor="mainComplaint" className="block text-sm font-medium text-slate-600 font-bold text-teal-700">Queixas do dia (Opcional)</label>
-          <textarea
-            id="mainComplaint"
-            name="mainComplaint"
-            value={patient.mainComplaint}
-            onChange={handleChange}
-            rows={4}
-            className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:border-teal-500 sm:text-sm"
-            placeholder="Descreva as queixas e sintomas para o atendimento de hoje (se houver)..."
-          />
+        <hr className="border-slate-200" />
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+             <h3 className="text-lg font-bold text-teal-700">Check List de Segurança</h3>
+             <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded border border-slate-200">Obrigatório</span>
+          </div>
+          
+          {showSafetyWarning && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm text-red-700 animate-pulse">
+              <p className="font-bold">⚠️ Atenção: este paciente requer avaliação especial antes de iniciar a sessão. Verifique as contraindicações orientadas no seu curso de formação antes de prosseguir.</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Campo 1 */}
+            <div className="bg-slate-50 p-3 rounded border border-slate-200">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Está em acompanhamento médico atualmente?</p>
+              <div className="flex gap-4">
+                 <label className="flex items-center gap-1 text-sm"><input type="radio" name="hasMedicalFollowUp" value="Sim" checked={safetyCheck.hasMedicalFollowUp === 'Sim'} onChange={handleSafetyChange} /> Sim</label>
+                 <label className="flex items-center gap-1 text-sm"><input type="radio" name="hasMedicalFollowUp" value="Não" checked={safetyCheck.hasMedicalFollowUp === 'Não'} onChange={handleSafetyChange} /> Não</label>
+              </div>
+              {safetyCheck.hasMedicalFollowUp === 'Sim' && (
+                <div className="mt-2">
+                  <input type="text" name="medicalSpecialty" value={safetyCheck.medicalSpecialty || ''} onChange={handleSafetyChange} placeholder="Qual especialidade?" className="w-full text-sm px-2 py-1 border border-slate-300 rounded focus:ring-teal-500" />
+                </div>
+              )}
+            </div>
+            
+            {/* Campo 2 */}
+            <div className="bg-slate-50 p-3 rounded border border-slate-200">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Usa medicamentos contínuos?</p>
+              <div className="flex gap-4">
+                 <label className="flex items-center gap-1 text-sm"><input type="radio" name="usesContinuousMedication" value="Sim" checked={safetyCheck.usesContinuousMedication === 'Sim'} onChange={handleSafetyChange} /> Sim</label>
+                 <label className="flex items-center gap-1 text-sm"><input type="radio" name="usesContinuousMedication" value="Não" checked={safetyCheck.usesContinuousMedication === 'Não'} onChange={handleSafetyChange} /> Não</label>
+              </div>
+              {safetyCheck.usesContinuousMedication === 'Sim' && (
+                <div className="mt-2">
+                  <input type="text" name="medications" value={safetyCheck.medications || ''} onChange={handleSafetyChange} placeholder="Quais medicamentos?" className="w-full text-sm px-2 py-1 border border-slate-300 rounded focus:ring-teal-500" />
+                </div>
+              )}
+            </div>
+
+            {/* Campo 3 */}
+            <div className={`bg-slate-50 p-3 rounded border ${safetyCheck.hasPacemakerOrDevice === 'Sim' ? 'border-red-300 bg-red-50/50' : 'border-slate-200'}`}>
+              <p className="text-sm font-semibold text-slate-700 mb-2">Possui marcapasso ou dispositivo eletrônico implantado?</p>
+              <div className="flex gap-4">
+                 <label className="flex items-center gap-1 text-sm"><input type="radio" name="hasPacemakerOrDevice" value="Sim" checked={safetyCheck.hasPacemakerOrDevice === 'Sim'} onChange={handleSafetyChange} /> Sim</label>
+                 <label className="flex items-center gap-1 text-sm"><input type="radio" name="hasPacemakerOrDevice" value="Não" checked={safetyCheck.hasPacemakerOrDevice === 'Não'} onChange={handleSafetyChange} /> Não</label>
+              </div>
+              {safetyCheck.hasPacemakerOrDevice === 'Sim' && (
+                <div className="mt-2">
+                  <input type="text" name="deviceDetails" value={safetyCheck.deviceDetails || ''} onChange={handleSafetyChange} placeholder="Qual dispositivo?" className="w-full text-sm px-2 py-1 border border-red-300 rounded focus:ring-red-500 bg-white" />
+                </div>
+              )}
+            </div>
+
+            {/* Campo 4 */}
+            <div className={`bg-slate-50 p-3 rounded border ${safetyCheck.isPregnantOrSuspected === 'Sim' ? 'border-red-300 bg-red-50/50' : 'border-slate-200'}`}>
+              <p className="text-sm font-semibold text-slate-700 mb-2">Está gestante ou suspeita de gestação?</p>
+              <div className="flex gap-4">
+                 <label className="flex items-center gap-1 text-sm"><input type="radio" name="isPregnantOrSuspected" value="Sim" checked={safetyCheck.isPregnantOrSuspected === 'Sim'} onChange={handleSafetyChange} /> Sim</label>
+                 <label className="flex items-center gap-1 text-sm"><input type="radio" name="isPregnantOrSuspected" value="Não" checked={safetyCheck.isPregnantOrSuspected === 'Não'} onChange={handleSafetyChange} /> Não</label>
+              </div>
+            </div>
+
+            {/* Campo 5 */}
+            <div className="bg-slate-50 p-3 rounded border border-slate-200 md:col-span-2">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Possui diagnósticos médicos relevantes informados por médico?</p>
+              <div className="flex gap-4">
+                 <label className="flex items-center gap-1 text-sm"><input type="radio" name="hasRelevantDiagnoses" value="Sim" checked={safetyCheck.hasRelevantDiagnoses === 'Sim'} onChange={handleSafetyChange} /> Sim</label>
+                 <label className="flex items-center gap-1 text-sm"><input type="radio" name="hasRelevantDiagnoses" value="Não" checked={safetyCheck.hasRelevantDiagnoses === 'Não'} onChange={handleSafetyChange} /> Não</label>
+              </div>
+              {safetyCheck.hasRelevantDiagnoses === 'Sim' && (
+                <div className="mt-2">
+                  <input type="text" name="diagnosesDetails" value={safetyCheck.diagnosesDetails || ''} onChange={handleSafetyChange} placeholder="Quais diagnósticos?" className="w-full text-sm px-2 py-1 border border-slate-300 rounded focus:ring-teal-500" />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="flex justify-end pt-4">
+        <hr className="border-slate-200" />
+        
+        {/* Termo de Ciência Modal */}
+        {isSignatureModalOpen && (
+          <div className="fixed inset-0 bg-black/70 z-[70] flex justify-center items-center p-4">
+             <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 animate-fade-in flex flex-col max-h-[90vh]">
+                <h3 className="text-xl font-bold text-teal-700 mb-4 border-b pb-2">Termo de Ciência do Paciente</h3>
+                
+                <div className="flex-1 overflow-y-auto pr-2 pb-4 space-y-4 text-sm text-slate-700">
+                    <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                        <p className="mb-2">O Biomagnetismo é uma terapia complementar e não substitui tratamento médico, terapêutico ou qualquer outro tratamento legalmente reconhecido.</p>
+                        <p className="mb-2">Não são feitas promessas de cura, e os resultados podem variar de pessoa para pessoa.</p>
+                        <p>O paciente deve manter seus exames, consultas e tratamentos em dia com os profissionais de saúde responsáveis.</p>
+                    </div>
+
+                    <label className="flex items-start gap-3 bg-teal-50 p-3 rounded border border-teal-200 cursor-pointer">
+                        <input type="checkbox" className="mt-1 w-4 h-4 text-teal-600 rounded" checked={hasAgreement} onChange={(e) => setHasAgreement(e.target.checked)} />
+                        <span className="text-sm font-medium text-teal-900 leading-tight">
+                            Li e declaro estar ciente de que o Biomagnetismo é uma terapia complementar e não substitui tratamento médico, terapêutico ou qualquer outro tratamento legalmente reconhecido. Não me foram feitas promessas de cura, resultados podem variar de pessoa para pessoa e ainda, que devo manter meus exames, consultas e tratamentos em dia com os profissionais de saúde responsáveis.
+                        </span>
+                    </label>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-600 mb-1">Nome Completo</label>
+                            <input type="text" value={signatureName} onChange={(e) => setSignatureName(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-teal-500 text-sm" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-600 mb-1">CPF (Opcional)</label>
+                            <input type="text" value={signatureCpf} onChange={(e) => setSignatureCpf(e.target.value)} placeholder="000.000.000-00" className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-teal-500 text-sm" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-slate-600 mb-1 flex justify-between items-end">
+                            <span>Assinatura (Desenhe no espaço abaixo)</span>
+                            <button type="button" onClick={clearSignature} className="text-teal-600 hover:text-teal-800 underline">Limpar Assinatura</button>
+                        </label>
+                        <canvas 
+                           ref={canvasRef}
+                           width={600}
+                           height={200}
+                           onMouseDown={startDrawing}
+                           onMouseMove={draw}
+                           onMouseUp={stopDrawing}
+                           onMouseOut={stopDrawing}
+                           onTouchStart={startDrawing}
+                           onTouchMove={draw}
+                           onTouchEnd={stopDrawing}
+                           className="w-full h-40 border-2 border-slate-300 rounded-lg bg-slate-50 cursor-crosshair touch-none"
+                        />
+                    </div>
+                </div>
+
+                <div className="pt-4 border-t flex justify-end gap-3 shrink-0">
+                   <button type="button" onClick={() => setIsSignatureModalOpen(false)} className="px-4 py-2 border border-slate-300 text-slate-700 rounded hover:bg-slate-50 transition-colors font-medium">Cancelar</button>
+                   <button type="button" onClick={confirmSignature} className="px-6 py-2 bg-teal-600 text-white rounded font-bold shadow hover:bg-teal-700 transition-colors">Confirmar e Assinar</button>
+                </div>
+             </div>
+          </div>
+        )}
+
+        <div className="space-y-4">
+           <div className="flex items-center gap-2">
+             <h3 className="text-lg font-bold text-teal-700">Termo de Ciência do Paciente</h3>
+             <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded border border-slate-200">Obrigatório</span>
+           </div>
+
+           <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm text-slate-600 leading-relaxed italic">
+             "O Biomagnetismo é uma terapia complementar e não substitui tratamento médico, terapêutico ou qualquer outro tratamento legalmente reconhecido. Não são feitas promessas de cura, e os resultados podem variar de pessoa para pessoa. O paciente deve manter seus exames, consultas e tratamentos em dia com os profissionais de saúde responsáveis."
+           </div>
+
+           {consentForm.status === 'pending' ? (
+             <div className="flex flex-col sm:flex-row gap-4 mt-4">
+                <button type="button" onClick={openSignatureModal} className="flex-1 px-4 py-3 bg-teal-600 text-white font-bold rounded-lg shadow hover:bg-teal-700 transition-colors">
+                    Assinar neste dispositivo
+                </button>
+                <button type="button" onClick={handleSendWhatsApp} className="flex-1 px-4 py-3 bg-green-600 text-white font-bold rounded-lg shadow hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.711.927 2.149.927h.001c3.181 0 5.768-2.586 5.769-5.766 0-3.181-2.587-5.769-5.77-5.769zM12.031 3c4.953 0 8.973 4.021 8.973 8.973 0 4.953-4.02 8.973-8.973 8.973h-.001c-1.558 0-3.092-.41-4.428-1.185l-4.602 1.208 1.231-4.484a8.956 8.956 0 01-1.173-4.512C3.058 7.021 7.078 3 12.031 3z"></path></svg>
+                    Enviar via WhatsApp
+                </button>
+             </div>
+           ) : (
+             <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 shadow-sm">
+                        <CheckIcon className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <p className="font-bold text-green-800">Termo assinado com sucesso.</p>
+                        <p className="text-xs text-green-600">O atendimento pode prosseguir. Assinado por: {consentForm.signedName}</p>
+                    </div>
+                </div>
+                <button type="button" onClick={openSignatureModal} className="text-sm font-semibold text-teal-600 hover:text-teal-800">Ver Assinatura</button>
+             </div>
+           )}
+        </div>
+
+        <hr className="border-slate-200" />
+
+        <div className={`space-y-4 transition-all duration-500 ${(consentForm.status === 'signed_local' || consentForm.status === 'signed_remote') ? 'opacity-100' : 'opacity-40 blur-[1px] pointer-events-none'}`}>
+          <div>
+            <label htmlFor="mainComplaint" className="block text-sm font-medium text-slate-600 font-bold text-teal-700">Queixas do dia (Opcional)</label>
+            <textarea
+              id="mainComplaint"
+              name="mainComplaint"
+              value={patient.mainComplaint}
+              onChange={handleChange}
+              rows={4}
+              className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:border-teal-500 sm:text-sm"
+              placeholder="Descreva as queixas e sintomas para o atendimento de hoje (se houver)..."
+            />
+          </div>
+
+          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mt-4">
+            <h4 className="text-sm font-bold text-teal-700 mb-3 border-b pb-2">Como o paciente está agora (antes da sessão):</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                 <label className="block text-xs font-semibold text-slate-600 mb-1">Dor (0-10)</label>
+                 <select value={scalesBefore.pain} onChange={(e) => setScalesBefore(prev => ({...prev, pain: e.target.value === '' ? '' : Number(e.target.value)}))} className="w-full text-sm border-slate-300 rounded focus:ring-teal-500 py-1.5 px-2">
+                    <option value="">--</option>
+                    {[0,1,2,3,4,5,6,7,8,9,10].map(n => <option key={`p${n}`} value={n}>{n}</option>)}
+                 </select>
+              </div>
+              <div>
+                 <label className="block text-xs font-semibold text-slate-600 mb-1">Ansiedade (0-10)</label>
+                 <select value={scalesBefore.anxiety} onChange={(e) => setScalesBefore(prev => ({...prev, anxiety: e.target.value === '' ? '' : Number(e.target.value)}))} className="w-full text-sm border-slate-300 rounded focus:ring-teal-500 py-1.5 px-2">
+                    <option value="">--</option>
+                    {[0,1,2,3,4,5,6,7,8,9,10].map(n => <option key={`a${n}`} value={n}>{n}</option>)}
+                 </select>
+              </div>
+              <div>
+                 <label className="block text-xs font-semibold text-slate-600 mb-1">Cansaço (0-10)</label>
+                 <select value={scalesBefore.tiredness} onChange={(e) => setScalesBefore(prev => ({...prev, tiredness: e.target.value === '' ? '' : Number(e.target.value)}))} className="w-full text-sm border-slate-300 rounded focus:ring-teal-500 py-1.5 px-2">
+                    <option value="">--</option>
+                    {[0,1,2,3,4,5,6,7,8,9,10].map(n => <option key={`t${n}`} value={n}>{n}</option>)}
+                 </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-4 border-t">
           <button
             type="submit"
             disabled={!isFormValid}

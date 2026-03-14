@@ -131,13 +131,24 @@ export const dbService = {
     async saveSession(therapistUsername: string, session: Session): Promise<void> {
         if (!supabase) return;
         const normalizedUsername = therapistUsername.toLowerCase();
+        
+        // Ensure to stringify complex objects if necessary, though supabase JS client
+        // handles objects mapped to JSONB fields automatically.
+        const sessionData = {
+            ...session,
+            safetyCheck: session.safetyCheck,
+            consentForm: session.consentForm,
+            scalesBefore: session.scalesBefore,
+            scalesAfter: session.scalesAfter,
+        };
+
         const { error } = await supabase
             .from('sessions')
             .upsert({
                 id: session.id,
                 therapist_username: normalizedUsername,
                 patient_id: session.patient.id,
-                data: session,
+                data: sessionData,
                 start_time: session.startTime,
                 end_time: session.endTime
             });

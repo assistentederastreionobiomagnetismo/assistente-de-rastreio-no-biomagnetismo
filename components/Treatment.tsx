@@ -1,17 +1,21 @@
 
 import React from 'react';
+import { SessionScales } from '../types';
 
 interface TreatmentProps {
   impactionTime: string;
   setImpactionTime: (time: string) => void;
   notes: string;
   setNotes: (notes: string) => void;
+  scalesBefore: SessionScales;
+  scalesAfter: SessionScales;
+  setScalesAfter: React.Dispatch<React.SetStateAction<SessionScales>>;
   onNext: () => void;
   onBack: () => void;
   sessionType?: string;
 }
 
-const Treatment: React.FC<TreatmentProps> = ({ impactionTime, setImpactionTime, notes, setNotes, onNext, onBack, sessionType }) => {
+const Treatment: React.FC<TreatmentProps> = ({ impactionTime, setImpactionTime, notes, setNotes, scalesBefore, scalesAfter, setScalesAfter, onNext, onBack, sessionType }) => {
   const isDistancia = sessionType === 'distancia';
 
   return (
@@ -79,6 +83,54 @@ const Treatment: React.FC<TreatmentProps> = ({ impactionTime, setImpactionTime, 
           </div>
 
         </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto space-y-4">
+        
+        {/* Nova seção: Como o paciente está agora (após a sessão) */}
+        <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+          <h3 className="text-lg font-bold text-teal-700 mb-4 border-b pb-2">Evolução do Paciente na Sessão</h3>
+          <p className="text-sm text-slate-600 mb-4">Compare com o estado inicial e registre como o paciente está se sentindo agora.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Dor */}
+            <div className="space-y-2">
+               <label className="block text-sm font-semibold text-slate-700">Dor (0-10)</label>
+               <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                  <span>Antes: <strong className="text-slate-700">{scalesBefore.pain !== '' ? scalesBefore.pain : '--'}</strong></span>
+               </div>
+               <select value={scalesAfter.pain} onChange={(e) => setScalesAfter(prev => ({...prev, pain: e.target.value === '' ? '' : Number(e.target.value)}))} className="w-full text-sm border-slate-300 rounded focus:ring-teal-500 py-2 px-3 shadow-sm bg-white">
+                  <option value="">-- Selecione --</option>
+                  {[0,1,2,3,4,5,6,7,8,9,10].map(n => <option key={`after_p${n}`} value={n}>{n}</option>)}
+               </select>
+            </div>
+
+            {/* Ansiedade */}
+            <div className="space-y-2">
+               <label className="block text-sm font-semibold text-slate-700">Ansiedade (0-10)</label>
+               <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                  <span>Antes: <strong className="text-slate-700">{scalesBefore.anxiety !== '' ? scalesBefore.anxiety : '--'}</strong></span>
+               </div>
+               <select value={scalesAfter.anxiety} onChange={(e) => setScalesAfter(prev => ({...prev, anxiety: e.target.value === '' ? '' : Number(e.target.value)}))} className="w-full text-sm border-slate-300 rounded focus:ring-teal-500 py-2 px-3 shadow-sm bg-white">
+                  <option value="">-- Selecione --</option>
+                  {[0,1,2,3,4,5,6,7,8,9,10].map(n => <option key={`after_a${n}`} value={n}>{n}</option>)}
+               </select>
+            </div>
+
+            {/* Cansaço */}
+            <div className="space-y-2">
+               <label className="block text-sm font-semibold text-slate-700">Cansaço (0-10)</label>
+               <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                  <span>Antes: <strong className="text-slate-700">{scalesBefore.tiredness !== '' ? scalesBefore.tiredness : '--'}</strong></span>
+               </div>
+               <select value={scalesAfter.tiredness} onChange={(e) => setScalesAfter(prev => ({...prev, tiredness: e.target.value === '' ? '' : Number(e.target.value)}))} className="w-full text-sm border-slate-300 rounded focus:ring-teal-500 py-2 px-3 shadow-sm bg-white">
+                  <option value="">-- Selecione --</option>
+                  {[0,1,2,3,4,5,6,7,8,9,10].map(n => <option key={`after_t${n}`} value={n}>{n}</option>)}
+               </select>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <div className="max-w-4xl mx-auto space-y-4">

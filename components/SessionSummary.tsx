@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Patient, BiomagneticPair, PhenomenaData, ProtocolData, Session } from '../types';
+import { Patient, BiomagneticPair, PhenomenaData, ProtocolData, Session, SafetyCheck, ConsentForm, SessionScales } from '../types';
 import { PrinterIcon } from './icons/Icons';
 
 interface SessionSummaryProps {
@@ -22,6 +22,10 @@ interface SessionSummaryProps {
   notes: string;
   startTime: Date | null;
   endTime: Date | null;
+  safetyCheck?: SafetyCheck;
+  consentForm?: ConsentForm;
+  scalesBefore?: SessionScales;
+  scalesAfter?: SessionScales;
   onFinish: () => void;
   onBack: () => void;
   isHistorical?: boolean;
@@ -46,6 +50,10 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
     notes, 
     startTime, 
     endTime, 
+    safetyCheck,
+    consentForm,
+    scalesBefore,
+    scalesAfter,
     onFinish, 
     onBack,
     isHistorical = false
@@ -140,8 +148,54 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
                     <p className="text-lg font-black text-teal-600">{impactionTime}</p>
                 </div>
             )}
+            
+            {(consentForm?.status === 'signed_local' || consentForm?.status === 'signed_remote') && (
+               <div className="mt-3 p-3 bg-green-50 rounded border border-green-200">
+                   <p className="text-xs font-bold text-green-800 uppercase mb-1">Termo de Ciência</p>
+                   <p className="text-sm font-semibold text-green-700">Assinado por: {consentForm.signedName}</p>
+                   <p className="text-xs text-green-600">Em: {new Date(consentForm.dateSigned!).toLocaleString('pt-BR')}</p>
+               </div>
+            )}
           </div>
         </div>
+
+        {/* Evolução da Sessão (Escalas) */}
+        {(scalesBefore || scalesAfter) && (
+           <div className="pb-6 border-b border-slate-200">
+              <h3 className="text-lg font-bold text-teal-700 mb-4">Evolução do Paciente</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                 {/* Dor */}
+                 <div className="bg-slate-50 p-3 rounded border border-slate-200 text-center">
+                    <strong className="text-xs uppercase text-slate-500 mb-2 block">Nível de Dor</strong>
+                    <div className="flex justify-center items-center gap-3">
+                       <span className="text-lg font-bold text-slate-700">{scalesBefore?.pain !== '' ? scalesBefore?.pain : '--'}</span>
+                       <span className="text-slate-400">→</span>
+                       <span className={`text-lg font-black ${String(scalesBefore?.pain) > String(scalesAfter?.pain) ? 'text-green-600' : 'text-slate-800'}`}>{scalesAfter?.pain !== '' ? scalesAfter?.pain : '--'}</span>
+                    </div>
+                 </div>
+
+                 {/* Ansiedade */}
+                 <div className="bg-slate-50 p-3 rounded border border-slate-200 text-center">
+                    <strong className="text-xs uppercase text-slate-500 mb-2 block">Ansiedade</strong>
+                    <div className="flex justify-center items-center gap-3">
+                       <span className="text-lg font-bold text-slate-700">{scalesBefore?.anxiety !== '' ? scalesBefore?.anxiety : '--'}</span>
+                       <span className="text-slate-400">→</span>
+                       <span className={`text-lg font-black ${String(scalesBefore?.anxiety) > String(scalesAfter?.anxiety) ? 'text-green-600' : 'text-slate-800'}`}>{scalesAfter?.anxiety !== '' ? scalesAfter?.anxiety : '--'}</span>
+                    </div>
+                 </div>
+
+                 {/* Cansaço */}
+                 <div className="bg-slate-50 p-3 rounded border border-slate-200 text-center">
+                    <strong className="text-xs uppercase text-slate-500 mb-2 block">Cansaço</strong>
+                    <div className="flex justify-center items-center gap-3">
+                       <span className="text-lg font-bold text-slate-700">{scalesBefore?.tiredness !== '' ? scalesBefore?.tiredness : '--'}</span>
+                       <span className="text-slate-400">→</span>
+                       <span className={`text-lg font-black ${String(scalesBefore?.tiredness) > String(scalesAfter?.tiredness) ? 'text-green-600' : 'text-slate-800'}`}>{scalesAfter?.tiredness !== '' ? scalesAfter?.tiredness : '--'}</span>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        )}
 
         {/* NOTAS DE ETAPAS */}
         {(protocolNotes || reservatoriosNotes || levelINotes || levelIINotes || levelIIINotes || phenomenaNotes) && (
@@ -296,8 +350,13 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
           )}
         </div>
 
+        {/* Disclaimer Impressão */}
+        <div className="hidden print:block mt-8 p-4 border border-slate-300 rounded bg-slate-50 text-[10px] text-slate-600 italic text-justify leading-tight max-w-4xl mx-auto">
+            <p><strong>Aviso Importante:</strong> O Biomagnetismo é uma técnica integrativa e complementar (PICS). Os rastreios e impactações magnéticas registrados neste relatório não constituem diagnóstico médico, prescrição de tratamento alopático, nem promessa de cura para qualquer enfermidade. É de responsabilidade exclusiva do paciente manter seus acompanhamentos e tratamentos convencionais com os profissionais e médicos competentes. A terapia biomagnética atua equilibrando o pH do corpo e auxiliando na autorregulação natural do organismo.</p>
+        </div>
+
         {/* Espaço para assinatura em Impressão */}
-        <div className="hidden print:block mt-20 pt-10">
+        <div className="hidden print:block mt-16 pt-8">
             <div className="flex justify-around items-end">
                 <div className="text-center w-64">
                     <div className="border-t border-slate-400 pt-2">
@@ -305,12 +364,29 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
                         <p className="text-[10px] text-slate-400 uppercase">Especialista em Biomagnetismo</p>
                     </div>
                 </div>
-                <div className="text-center w-64">
-                    <div className="border-t border-slate-400 pt-2">
-                        <p className="text-sm font-bold text-slate-700">{patient.name}</p>
-                        <p className="text-[10px] text-slate-400 uppercase">Paciente / Responsável</p>
+                {!consentForm?.signatureImage ? (
+                    <div className="text-center w-64">
+                        <div className="border-t border-slate-400 pt-2">
+                            <p className="text-sm font-bold text-slate-700">{patient.name}</p>
+                            <p className="text-[10px] text-slate-400 uppercase">Paciente / Responsável</p>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="text-center w-64 flex flex-col items-center">
+                        <img src={consentForm.signatureImage} alt="Assinatura" className="h-16 object-contain mb-1" />
+                        <div className="w-full border-t border-slate-400 pt-1">
+                            <p className="text-sm font-bold text-slate-700">{consentForm.signedName}</p>
+                            <p className="text-[10px] text-slate-400 uppercase">Termo Assinado Digitalmente</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+            
+            {/* FOOTER PDF */}
+            <div className="mt-16 text-center border-t border-slate-200 pt-3">
+                <p className="text-[9px] text-slate-400 font-mono">
+                    Relatório gerado pelo Sistema de Gestão Rastreios no Biomagnetismo — {new Date().toLocaleString('pt-BR')}
+                </p>
             </div>
         </div>
       </div>
