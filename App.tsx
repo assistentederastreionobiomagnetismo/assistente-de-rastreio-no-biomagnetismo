@@ -396,8 +396,10 @@ const App: React.FC = () => {
     if (currentStep < Step.SUMMARY) setCurrentStep(currentStep + 1);
   };
 
-  const handleFinishSession = async () => {
+  const handleFinishSession = async (finalTherapistSig?: string) => {
     const isEditing = !!editingSessionId;
+    const currentTherapistSig = finalTherapistSig !== undefined ? finalTherapistSig : therapistSignature;
+    
     const newSession: Session = {
       id: isEditing ? editingSessionId! : new Date().toISOString(),
       patient,
@@ -422,7 +424,7 @@ const App: React.FC = () => {
       phenomenaNotes,
       startTime: sessionStartTime,
       endTime: sessionEndTime,
-      therapistSignature,
+      therapistSignature: currentTherapistSig,
       ...(isEditing ? { editedAt: new Date().toISOString() } : {})
     };
 

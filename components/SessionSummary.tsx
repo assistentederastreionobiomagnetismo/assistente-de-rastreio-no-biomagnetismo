@@ -28,7 +28,7 @@ interface SessionSummaryProps {
   scalesAfter?: SessionScales;
   therapistSignature?: string;
   setTherapistSignature?: (val: string) => void;
-  onFinish: () => void;
+  onFinish: (sig?: string) => void;
   onBack: () => void;
   isHistorical?: boolean;
 }
@@ -140,9 +140,20 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
   };
 
   const handleFinish = () => {
-      // Re-evaluate signature before saving
-      saveSignature();
-      onFinish();
+      // Get the latest signature from canvas
+      const canvas = canvasRef.current;
+      let finalSig = therapistSignature;
+      
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        const pixelBuffer = new Uint32Array(ctx!.getImageData(0,0, canvas.width, canvas.height).data.buffer);
+        const hasDrawn = pixelBuffer.some(color => color !== 0);
+        if (hasDrawn) {
+            finalSig = canvas.toDataURL('image/png');
+        }
+      }
+      
+      onFinish(finalSig);
   };
 
   const formatDuration = (start: Date | null, end: Date | null) => {
@@ -237,9 +248,18 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
             
             {(consentForm?.status === 'signed_local' || consentForm?.status === 'signed_remote') && (
                <div className="mt-3 p-3 bg-green-50 rounded border border-green-200">
-                   <p className="text-xs font-bold text-green-800 uppercase mb-1">Termo de Ciência</p>
-                   <p className="text-sm font-semibold text-green-700">Assinado por: {consentForm.signedName}</p>
-                   <p className="text-xs text-green-600">Em: {new Date(consentForm.dateSigned!).toLocaleString('pt-BR')}</p>
+                   <div className="flex flex-col md:flex-row md:items-center gap-4">
+                       <div className="flex-1">
+                           <p className="text-xs font-bold text-green-800 uppercase mb-1">Termo de Ciência</p>
+                           <p className="text-sm font-semibold text-green-700">Assinado por: {consentForm.signedName}</p>
+                           <p className="text-xs text-green-600">Em: {new Date(consentForm.dateSigned!).toLocaleString('pt-BR')}</p>
+                       </div>
+                       {consentForm.signatureImage && (
+                           <div className="bg-white p-1 rounded border border-green-100 shadow-sm w-32 h-16 flex items-center justify-center">
+                               <img src={consentForm.signatureImage} alt="Assinatura" className="max-h-full max-w-full object-contain" />
+                           </div>
+                       )}
+                   </div>
                </div>
             )}
           </div>

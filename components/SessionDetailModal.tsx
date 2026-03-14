@@ -40,6 +40,7 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ session, onClos
             emotionsNotes={session.emotionsNotes}
             sensationsNotes={session.sensationsNotes}
             protocolNotes={session.protocolNotes}
+            reservatoriosNotes={session.reservatoriosNotes}
             levelINotes={session.levelINotes}
             levelIINotes={session.levelIINotes}
             levelIIINotes={session.levelIIINotes}
@@ -48,6 +49,11 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ session, onClos
             notes={session.notes}
             startTime={session.startTime}
             endTime={session.endTime}
+            safetyCheck={session.safetyCheck}
+            consentForm={session.consentForm}
+            scalesBefore={session.scalesBefore}
+            scalesAfter={session.scalesAfter}
+            therapistSignature={session.therapistSignature}
             onFinish={() => { }}
             onBack={() => { }}
             isHistorical={true}
