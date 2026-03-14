@@ -15,6 +15,7 @@ import SessionDetailModal from './components/SessionDetailModal';
 import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon, BrainIcon, SuccessIcon, ReportIcon, CheckIcon, DropletIcon, LayerOneIcon, LayerTwoIcon, LayerThreeIcon, HeartPulseIcon } from './components/icons/Icons';
 import { BIOMAGNETIC_PAIRS } from './constants';
 import { dbService } from './services/dbService';
+import RemoteSignature from './components/RemoteSignature';
 
 // --- SUPABASE MIGRATION IN PROGRESS ---
 // IndexedDB utils will be removed after full verification.
@@ -242,6 +243,14 @@ const App: React.FC = () => {
     };
     initAppData();
   }, []);
+
+  // Remote Signature URL Parameter Handling
+  const urlParams = new URLSearchParams(window.location.search);
+  const signatureIdParam = urlParams.get('sign');
+  
+  if (signatureIdParam) {
+     return <RemoteSignature signatureId={signatureIdParam} />;
+  }
 
   // Efeito de Auto-Save do Atendimento Ativo
   useEffect(() => {

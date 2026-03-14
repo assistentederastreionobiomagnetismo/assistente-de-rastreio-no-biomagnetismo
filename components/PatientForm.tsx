@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Patient, SafetyCheck, ConsentForm, SessionScales } from '../types';
 import { SearchIcon, UserIcon, PlusIcon, TrashIcon, PencilIcon, CheckIcon } from './icons/Icons';
 import { dbService } from '../services/dbService';
@@ -44,6 +44,9 @@ const PatientForm: React.FC<PatientFormProps> = ({
     phone: '',
     mainComplaint: ''
   });
+
+  const [isWaitingSignature, setIsWaitingSignature] = useState(false);
+  const [pendingSignatureId, setPendingSignatureId] = useState<string | null>(null);
 
   const calculateAge = (birthDate: string): number | undefined => {
     if (!birthDate || birthDate.length < 10) return undefined;
@@ -274,10 +277,64 @@ const PatientForm: React.FC<PatientFormProps> = ({
     setIsSignatureModalOpen(false);
   };
 
-  const handleSendWhatsApp = () => {
-     alert("Enviando link via WhatsApp e aguardando assinatura...(Funcionalidade Backend a ser implementada)");
-     // Implementaremos o fluxo do whatsapp e do poll na proxima iteracao,
-     // por enquanto o usuario pode testar a assinatura local.
+  useEffect(() => {
+     let intervalId: NodeJS.Timeout;
+     
+     if (isWaitingSignature && pendingSignatureId) {
+        intervalId = setInterval(async () => {
+           try {
+              const statusData = await dbService.checkPendingSignatureStatus(pendingSignatureId);
+              if (statusData && statusData.status === 'signed' && statusData.signedData) {
+                 setIsWaitingSignature(false);
+                 setPendingSignatureId(null);
+                 setConsentForm({
+                   status: 'signed_remote',
+                   cpf: statusData.signedData.cpf || '',
+                   dateSigned: new Date().toISOString(),
+                   signedName: statusData.signedData.name || patient.name || '',
+                   signatureImage: statusData.signedData.signatureImage || '',
+                 });
+                 alert('✅ O paciente assinou o termo com sucesso!');
+              }
+           } catch (error) {
+              console.error("Erro ao verificar assinatura:", error);
+           }
+        }, 3000); // Check every 3 seconds
+     }
+     
+     return () => {
+        if (intervalId) clearInterval(intervalId);
+     };
+  }, [isWaitingSignature, pendingSignatureId, patient.name, setConsentForm]);
+
+  const handleSendWhatsApp = async () => {
+     if (!patient || !patient.id) {
+       alert("Selecione um paciente primeiro.");
+       return;
+     }
+
+     try {
+        const signatureId = await dbService.createPendingSignature(patient.id, patient.name, therapistUsername);
+        setPendingSignatureId(signatureId);
+        setIsWaitingSignature(true);
+        
+        // Formatar app origin para o link local ou produção
+        const appUrl = window.location.origin;
+        const link = `${appUrl}/?sign=${signatureId}`;
+        const encodedMessage = encodeURIComponent(`Olá ${patient.name}, por favor, acesse o link abaixo para assinar o seu Termo de Ciência e Autorização para a nossa sessão de Biomagnetismo:\n\n${link}`);
+        // Abrir app ou web de forma genérica para o terapeuta escolher
+        const waUrl = `https://wa.me/?text=${encodedMessage}`;
+        
+        window.open(waUrl, '_blank');
+     } catch (error) {
+        alert("Erro ao criar link de assinatura. Verifique sua conexão ou contate o suporte.");
+        console.error(error);
+     }
+  };
+
+  const cancelWaitingSignature = () => {
+     setIsWaitingSignature(false);
+     setPendingSignatureId(null);
   };
 
   const openSignatureModal = () => {
@@ -591,30 +648,63 @@ const PatientForm: React.FC<PatientFormProps> = ({
                     <div>
                         <label className="block text-xs font-bold text-slate-600 mb-1 flex justify-between items-end">
                             <span>Assinatura (Desenhe no espaço abaixo)</span>
-                            <button type="button" onClick={clearSignature} className="text-teal-600 hover:text-teal-800 underline">Limpar Assinatura</button>
+                            {consentForm.status !== 'pending' && consentForm.signatureImage ? (
+                               <button type="button" onClick={() => setConsentForm({status: 'pending'})} className="text-teal-600 hover:text-teal-800 underline">Refazer Assinatura</button>
+                            ) : (
+                               <button type="button" onClick={clearSignature} className="text-teal-600 hover:text-teal-800 underline">Limpar Assinatura</button>
+                            )}
                         </label>
-                        <canvas 
-                           ref={canvasRef}
-                           width={600}
-                           height={200}
-                           onMouseDown={startDrawing}
-                           onMouseMove={draw}
-                           onMouseUp={stopDrawing}
-                           onMouseOut={stopDrawing}
-                           onTouchStart={startDrawing}
-                           onTouchMove={draw}
-                           onTouchEnd={stopDrawing}
-                           className="w-full h-40 border-2 border-slate-300 rounded-lg bg-slate-50 cursor-crosshair touch-none"
-                        />
+                        
+                        {(consentForm.status === 'signed_local' || consentForm.status === 'signed_remote') && consentForm.signatureImage ? (
+                           <div className="w-full h-40 border-2 border-slate-300 rounded-lg bg-slate-50 flex items-center justify-center p-2 relative">
+                               <img src={consentForm.signatureImage} alt="Assinatura do Paciente" className="max-h-full max-w-full object-contain" />
+                               <div className="absolute bottom-2 right-2 text-xs text-slate-400 bg-white/80 px-2 py-1 rounded shadow-sm">
+                                  Assinado em: {consentForm.dateSigned ? new Date(consentForm.dateSigned).toLocaleDateString() : 'Data não registrada'}
+                               </div>
+                           </div>
+                        ) : (
+                           <canvas 
+                              ref={canvasRef}
+                              width={600}
+                              height={200}
+                              onMouseDown={startDrawing}
+                              onMouseMove={draw}
+                              onMouseUp={stopDrawing}
+                              onMouseOut={stopDrawing}
+                              onTouchStart={startDrawing}
+                              onTouchMove={draw}
+                              onTouchEnd={stopDrawing}
+                              className="w-full h-40 border-2 border-slate-300 rounded-lg bg-slate-50 cursor-crosshair touch-none"
+                           />
+                        )}
                     </div>
                 </div>
 
                 <div className="pt-4 border-t flex justify-end gap-3 shrink-0">
                    <button type="button" onClick={() => setIsSignatureModalOpen(false)} className="px-4 py-2 border border-slate-300 text-slate-700 rounded hover:bg-slate-50 transition-colors font-medium">Cancelar</button>
-                   <button type="button" onClick={confirmSignature} className="px-6 py-2 bg-teal-600 text-white rounded font-bold shadow hover:bg-teal-700 transition-colors">Confirmar e Assinar</button>
+                   {consentForm.status === 'pending' && (
+                     <button type="button" onClick={confirmSignature} className="px-6 py-2 bg-teal-600 text-white rounded font-bold shadow hover:bg-teal-700 transition-colors">Confirmar e Assinar</button>
+                   )}
                 </div>
              </div>
           </div>
+        )}
+
+         {/* Waiting WhatsApp Signature Modal */}
+        {isWaitingSignature && (
+            <div className="fixed inset-0 bg-slate-900 bg-opacity-75 z-[80] flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm flex flex-col items-center text-center">
+                    <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">Aguardando Assinatura</h3>
+                    <p className="text-slate-600 mb-6 flex-1 text-sm">Enviamos um link para o WhatsApp de <strong>{patient.name}</strong>. Peça para o paciente abrir o link e assinar. Esta tela irá sair automaticamente quando o termo for assinado pelo paciente ou você pode cancelar abaixo.</p>
+                    <button 
+                       onClick={cancelWaitingSignature}
+                       className="px-6 py-2 text-red-600 font-bold bg-red-100 rounded-full hover:bg-red-200 transition text-sm"
+                    >
+                       Cancelar Aguardo / Envio de Link
+                    </button>
+                </div>
+            </div>
         )}
 
         <div className="space-y-4">
@@ -634,7 +724,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
                 </button>
                 <button type="button" onClick={handleSendWhatsApp} className="flex-1 px-4 py-3 bg-green-600 text-white font-bold rounded-lg shadow hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
                     <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.711.927 2.149.927h.001c3.181 0 5.768-2.586 5.769-5.766 0-3.181-2.587-5.769-5.77-5.769zM12.031 3c4.953 0 8.973 4.021 8.973 8.973 0 4.953-4.02 8.973-8.973 8.973h-.001c-1.558 0-3.092-.41-4.428-1.185l-4.602 1.208 1.231-4.484a8.956 8.956 0 01-1.173-4.512C3.058 7.021 7.078 3 12.031 3z"></path></svg>
-                    Enviar via WhatsApp
+                    Enviar termo via WhatsApp
                 </button>
              </div>
            ) : (

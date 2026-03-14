@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { Patient, Session, BiomagneticPair, User } from '../types';
+import { Patient, Session, BiomagneticPair, User, ConsentForm } from '../types';
 
 export const dbService = {
     // Profiles / Auth
@@ -231,5 +231,56 @@ export const dbService = {
             .getPublicUrl(filePath);
 
         return publicUrl;
+    },
+
+    // Remote Signatures
+    async createPendingSignature(patientId: string, patientName: string, therapistUsername: string): Promise<string> {
+        if (!supabase) throw new Error("Supabase não configurado");
+        
+        const { data, error } = await supabase
+            .from('pending_signatures')
+            .insert([{
+                patient_id: patientId,
+                patient_name: patientName,
+                therapist_username: therapistUsername.toLowerCase(),
+                status: 'pending'
+            }])
+            .select('id')
+            .single();
+
+        if (error) throw error;
+        return data.id;
+    },
+
+    async checkPendingSignatureStatus(signatureId: string): Promise<{status: string, signedData: any} | null> {
+        if (!supabase) return null;
+
+        const { data, error } = await supabase
+            .from('pending_signatures')
+            .select('status, signed_data')
+            .eq('id', signatureId)
+            .single();
+
+        if (error) return null;
+        
+        return {
+            status: data.status,
+            signedData: data.signed_data
+        };
+    },
+
+    async completePendingSignature(signatureId: string, signedData: any): Promise<void> {
+        if (!supabase) return;
+
+        const { error } = await supabase
+            .from('pending_signatures')
+            .update({
+                status: 'signed',
+                signed_data: signedData
+            })
+            .eq('id', signatureId)
+            .eq('status', 'pending');
+
+        if (error) throw error;
     }
 };
