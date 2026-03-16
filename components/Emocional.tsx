@@ -80,7 +80,7 @@ const Emocional: React.FC<EmocionalProps> = ({
     const sensationPart = physicalSensation ? `. Sensação física associada: ${physicalSensation}.` : '';
     const info = `${name}${agePart}${contextPart}${sensationPart}`;
     
-    return `Todos os pontos anatômicos, orgânicos, sistêmicos, que carreguem informação, presença, frequência e ressonância da(s) emoção(ões) ${info}, Façam-se presente (falar 3x). Alinhem-se, equilibrem-se, entreguem-se (3x) com a carga magnética de 1 bilhão de Gauss ou quanto se faz necessário. Enviando agora a(s) emoção(ões) ${info} para os buracos negros do universo. Fechando esses portais.`;
+    return `Todos os pontos anatômicos, orgânicos, sistêmicos, que carreguem informação, presença, frequência e ressonância da(s) emoção(ões) ${info}, Façam-se presente (falar 3x). Alinhem-se, equilibrem-se, entreguem-se (3x) com a carga magnética de 1 bilhão de Gauss ou quanto se faz necessário. Enviando agora essa(s) emoção(ões) para os buracos negros do universo. Fechando esses portais.`;
   };
 
   const generateSensationCommand = (name: string, location?: string, intensity?: number, situation?: string) => {
@@ -89,7 +89,7 @@ const Emocional: React.FC<EmocionalProps> = ({
     const situationPart = situation ? `, mais presente quando ${situation}` : '';
     const info = `${name}${locationPart}${intensityPart}${situationPart}`;
 
-    return `Todos os pontos anatômicos, orgânicos, sistêmicos, que carreguem informação, presença, frequência e ressonância da(s) sensação(ões) ${info}, Façam-se presente (falar 3x). Alinhem-se, equilibrem-se, entreguem-se (3x) com a carga magnética de 1 bilhão de Gauss ou quanto se faz necessário. Enviando agora a(s) sensação(ões) ${info} para os buracos negros do universo. Fechando esses portais.`;
+    return `Todos os pontos anatômicos, orgânicos, sistêmicos, que carreguem informação, presença, frequência e ressonância da(s) sensação(ões) ${info}, Façam-se presente (falar 3x). Alinhem-se, equilibrem-se, entreguem-se (3x) com a carga magnética de 1 bilhão de Gauss ou quanto se faz necessário. Enviando agora essa(s) sensação(ões) para os buracos negros do universo. Fechando esses portais.`;
   };
 
   const toggleEmotion = (emotion: string) => {
@@ -203,65 +203,68 @@ const Emocional: React.FC<EmocionalProps> = ({
         {emotionsData.length > 0 && (
           <div className="space-y-6 mt-8">
             <h3 className="text-lg font-bold text-teal-700 uppercase tracking-tight border-l-4 border-teal-500 pl-3">Identificação do Gatilho Emocional</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               {emotionsData.map((emo, idx) => (
                 <div key={idx} className="bg-white p-6 rounded-2xl border border-teal-100 shadow-sm space-y-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs font-black text-white bg-teal-500 px-3 py-1 rounded-full uppercase">{emo.name}</span>
                   </div>
                   
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E1 — Emoção identificada</label>
-                      <input 
-                        type="text" 
-                        value={emo.name} 
-                        onChange={(e) => updateEmotionField(emo.name, 'name', e.target.value)}
-                        className="w-full text-sm p-2 bg-slate-50 border border-slate-200 rounded focus:ring-1 focus:ring-teal-500 outline-none"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    {/* Campos de Identificação */}
+                    <div className="grid grid-cols-1 gap-4">
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E2 — Idade aproximada</label>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E1 — Emoção identificada</label>
                         <input 
                           type="text" 
-                          value={emo.age || ''} 
-                          onChange={(e) => updateEmotionField(emo.name, 'age', e.target.value)}
-                          placeholder="Ex: 8"
+                          value={emo.name} 
+                          onChange={(e) => updateEmotionField(emo.name, 'name', e.target.value)}
+                          className="w-full text-sm p-2 bg-slate-50 border border-slate-200 rounded focus:ring-1 focus:ring-teal-500 outline-none"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E2 — Idade aproximada</label>
+                          <input 
+                            type="text" 
+                            value={emo.age || ''} 
+                            onChange={(e) => updateEmotionField(emo.name, 'age', e.target.value)}
+                            placeholder="Ex: 8"
+                            className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-teal-500 outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E4 — Sensação física (opcional)</label>
+                          <input 
+                            type="text" 
+                            value={emo.physicalSensation || ''} 
+                            onChange={(e) => updateEmotionField(emo.name, 'physicalSensation', e.target.value)}
+                            placeholder="Ex: Aperto no peito"
+                            className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-teal-500 outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E3 — Contexto ou situação associada</label>
+                        <input 
+                          type="text" 
+                          value={emo.context || ''} 
+                          onChange={(e) => updateEmotionField(emo.name, 'context', e.target.value)}
+                          placeholder="Ex: Separação dos pais"
                           className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-teal-500 outline-none"
                         />
                       </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E4 — Sensação física (opcional)</label>
-                        <input 
-                          type="text" 
-                          value={emo.physicalSensation || ''} 
-                          onChange={(e) => updateEmotionField(emo.name, 'physicalSensation', e.target.value)}
-                          placeholder="Ex: Aperto no peito"
-                          className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-teal-500 outline-none"
-                        />
-                      </div>
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E3 — Contexto ou situação associada</label>
-                      <input 
-                        type="text" 
-                        value={emo.context || ''} 
-                        onChange={(e) => updateEmotionField(emo.name, 'context', e.target.value)}
-                        placeholder="Ex: Separação dos pais"
-                        className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-teal-500 outline-none"
-                      />
-                    </div>
-                  </div>
 
-                  <div className="pt-4 border-t border-slate-100">
-                    <p className="text-xs font-bold text-teal-700 uppercase mb-2">Comando de Liberação (Emoção):</p>
-                    <textarea 
-                      value={emo.command || ''} 
-                      onChange={(e) => updateEmotionField(emo.name, 'command', e.target.value)}
-                      rows={2}
-                      className="w-full text-xs p-3 bg-teal-50 border border-teal-100 rounded-lg text-slate-700 italic outline-none focus:ring-1 focus:ring-teal-500"
-                    />
+                    {/* Comando de Liberação */}
+                    <div className="h-full flex flex-col">
+                      <p className="text-xs font-bold text-teal-700 uppercase mb-2">Comando de Liberação (Emoção):</p>
+                      <textarea 
+                        value={emo.command || ''} 
+                        onChange={(e) => updateEmotionField(emo.name, 'command', e.target.value)}
+                        className="w-full flex-grow text-xs p-3 bg-teal-50 border border-teal-100 rounded-lg text-slate-700 italic outline-none focus:ring-1 focus:ring-teal-500 min-h-[150px]"
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -352,66 +355,69 @@ const Emocional: React.FC<EmocionalProps> = ({
         {sensationsData.length > 0 && (
           <div className="space-y-6 mt-8">
             <h3 className="text-lg font-bold text-orange-700 uppercase tracking-tight border-l-4 border-orange-400 pl-3">Detalhamento da Sensação</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               {sensationsData.map((sens, idx) => (
                 <div key={idx} className="bg-white p-6 rounded-2xl border border-orange-100 shadow-sm space-y-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs font-black text-white bg-orange-400 px-3 py-1 rounded-full uppercase">{sens.name}</span>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S1 — Sensação identificada</label>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    {/* Campos de Identificação */}
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S1 — Sensação identificada</label>
+                          <input 
+                            type="text" 
+                            value={sens.name} 
+                            onChange={(e) => updateSensationField(sens.name, 'name', e.target.value)}
+                            className="w-full text-sm p-2 bg-slate-50 border border-slate-200 rounded focus:ring-1 focus:ring-orange-500 outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S2 — Local do corpo</label>
+                          <input 
+                            type="text" 
+                            value={sens.location || ''} 
+                            onChange={(e) => updateSensationField(sens.name, 'location', e.target.value)}
+                            placeholder="Ex: Peito, Cabeça"
+                            className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-orange-500 outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 gap-1">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S3 — Intensidade (0–10): <span className="text-orange-600 font-black">{sens.intensity}</span></label>
                         <input 
-                          type="text" 
-                          value={sens.name} 
-                          onChange={(e) => updateSensationField(sens.name, 'name', e.target.value)}
-                          className="w-full text-sm p-2 bg-slate-50 border border-slate-200 rounded focus:ring-1 focus:ring-orange-500 outline-none"
+                          type="range" 
+                          min="0" 
+                          max="10" 
+                          value={sens.intensity || 0} 
+                          onChange={(e) => updateSensationField(sens.name, 'intensity', parseInt(e.target.value))}
+                          className="w-full h-1.5 bg-orange-100 rounded-lg appearance-none cursor-pointer accent-orange-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S2 — Local do corpo</label>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S4 — Situação de Gatilho</label>
                         <input 
                           type="text" 
-                          value={sens.location || ''} 
-                          onChange={(e) => updateSensationField(sens.name, 'location', e.target.value)}
-                          placeholder="Ex: Peito, Cabeça"
+                          value={sens.situation || ''} 
+                          onChange={(e) => updateSensationField(sens.name, 'situation', e.target.value)}
+                          placeholder="Ex: Quando pensa no trabalho"
                           className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-orange-500 outline-none"
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-1">
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S3 — Intensidade (0–10): <span className="text-orange-600 font-black">{sens.intensity}</span></label>
-                      <input 
-                        type="range" 
-                        min="0" 
-                        max="10" 
-                        value={sens.intensity || 0} 
-                        onChange={(e) => updateSensationField(sens.name, 'intensity', parseInt(e.target.value))}
-                        className="w-full h-1.5 bg-orange-100 rounded-lg appearance-none cursor-pointer accent-orange-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S4 — Situação de Gatilho</label>
-                      <input 
-                        type="text" 
-                        value={sens.situation || ''} 
-                        onChange={(e) => updateSensationField(sens.name, 'situation', e.target.value)}
-                        placeholder="Ex: Quando pensa no trabalho"
-                        className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-orange-500 outline-none"
-                      />
-                    </div>
-                  </div>
 
-                  <div className="pt-4 border-t border-slate-100">
-                    <p className="text-xs font-bold text-orange-800 uppercase mb-2">Descrição da Sensação:</p>
-                    <textarea 
-                      value={sens.description || ''} 
-                      onChange={(e) => updateSensationField(sens.name, 'description', e.target.value)}
-                      rows={2}
-                      className="w-full text-xs p-3 bg-orange-50 border border-orange-100 rounded-lg text-slate-700 italic outline-none focus:ring-1 focus:ring-orange-500"
-                    />
+                    {/* Descrição da Sensação */}
+                    <div className="h-full flex flex-col">
+                      <p className="text-xs font-bold text-orange-800 uppercase mb-2">Descrição da Sensação:</p>
+                      <textarea 
+                        value={sens.description || ''} 
+                        onChange={(e) => updateSensationField(sens.name, 'description', e.target.value)}
+                        className="w-full flex-grow text-xs p-3 bg-orange-50 border border-orange-100 rounded-lg text-slate-700 italic outline-none focus:ring-1 focus:ring-orange-500 min-h-[150px]"
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
