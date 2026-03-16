@@ -109,9 +109,16 @@ const PatientForm: React.FC<PatientFormProps> = ({
 
   const filteredPatients = useMemo(() => {
     if (!searchTerm.trim()) return [];
-    return patientsList.filter(p =>
-      p.name.toLowerCase().includes(searchTerm.toLowerCase())
-    ).slice(0, 5);
+    // Deduplicate by name and phone to ensure unique results in UI
+    const seen = new Set();
+    return patientsList.filter(p => {
+      const isMatch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+      if (!isMatch) return false;
+      const key = `${p.name}-${p.phone}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 5);
   }, [searchTerm, patientsList]);
 
   const selectExistingPatient = (p: Patient) => {
@@ -198,10 +205,21 @@ const PatientForm: React.FC<PatientFormProps> = ({
 
   const showSafetyWarning = safetyCheck.hasPacemakerOrDevice === 'Sim' || safetyCheck.isPregnantOrSuspected === 'Sim';
 
-  const isFormValid = patient.name.trim() !== '' 
-                      && (patient.birthDate || '').length === 10 
-                      && isSafetyCheckComplete 
-                      && (consentForm.status === 'signed_local' || consentForm.status === 'signed_remote');
+  const isSafetyCheckValid = isSafetyCheckComplete;
+  
+  const isPatientDataValid = patient.name.trim() !== '' && (patient.birthDate || '').length === 10;
+  
+  const isConsentSigned = consentForm.status === 'signed_local' || consentForm.status === 'signed_remote';
+  
+  const isComplaintValid = (patient.mainComplaint || '').trim().length >= 3;
+
+  const isFormValid = isPatientDataValid 
+                      && isSafetyCheckValid 
+                      && isConsentSigned
+                      && isComplaintValid;
+
+  const getSectionClass = (isLocked: boolean) => 
+    `transition-all duration-500 ${isLocked ? 'opacity-30 blur-[1px] pointer-events-none' : 'opacity-100'}`;
 
   // --- Signature Canvas Logic ---
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
@@ -364,7 +382,13 @@ const PatientForm: React.FC<PatientFormProps> = ({
         </div>
 
         <div className="space-y-6 text-justify text-slate-800 leading-relaxed">
-            <p>Eu, <strong>{consentForm.signedName || patient.name}</strong>, {consentForm.cpf ? `portador(a) do CPF nº ${consentForm.cpf},` : ''} declaro para os devidos fins estar plenamente ciente das seguintes informações acerca do atendimento de Biomagnetismo:</p>
+            <p>
+                {consentForm.signedName && consentForm.signedName.trim() !== patient.name.trim() ? (
+                    <>Eu, <strong>{consentForm.signedName}</strong>, {consentForm.cpf ? `portador(a) do CPF nº ${consentForm.cpf},` : ''} na qualidade de <strong>responsável legal</strong> do(a) paciente <strong>{patient.name}</strong>, declaro para os devidos fins estar plenamente ciente das seguintes informações acerca do atendimento de Biomagnetismo:</>
+                ) : (
+                    <>Eu, <strong>{patient.name}</strong>, {consentForm.cpf ? `portador(a) do CPF nº ${consentForm.cpf},` : ''} declaro para os devidos fins estar plenamente ciente das seguintes informações acerca do atendimento de Biomagnetismo:</>
+                )}
+            </p>
             
             <div className="bg-slate-50 p-6 rounded border border-slate-200 space-y-4 italic">
                 <p>1. O Biomagnetismo é uma terapia integrativa, complementar e não substitui, em hipótese alguma, o acompanhamento médico convencional, tratamentos alopáticos ou qualquer intervenção de saúde legalmente reconhecida.</p>
@@ -384,7 +408,11 @@ const PatientForm: React.FC<PatientFormProps> = ({
                         <div className="h-24"></div>
                     )}
                     <p className="font-bold text-lg">{consentForm.signedName || patient.name}</p>
-                    <p className="text-xs text-slate-500 uppercase">Assinatura do Paciente / Responsável</p>
+                    <p className="text-xs text-slate-500 uppercase">
+                        {consentForm.signedName && consentForm.signedName.trim() !== patient.name.trim() 
+                            ? `Responsável Legal (por: ${patient.name})` 
+                            : 'Assinatura do Paciente'}
+                    </p>
                 </div>
                 <div className="text-slate-400 text-sm mt-4">
                     Assinado digitalmente em: {consentForm.dateSigned ? new Date(consentForm.dateSigned).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR')}
@@ -486,6 +514,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
                 value={searchTerm}
                 onChange={handleManualSearchChange}
                 onFocus={() => setShowDropdown(true)}
+                autoComplete="off"
                 className="block w-full px-3 py-2 pl-10 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                 placeholder="Pesquise por um nome já cadastrado..."
                 required
@@ -585,11 +614,11 @@ const PatientForm: React.FC<PatientFormProps> = ({
           />
         </div>
 
-        <hr className="border-slate-200" />
-
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-             <h3 className="text-lg font-bold text-teal-700">Check List de Segurança</h3>
+        <div className={getSectionClass(!isPatientDataValid)}>
+          <hr className="border-slate-200" />
+          <div className="space-y-4 mt-6">
+            <div className="flex items-center gap-2">
+               <h3 className="text-lg font-bold text-teal-700">Check List de Segurança</h3>
              <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded border border-slate-200">Obrigatório</span>
           </div>
           
@@ -661,10 +690,11 @@ const PatientForm: React.FC<PatientFormProps> = ({
             </div>
           </div>
         </div>
+        </div>
 
-        <hr className="border-slate-200" />
-
-        <div className="space-y-4">
+        <div className={getSectionClass(!isSafetyCheckValid || !isPatientDataValid)}>
+          <hr className="border-slate-200" />
+          <div className="space-y-4 mt-6">
           <div className="flex items-center gap-2">
              <h3 className="text-lg font-bold text-teal-700">Termo de Ciência do Paciente</h3>
              <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded border border-slate-200">Obrigatório</span>
@@ -692,7 +722,11 @@ const PatientForm: React.FC<PatientFormProps> = ({
                    </div>
                    <div>
                        <p className="font-bold text-green-800">Termo assinado com sucesso.</p>
-                       <p className="text-xs text-green-600">O atendimento pode prosseguir. Assinado por: {consentForm.signedName}</p>
+                       <p className="text-xs text-green-600">
+                           {consentForm.signedName && consentForm.signedName.trim() !== patient.name.trim() 
+                               ? `Responsável Legal: ${consentForm.signedName} (por: ${patient.name})` 
+                               : `Assinado por: ${consentForm.signedName}`}
+                       </p>
                    </div>
                </div>
                <div className="flex gap-3">
@@ -705,12 +739,16 @@ const PatientForm: React.FC<PatientFormProps> = ({
             </div>
           )}
         </div>
+        </div> {/* Closing div for getSectionClass(!isSafetyCheckValid || !isPatientDataValid) */}
 
-        <hr className="border-slate-200" />
-
-        <div className={`space-y-4 transition-all duration-500 ${(consentForm.status === 'signed_local' || consentForm.status === 'signed_remote') ? 'opacity-100' : 'opacity-40 blur-[1px] pointer-events-none'}`}>
-          <div>
-            <label htmlFor="mainComplaint" className="block text-sm font-medium text-slate-600 font-bold text-teal-700">Queixas do dia (Opcional)</label>
+        <div className={getSectionClass(!isConsentSigned || !isSafetyCheckValid)}>
+          <hr className="border-slate-200" />
+          <div className="space-y-4 mt-6">
+            <div>
+              <label htmlFor="mainComplaint" className="block text-sm font-medium text-slate-600 font-bold text-teal-700 flex justify-between items-center">
+                <span>Queixas do dia (Obrigatório)</span>
+                {isComplaintValid && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded">Preenchido</span>}
+              </label>
             <textarea
               id="mainComplaint"
               name="mainComplaint"
@@ -748,6 +786,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
               </div>
             </div>
           </div>
+        </div>
         </div>
 
         <div className="flex justify-end pt-4 border-t">

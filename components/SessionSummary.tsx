@@ -251,7 +251,11 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
                    <div className="flex flex-col md:flex-row md:items-center gap-4">
                        <div className="flex-1">
                            <p className="text-xs font-bold text-green-800 uppercase mb-1">Termo de Ciência</p>
-                           <p className="text-sm font-semibold text-green-700">Assinado por: {consentForm.signedName}</p>
+                           <p className="text-sm font-semibold text-green-700">
+                               {consentForm.signedName && consentForm.signedName.trim() !== patient.name.trim() 
+                                   ? `Responsável Legal: ${consentForm.signedName} (por: ${patient.name})` 
+                                   : `Assinado por: ${consentForm.signedName}`}
+                           </p>
                            <p className="text-xs text-green-600">Em: {new Date(consentForm.dateSigned!).toLocaleString('pt-BR')}</p>
                        </div>
                        {consentForm.signatureImage && (
@@ -509,7 +513,13 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
                 </div>
 
                 <div className="space-y-6 text-justify text-slate-800 leading-relaxed max-w-4xl mx-auto">
-                    <p>Eu, <strong>{consentForm.signedName || patient.name}</strong>, {consentForm.cpf ? `portador(a) do CPF nº ${consentForm.cpf},` : ''} declaro para os devidos fins estar plenamente ciente das seguintes informações acerca do atendimento de Biomagnetismo:</p>
+                    <p>
+                        {consentForm.signedName && consentForm.signedName.trim() !== patient.name.trim() ? (
+                            <>Eu, <strong>{consentForm.signedName}</strong>, {consentForm.cpf ? `portador(a) do CPF nº ${consentForm.cpf},` : ''} na qualidade de <strong>responsável legal</strong> do(a) paciente <strong>{patient.name}</strong>, declaro para os devidos fins estar plenamente ciente das seguintes informações acerca do atendimento de Biomagnetismo:</>
+                        ) : (
+                            <>Eu, <strong>{patient.name}</strong>, {consentForm.cpf ? `portador(a) do CPF nº ${consentForm.cpf},` : ''} declaro para os devidos fins estar plenamente ciente das seguintes informações acerca do atendimento de Biomagnetismo:</>
+                        )}
+                    </p>
                     
                     <div className="bg-slate-50 p-6 rounded border border-slate-200 space-y-4 italic">
                         <p>1. O Biomagnetismo é uma terapia integrativa, complementar e não substitui, em hipótese alguma, o acompanhamento médico convencional, tratamentos alopáticos ou qualquer intervenção de saúde legalmente reconhecida.</p>
@@ -529,7 +539,11 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
                                 <div className="h-24"></div>
                             )}
                             <p className="font-bold text-lg">{consentForm.signedName || patient.name}</p>
-                            <p className="text-xs text-slate-500 uppercase">Assinatura do Paciente / Responsável</p>
+                            <p className="text-xs text-slate-500 uppercase">
+                                {consentForm.signedName && consentForm.signedName.trim() !== patient.name.trim() 
+                                    ? `Responsável Legal (por: ${patient.name})` 
+                                    : 'Assinatura do Paciente'}
+                            </p>
                         </div>
                         <div className="text-slate-400 text-sm mt-2">
                             Assinado digitalmente em: {consentForm.dateSigned ? new Date(consentForm.dateSigned).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR')}
