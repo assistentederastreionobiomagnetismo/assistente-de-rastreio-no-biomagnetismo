@@ -74,11 +74,29 @@ const Emocional: React.FC<EmocionalProps> = ({
     onNext, onBack, patientName
 }) => {
   
+  const generateEmotionCommand = (name: string, age?: string, context?: string, physicalSensation?: string) => {
+    const agePart = age ? ` aos ${age} anos de idade` : '';
+    const contextPart = context ? `, relacionado a ${context}` : '';
+    const sensationPart = physicalSensation ? `. Sensação física associada: ${physicalSensation}.` : '';
+    const info = `${name}${agePart}${contextPart}${sensationPart}`;
+    
+    return `Todos os pontos anatômicos, orgânicos, sistêmicos, que carreguem informação, presença, frequência e ressonância da(s) emoção(ões) ${info}, Façam-se presente (falar 3x). Alinhem-se, equilibrem-se, entreguem-se (3x) com a carga magnética de 1 bilhão de Gauss ou quanto se faz necessário. Enviando agora a(s) emoção(ões) ${info} para os buracos negros do universo. Fechando esses portais.`;
+  };
+
+  const generateSensationCommand = (name: string, location?: string, intensity?: number, situation?: string) => {
+    const locationPart = location ? ` na região de ${location}` : '';
+    const intensityPart = intensity !== undefined ? `, com intensidade aproximada ${intensity}/10` : '';
+    const situationPart = situation ? `, mais presente quando ${situation}` : '';
+    const info = `${name}${locationPart}${intensityPart}${situationPart}`;
+
+    return `Todos os pontos anatômicos, orgânicos, sistêmicos, que carreguem informação, presença, frequência e ressonância da(s) sensação(ões) ${info}, Façam-se presente (falar 3x). Alinhem-se, equilibrem-se, entreguem-se (3x) com a carga magnética de 1 bilhão de Gauss ou quanto se faz necessário. Enviando agora a(s) sensação(ões) ${info} para os buracos negros do universo. Fechando esses portais.`;
+  };
+
   const toggleEmotion = (emotion: string) => {
     setSelectedEmotions(prev => {
       const isSelecting = !prev.includes(emotion);
       if (isSelecting) {
-        setEmotionsData(curr => [...curr, { name: emotion, command: `${patientName} sentiu-se ${emotion}.` }]);
+        setEmotionsData(curr => [...curr, { name: emotion, command: generateEmotionCommand(emotion) }]);
         return [...prev, emotion];
       } else {
         setEmotionsData(curr => curr.filter(e => e.name !== emotion));
@@ -91,7 +109,7 @@ const Emocional: React.FC<EmocionalProps> = ({
     setSelectedSensations(prev => {
       const isSelecting = !prev.includes(sensation);
       if (isSelecting) {
-        setSensationsData(curr => [...curr, { name: sensation, intensity: 5, description: `${patientName} relata ${sensation}.` }]);
+        setSensationsData(curr => [...curr, { name: sensation, intensity: 5, description: generateSensationCommand(sensation, '', 5) }]);
         return [...prev, sensation];
       } else {
         setSensationsData(curr => curr.filter(s => s.name !== sensation));
@@ -105,10 +123,7 @@ const Emocional: React.FC<EmocionalProps> = ({
       if (e.name === emotionName) {
         const updated = { ...e, [field]: value };
         if (field !== 'command') {
-          const agePart = updated.age ? ` aos ${updated.age} anos de idade` : '';
-          const contextPart = updated.context ? `, relacionado a ${updated.context}` : '';
-          const sensationPart = updated.physicalSensation ? `. Sensação física associada: ${updated.physicalSensation}.` : '.';
-          updated.command = `${patientName} sentiu-se ${updated.name}${agePart}${contextPart}${sensationPart}`;
+          updated.command = generateEmotionCommand(updated.name, updated.age, updated.context, updated.physicalSensation);
         }
         return updated;
       }
@@ -121,10 +136,7 @@ const Emocional: React.FC<EmocionalProps> = ({
       if (s.name === sensationName) {
         const updated = { ...s, [field]: value };
         if (field !== 'description') {
-          const locationPart = updated.location ? ` na região de ${updated.location}` : '';
-          const intensityPart = updated.intensity !== undefined ? `, com intensidade aproximada ${updated.intensity}/10` : '';
-          const situationPart = updated.situation ? `, mais presente quando ${updated.situation}` : '';
-          updated.description = `${patientName} relata ${updated.name}${locationPart}${intensityPart}${situationPart}.`;
+          updated.description = generateSensationCommand(updated.name, updated.location, updated.intensity, updated.situation);
         }
         return updated;
       }
