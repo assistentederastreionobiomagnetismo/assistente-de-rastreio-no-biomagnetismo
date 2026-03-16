@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Patient, BiomagneticPair, PhenomenaData, ProtocolData, Session, SafetyCheck, ConsentForm, SessionScales } from '../types';
+import { Patient, BiomagneticPair, PhenomenaData, ProtocolData, Session, SafetyCheck, ConsentForm, SessionScales, EmotionRelease, SensationRelease } from '../types';
 import { PrinterIcon } from './icons/Icons';
 
 interface SessionSummaryProps {
@@ -10,6 +10,8 @@ interface SessionSummaryProps {
   phenomena?: PhenomenaData;
   emotions?: string[];
   sensations?: string[];
+  emotionsData?: EmotionRelease[];
+  sensationsData?: SensationRelease[];
   emotionsNotes?: string;
   sensationsNotes?: string;
   protocolNotes?: string;
@@ -40,6 +42,8 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
     phenomena, 
     emotions, 
     sensations, 
+    emotionsData,
+    sensationsData,
     emotionsNotes,
     sensationsNotes,
     protocolNotes,
@@ -371,7 +375,32 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
           )}
         </div>
 
-        {(emotions?.length || 0) > 0 && (
+        {(emotionsData?.length || 0) > 0 ? (
+          <div className="pb-6 border-b border-slate-200">
+            <h3 className="text-lg font-bold text-teal-700 mb-4">Equilíbrio Bioenergético (Emoções)</h3>
+            <div className="space-y-4">
+              {emotionsData?.map((emo, idx) => (
+                <div key={idx} className="bg-teal-50 p-4 rounded-xl border border-teal-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-teal-600 text-white text-[10px] font-black px-2 py-0.5 rounded uppercase">{emo.name}</span>
+                    {emo.age && <span className="text-[10px] text-teal-700 font-bold border border-teal-200 px-2 py-0.5 rounded bg-white">IDADE: {emo.age}</span>}
+                  </div>
+                  {emo.context && <p className="text-xs text-slate-600 mb-2"><strong>Contexto:</strong> {emo.context}</p>}
+                  {emo.physicalSensation && <p className="text-xs text-slate-600 mb-2"><strong>Sensação Física:</strong> {emo.physicalSensation}</p>}
+                  <div className="mt-2 pt-2 border-t border-teal-100/50">
+                    <p className="text-[11px] font-bold text-teal-800 uppercase mb-1">Comando de Liberação:</p>
+                    <p className="text-sm text-slate-700 italic leading-relaxed">{emo.command}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {emotionsNotes && (
+                <div className="mt-4 p-3 bg-slate-50 rounded border italic text-sm text-slate-700">
+                    <strong>Notas Adicionais:</strong> {emotionsNotes}
+                </div>
+            )}
+          </div>
+        ) : (emotions?.length || 0) > 0 && (
           <div className="pb-6 border-b border-slate-200">
             <h3 className="text-lg font-bold text-teal-700 mb-4">Equilíbrio Bioenergético (Emoções)</h3>
             <div className="flex flex-wrap gap-2 mb-3">
@@ -389,7 +418,32 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
           </div>
         )}
 
-        {(sensations?.length || 0) > 0 && (
+        {(sensationsData?.length || 0) > 0 ? (
+          <div className="pb-6 border-b border-slate-200">
+            <h3 className="text-lg font-bold text-orange-700 mb-4">Sensações Liberadas</h3>
+            <div className="space-y-4">
+              {sensationsData?.map((sens, idx) => (
+                <div key={idx} className="bg-orange-50 p-4 rounded-xl border border-orange-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-orange-600 text-white text-[10px] font-black px-2 py-0.5 rounded uppercase">{sens.name}</span>
+                    {sens.location && <span className="text-[10px] text-orange-700 font-bold border border-orange-200 px-2 py-0.5 rounded bg-white">{sens.location}</span>}
+                    {sens.intensity !== undefined && <span className="text-[10px] text-orange-700 font-bold border border-orange-200 px-2 py-0.5 rounded bg-white">INTENSIDADE: {sens.intensity}/10</span>}
+                  </div>
+                  {sens.situation && <p className="text-xs text-slate-600 mb-2"><strong>Gatilho/Situação:</strong> {sens.situation}</p>}
+                  <div className="mt-2 pt-2 border-t border-orange-100/50">
+                    <p className="text-[11px] font-bold text-orange-800 uppercase mb-1">Descrição Final:</p>
+                    <p className="text-sm text-slate-700 italic leading-relaxed">{sens.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {sensationsNotes && (
+                <div className="mt-4 p-3 bg-slate-50 rounded border italic text-sm text-slate-700">
+                    <strong>Notas Adicionais:</strong> {sensationsNotes}
+                </div>
+            )}
+          </div>
+        ) : (sensations?.length || 0) > 0 && (
           <div className="pb-6 border-b border-slate-200">
             <h3 className="text-lg font-bold text-orange-700 mb-4">Sensações Liberadas</h3>
             <div className="flex flex-wrap gap-2 mb-3">

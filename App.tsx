@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Patient, BiomagneticPair, User, Session, PhenomenaData, ProtocolData, SafetyCheck, ConsentForm, SessionScales } from './types';
+import { Patient, BiomagneticPair, User, Session, PhenomenaData, ProtocolData, SafetyCheck, ConsentForm, SessionScales, EmotionRelease, SensationRelease } from './types';
 import PatientForm from './components/PatientForm';
 import StartProtocol from './components/StartProtocol';
 import Scanning from './components/Scanning';
@@ -59,6 +59,8 @@ const App: React.FC = () => {
   });
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const [selectedSensations, setSelectedSensations] = useState<string[]>([]);
+  const [emotionsData, setEmotionsData] = useState<EmotionRelease[]>([]);
+  const [sensationsData, setSensationsData] = useState<SensationRelease[]>([]);
   const [emotionsNotes, setEmotionsNotes] = useState<string>('');
   const [sensationsNotes, setSensationsNotes] = useState<string>('');
   const [impactionTime, setImpactionTime] = useState<string>('');
@@ -121,6 +123,8 @@ const App: React.FC = () => {
     });
     setSelectedEmotions([]);
     setSelectedSensations([]);
+    setEmotionsData([]);
+    setSensationsData([]);
     setEmotionsNotes('');
     setSensationsNotes('');
     setImpactionTime('');
@@ -210,6 +214,8 @@ const App: React.FC = () => {
                 setPhenomena(data.phenomena);
                 setSelectedEmotions(data.selectedEmotions);
                 setSelectedSensations(data.selectedSensations);
+                setEmotionsData(data.emotionsData || []);
+                setSensationsData(data.sensationsData || []);
                 setEmotionsNotes(data.emotionsNotes);
                 setSensationsNotes(data.sensationsNotes);
                 setImpactionTime(data.impactionTime);
@@ -270,6 +276,8 @@ const App: React.FC = () => {
         phenomena,
         selectedEmotions,
         selectedSensations,
+        emotionsData,
+        sensationsData,
         emotionsNotes,
         sensationsNotes,
         impactionTime,
@@ -289,7 +297,7 @@ const App: React.FC = () => {
     }
   }, [
     isAuthenticated, appView, currentStep, patient, safetyCheck, consentForm, scalesBefore, scalesAfter, protocolData, selectedPairs,
-    phenomena, selectedEmotions, selectedSensations, emotionsNotes, sensationsNotes,
+    phenomena, selectedEmotions, selectedSensations, emotionsData, sensationsData, emotionsNotes, sensationsNotes,
     impactionTime, sessionNotes, protocolNotes, reservatoriosNotes, levelINotes,
     levelIINotes, levelIIINotes, phenomenaNotes, sessionStartTime, sessionEndTime, therapistSignature
   ]);
@@ -412,6 +420,8 @@ const App: React.FC = () => {
       phenomena,
       emotions: selectedEmotions,
       sensations: selectedSensations,
+      emotionsData,
+      sensationsData,
       emotionsNotes,
       sensationsNotes,
       impactionTime,
@@ -488,6 +498,8 @@ const App: React.FC = () => {
     });
     setSelectedEmotions(session.emotions || []);
     setSelectedSensations(session.sensations || []);
+    setEmotionsData(session.emotionsData || []);
+    setSensationsData(session.sensationsData || []);
     setEmotionsNotes(session.emotionsNotes || '');
     setSensationsNotes(session.sensationsNotes || '');
     setImpactionTime(session.impactionTime || '');
@@ -690,9 +702,58 @@ const App: React.FC = () => {
               {currentStep === Step.SCANNING_LEVEL_II && <Scanning levelTitle="Nível II" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIINotes} setNotes={setLevelIINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_I)} biomagneticPairs={biomagneticPairs} />}
               {currentStep === Step.SCANNING_LEVEL_III && <Scanning levelTitle="Nível III" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIIINotes} setNotes={setLevelIIINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_II)} biomagneticPairs={biomagneticPairs} />}
               {currentStep === Step.PHENOMENA && <Phenomena data={phenomena} setData={setPhenomena} notes={phenomenaNotes} setNotes={setPhenomenaNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_III)} />}
-              {currentStep === Step.EMOTIONAL && <Emocional selectedEmotions={selectedEmotions} setSelectedEmotions={setSelectedEmotions} selectedSensations={selectedSensations} setSelectedSensations={setSelectedSensations} emotionsNotes={emotionsNotes} setEmotionsNotes={setEmotionsNotes} sensationsNotes={sensationsNotes} setSensationsNotes={setSensationsNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PHENOMENA)} />}
+              {currentStep === Step.EMOTIONAL && (
+                <Emocional 
+                  selectedEmotions={selectedEmotions} 
+                  setSelectedEmotions={setSelectedEmotions} 
+                  selectedSensations={selectedSensations} 
+                  setSelectedSensations={setSelectedSensations} 
+                  emotionsData={emotionsData}
+                  setEmotionsData={setEmotionsData}
+                  sensationsData={sensationsData}
+                  setSensationsData={setSensationsData}
+                  emotionsNotes={emotionsNotes} 
+                  setEmotionsNotes={setEmotionsNotes} 
+                  sensationsNotes={sensationsNotes} 
+                  setSensationsNotes={setSensationsNotes} 
+                  onNext={nextStep} 
+                  onBack={() => setCurrentStep(Step.PHENOMENA)} 
+                  patientName={patient.name}
+                />
+              )}
               {currentStep === Step.TREATMENT && <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} scalesBefore={scalesBefore} scalesAfter={scalesAfter} setScalesAfter={setScalesAfter} onNext={nextStep} onBack={() => setCurrentStep(Step.EMOTIONAL)} sessionType={protocolData.sessionType} />}
-              {currentStep === Step.SUMMARY && <SessionSummary patient={patient} protocolData={protocolData} pairs={selectedPairs} phenomena={phenomena} emotions={selectedEmotions} sensations={selectedSensations} emotionsNotes={emotionsNotes} sensationsNotes={sensationsNotes} protocolNotes={protocolNotes} reservatoriosNotes={reservatoriosNotes} levelINotes={levelINotes} levelIINotes={levelIINotes} levelIIINotes={levelIIINotes} phenomenaNotes={phenomenaNotes} impactionTime={impactionTime} notes={sessionNotes} startTime={sessionStartTime} endTime={sessionEndTime} safetyCheck={safetyCheck} consentForm={consentForm} scalesBefore={scalesBefore} scalesAfter={scalesAfter} therapistSignature={therapistSignature} setTherapistSignature={setTherapistSignature} onFinish={handleFinishSession} onBack={() => setCurrentStep(Step.TREATMENT)} />}
+              {currentStep === Step.SUMMARY && (
+                <SessionSummary 
+                  patient={patient} 
+                  protocolData={protocolData} 
+                  pairs={selectedPairs} 
+                  phenomena={phenomena} 
+                  emotions={selectedEmotions} 
+                  sensations={selectedSensations} 
+                  emotionsData={emotionsData}
+                  sensationsData={sensationsData}
+                  emotionsNotes={emotionsNotes} 
+                  sensationsNotes={sensationsNotes} 
+                  protocolNotes={protocolNotes} 
+                  reservatoriosNotes={reservatoriosNotes} 
+                  levelINotes={levelINotes} 
+                  levelIINotes={levelIINotes} 
+                  levelIIINotes={levelIIINotes} 
+                  phenomenaNotes={phenomenaNotes} 
+                  impactionTime={impactionTime} 
+                  notes={sessionNotes} 
+                  startTime={sessionStartTime} 
+                  endTime={sessionEndTime} 
+                  safetyCheck={safetyCheck} 
+                  consentForm={consentForm} 
+                  scalesBefore={scalesBefore} 
+                  scalesAfter={scalesAfter} 
+                  therapistSignature={therapistSignature} 
+                  setTherapistSignature={setTherapistSignature} 
+                  onFinish={handleFinishSession} 
+                  onBack={() => setCurrentStep(Step.TREATMENT)} 
+                />
+              )}
 
               {currentStep === Step.PATIENT_INFO && (
                 <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 print:hidden">

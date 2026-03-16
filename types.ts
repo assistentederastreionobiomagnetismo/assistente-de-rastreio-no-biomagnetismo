@@ -85,6 +85,22 @@ export interface SessionScales {
   tiredness: number | '';
 }
 
+export interface EmotionRelease {
+  name: string;
+  age?: string;
+  context?: string;
+  physicalSensation?: string;
+  command?: string;
+}
+
+export interface SensationRelease {
+  name: string;
+  location?: string;
+  intensity?: number;
+  situation?: string;
+  description?: string;
+}
+
 
 export interface Session {
   id: string;
@@ -98,6 +114,8 @@ export interface Session {
   phenomena?: PhenomenaData;
   emotions?: string[];
   sensations?: string[];
+  emotionsData?: EmotionRelease[];
+  sensationsData?: SensationRelease[];
   emotionsNotes?: string;
   sensationsNotes?: string;
   impactionTime?: string;

@@ -1,17 +1,22 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
+import { EmotionRelease, SensationRelease } from '../types';
 
 interface EmocionalProps {
   selectedEmotions: string[];
   setSelectedEmotions: React.Dispatch<React.SetStateAction<string[]>>;
   selectedSensations: string[];
   setSelectedSensations: React.Dispatch<React.SetStateAction<string[]>>;
+  emotionsData: EmotionRelease[];
+  setEmotionsData: React.Dispatch<React.SetStateAction<EmotionRelease[]>>;
+  sensationsData: SensationRelease[];
+  setSensationsData: React.Dispatch<React.SetStateAction<SensationRelease[]>>;
   emotionsNotes: string;
   setEmotionsNotes: React.Dispatch<React.SetStateAction<string>>;
   sensationsNotes: string;
   setSensationsNotes: React.Dispatch<React.SetStateAction<string>>;
   onNext: () => void;
   onBack: () => void;
+  patientName: string;
 }
 
 const EMOTIONS_CHART = [
@@ -62,17 +67,69 @@ const SENSATIONS_COMP_B = [
 const Emocional: React.FC<EmocionalProps> = ({ 
     selectedEmotions, setSelectedEmotions, 
     selectedSensations, setSelectedSensations, 
+    emotionsData, setEmotionsData,
+    sensationsData, setSensationsData,
     emotionsNotes, setEmotionsNotes,
     sensationsNotes, setSensationsNotes,
-    onNext, onBack 
+    onNext, onBack, patientName
 }) => {
   
   const toggleEmotion = (emotion: string) => {
-    setSelectedEmotions(prev => prev.includes(emotion) ? prev.filter(e => e !== emotion) : [...prev, emotion]);
+    setSelectedEmotions(prev => {
+      const isSelecting = !prev.includes(emotion);
+      if (isSelecting) {
+        setEmotionsData(curr => [...curr, { name: emotion, command: `${patientName} sentiu-se ${emotion}.` }]);
+        return [...prev, emotion];
+      } else {
+        setEmotionsData(curr => curr.filter(e => e.name !== emotion));
+        return prev.filter(e => e !== emotion);
+      }
+    });
   };
 
   const toggleSensation = (sensation: string) => {
-    setSelectedSensations(prev => prev.includes(sensation) ? prev.filter(s => s !== sensation) : [...prev, sensation]);
+    setSelectedSensations(prev => {
+      const isSelecting = !prev.includes(sensation);
+      if (isSelecting) {
+        setSensationsData(curr => [...curr, { name: sensation, intensity: 5, description: `${patientName} relata ${sensation}.` }]);
+        return [...prev, sensation];
+      } else {
+        setSensationsData(curr => curr.filter(s => s.name !== sensation));
+        return prev.filter(s => s !== sensation);
+      }
+    });
+  };
+
+  const updateEmotionField = (emotionName: string, field: keyof EmotionRelease, value: string) => {
+    setEmotionsData(curr => curr.map(e => {
+      if (e.name === emotionName) {
+        const updated = { ...e, [field]: value };
+        if (field !== 'command') {
+          const agePart = updated.age ? ` aos ${updated.age} anos de idade` : '';
+          const contextPart = updated.context ? `, relacionado a ${updated.context}` : '';
+          const sensationPart = updated.physicalSensation ? `. Sensação física associada: ${updated.physicalSensation}.` : '.';
+          updated.command = `${patientName} sentiu-se ${updated.name}${agePart}${contextPart}${sensationPart}`;
+        }
+        return updated;
+      }
+      return e;
+    }));
+  };
+
+  const updateSensationField = (sensationName: string, field: keyof SensationRelease, value: string | number) => {
+    setSensationsData(curr => curr.map(s => {
+      if (s.name === sensationName) {
+        const updated = { ...s, [field]: value };
+        if (field !== 'description') {
+          const locationPart = updated.location ? ` na região de ${updated.location}` : '';
+          const intensityPart = updated.intensity !== undefined ? `, com intensidade aproximada ${updated.intensity}/10` : '';
+          const situationPart = updated.situation ? `, mais presente quando ${updated.situation}` : '';
+          updated.description = `${patientName} relata ${updated.name}${locationPart}${intensityPart}${situationPart}.`;
+        }
+        return updated;
+      }
+      return s;
+    }));
   };
 
   return (
@@ -128,20 +185,77 @@ const Emocional: React.FC<EmocionalProps> = ({
                 </table>
             </div>
 
-            <div className="lg:w-1/3 flex flex-col gap-4">
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-inner">
-                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Comando para Liberação</h3>
-                    <div className="text-sm text-slate-800 font-medium leading-relaxed bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                        Todos os pontos anatômicos, orgânicos, sistêmicos, de todos os corpos, que carreguem informação, presença, frequência e ressonância das emoções 
-                        <span className="text-teal-600 font-bold underline px-1">{selectedEmotions.length > 0 ? selectedEmotions.join(', ') : '________________'}</span>, 
-                        <span className="text-purple-700 font-bold italic"> Façam-se presente (falar 3x)</span>. 
-                        Alinhem-se, equilibrem-se, entreguem-se (3x) com a carga magnética de 1 bilhão de Gauss ou quanto se faz necessário. 
-                        Enviando agora as emoções para os buracos negros do universo. 
-                        <span className="text-purple-700 font-bold"> Fechando esses portais.</span>
-                    </div>
-                </div>
-            </div>
         </div>
+
+        {/* Blocos de Identificação do Gatilho Emocional */}
+        {emotionsData.length > 0 && (
+          <div className="space-y-6 mt-8">
+            <h3 className="text-lg font-bold text-teal-700 uppercase tracking-tight border-l-4 border-teal-500 pl-3">Identificação do Gatilho Emocional</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {emotionsData.map((emo, idx) => (
+                <div key={idx} className="bg-white p-6 rounded-2xl border border-teal-100 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-black text-white bg-teal-500 px-3 py-1 rounded-full uppercase">{emo.name}</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E1 — Emoção identificada</label>
+                      <input 
+                        type="text" 
+                        value={emo.name} 
+                        onChange={(e) => updateEmotionField(emo.name, 'name', e.target.value)}
+                        className="w-full text-sm p-2 bg-slate-50 border border-slate-200 rounded focus:ring-1 focus:ring-teal-500 outline-none"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E2 — Idade aproximada</label>
+                        <input 
+                          type="text" 
+                          value={emo.age || ''} 
+                          onChange={(e) => updateEmotionField(emo.name, 'age', e.target.value)}
+                          placeholder="Ex: 8"
+                          className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-teal-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E4 — Sensação física (opcional)</label>
+                        <input 
+                          type="text" 
+                          value={emo.physicalSensation || ''} 
+                          onChange={(e) => updateEmotionField(emo.name, 'physicalSensation', e.target.value)}
+                          placeholder="Ex: Aperto no peito"
+                          className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-teal-500 outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E3 — Contexto ou situação associada</label>
+                      <input 
+                        type="text" 
+                        value={emo.context || ''} 
+                        onChange={(e) => updateEmotionField(emo.name, 'context', e.target.value)}
+                        placeholder="Ex: Separação dos pais"
+                        className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-teal-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100">
+                    <p className="text-xs font-bold text-teal-700 uppercase mb-2">Comando de Liberação (Emoção):</p>
+                    <textarea 
+                      value={emo.command || ''} 
+                      onChange={(e) => updateEmotionField(emo.name, 'command', e.target.value)}
+                      rows={2}
+                      className="w-full text-xs p-3 bg-teal-50 border border-teal-100 rounded-lg text-slate-700 italic outline-none focus:ring-1 focus:ring-teal-500"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Anotações de Emoções */}
         <div className="mt-4">
@@ -221,6 +335,77 @@ const Emocional: React.FC<EmocionalProps> = ({
                 </div>
             </div>
         </div>
+
+        {/* Blocos de Detalhamento da Sensação */}
+        {sensationsData.length > 0 && (
+          <div className="space-y-6 mt-8">
+            <h3 className="text-lg font-bold text-orange-700 uppercase tracking-tight border-l-4 border-orange-400 pl-3">Detalhamento da Sensação</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {sensationsData.map((sens, idx) => (
+                <div key={idx} className="bg-white p-6 rounded-2xl border border-orange-100 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-black text-white bg-orange-400 px-3 py-1 rounded-full uppercase">{sens.name}</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S1 — Sensação identificada</label>
+                        <input 
+                          type="text" 
+                          value={sens.name} 
+                          onChange={(e) => updateSensationField(sens.name, 'name', e.target.value)}
+                          className="w-full text-sm p-2 bg-slate-50 border border-slate-200 rounded focus:ring-1 focus:ring-orange-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S2 — Local do corpo</label>
+                        <input 
+                          type="text" 
+                          value={sens.location || ''} 
+                          onChange={(e) => updateSensationField(sens.name, 'location', e.target.value)}
+                          placeholder="Ex: Peito, Cabeça"
+                          className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-orange-500 outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-1">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S3 — Intensidade (0–10): <span className="text-orange-600 font-black">{sens.intensity}</span></label>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="10" 
+                        value={sens.intensity || 0} 
+                        onChange={(e) => updateSensationField(sens.name, 'intensity', parseInt(e.target.value))}
+                        className="w-full h-1.5 bg-orange-100 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S4 — Situação de Gatilho</label>
+                      <input 
+                        type="text" 
+                        value={sens.situation || ''} 
+                        onChange={(e) => updateSensationField(sens.name, 'situation', e.target.value)}
+                        placeholder="Ex: Quando pensa no trabalho"
+                        className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-orange-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100">
+                    <p className="text-xs font-bold text-orange-800 uppercase mb-2">Descrição da Sensação:</p>
+                    <textarea 
+                      value={sens.description || ''} 
+                      onChange={(e) => updateSensationField(sens.name, 'description', e.target.value)}
+                      rows={2}
+                      className="w-full text-xs p-3 bg-orange-50 border border-orange-100 rounded-lg text-slate-700 italic outline-none focus:ring-1 focus:ring-orange-500"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Anotações de Sensações */}
         <div className="mt-4">
