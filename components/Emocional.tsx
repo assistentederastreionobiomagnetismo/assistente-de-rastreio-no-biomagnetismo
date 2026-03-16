@@ -297,8 +297,8 @@ const Emocional: React.FC<EmocionalProps> = ({
             </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 items-stretch">
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 shadow-md border rounded-xl overflow-hidden bg-white">
+        <div className="flex flex-col gap-8 items-stretch">
+            <div className="grid grid-cols-1 md:grid-cols-2 shadow-md border rounded-xl overflow-hidden bg-white">
                 {/* Principais */}
                 <div className="border-r border-slate-200">
                     <div className="bg-orange-50 p-3 text-center border-b font-bold text-xs uppercase text-orange-800 tracking-wider">SENSAÇÕES PRINCIPAIS (MEMÓRIAS)</div>
@@ -337,18 +337,6 @@ const Emocional: React.FC<EmocionalProps> = ({
                     </div>
                 </div>
             </div>
-
-            <div className="lg:w-1/3 bg-orange-50 p-6 rounded-2xl border border-orange-100 shadow-inner">
-                <h3 className="text-sm font-bold text-orange-800 uppercase tracking-widest mb-4">Comando Sensações</h3>
-                <div className="text-sm text-slate-800 font-medium leading-relaxed bg-white p-4 rounded-xl border border-orange-50 shadow-sm">
-                    Todos os pontos anatômicos, orgânicos, sistêmicos, que carreguem informação, presença, frequência e ressonância das sensações 
-                    <span className="text-orange-600 font-bold underline px-1">{selectedSensations.length > 0 ? selectedSensations.join(', ') : '________________'}</span>, 
-                    <span className="text-purple-700 font-bold"> Façam-se presente (falar 3x)</span>. 
-                    Alinhem-se, equilibrem-se, entreguem-se (3x) com a carga magnética de 1 bilhão de Gauss ou quanto se faz necessário. 
-                    Enviando agora as sensações para os buracos negros do universo. 
-                    <span className="text-purple-700 font-bold italic"> Fechando esses portais.</span>
-                </div>
-            </div>
         </div>
 
         {/* Blocos de Detalhamento da Sensação */}
@@ -376,12 +364,12 @@ const Emocional: React.FC<EmocionalProps> = ({
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S2 — Local do corpo</label>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">S2 — Sensação física (opcional)</label>
                           <input 
                             type="text" 
                             value={sens.location || ''} 
                             onChange={(e) => updateSensationField(sens.name, 'location', e.target.value)}
-                            placeholder="Ex: Peito, Cabeça"
+                            placeholder="Ex: Aperto no peito, Frio na barriga"
                             className="w-full text-sm p-2 border border-slate-200 rounded focus:ring-1 focus:ring-orange-500 outline-none"
                           />
                         </div>
