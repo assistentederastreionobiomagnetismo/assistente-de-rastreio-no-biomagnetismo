@@ -92,6 +92,30 @@ const Emocional: React.FC<EmocionalProps> = ({
     return `Todos os pontos anatômicos, orgânicos, sistêmicos, que carreguem informação, presença, frequência e ressonância da(s) sensação(ões) ${info}, Façam-se presente (falar 3x). Alinhem-se, equilibrem-se, entreguem-se (3x) com a carga magnética de 1 bilhão de Gauss ou quanto se faz necessário. Enviando agora essa(s) sensação(ões) para os buracos negros do universo. Fechando esses portais.`;
   };
 
+  const getUnifiedEmotionCommand = () => {
+    if (emotionsData.length === 0) return '';
+    const allInfos = emotionsData.map(emo => {
+      const agePart = emo.age ? ` aos ${emo.age} anos de idade` : '';
+      const contextPart = emo.context ? `, relacionado a ${emo.context}` : '';
+      const sensationPart = emo.physicalSensation ? `. Sensação física associada: ${emo.physicalSensation}.` : '';
+      return `${emo.name}${agePart}${contextPart}${sensationPart}`;
+    }).join('; ');
+
+    return `Todos os pontos anatômicos, orgânicos, sistêmicos, que carreguem informação, presença, frequência e ressonância da(s) emoção(ões) ${allInfos}, Façam-se presente (falar 3x). Alinhem-se, equilibrem-se, entreguem-se (3x) com a carga magnética de 1 bilhão de Gauss ou quanto se faz necessário. Enviando agora essa(s) emoção(ões) para os buracos negros do universo. Fechando esses portais.`;
+  };
+
+  const getUnifiedSensationCommand = () => {
+    if (sensationsData.length === 0) return '';
+    const allInfos = sensationsData.map(sens => {
+      const locationPart = sens.location ? ` na região de ${sens.location}` : '';
+      const intensityPart = sens.intensity !== undefined ? `, com intensidade aproximada ${sens.intensity}/10` : '';
+      const situationPart = sens.situation ? `, mais presente quando ${sens.situation}` : '';
+      return `${sens.name}${locationPart}${intensityPart}${situationPart}`;
+    }).join('; ');
+
+    return `Todos os pontos anatômicos, orgânicos, sistêmicos, que carreguem informação, presença, frequência e ressonância da(s) sensação(ões) ${allInfos}, Façam-se presente (falar 3x). Alinhem-se, equilibrem-se, entreguem-se (3x) com a carga magnética de 1 bilhão de Gauss ou quanto se faz necessário. Enviando agora essa(s) sensação(ões) para os buracos negros do universo. Fechando esses portais.`;
+  };
+
   const toggleEmotion = (emotion: string) => {
     setSelectedEmotions(prev => {
       const isSelecting = !prev.includes(emotion);
@@ -210,7 +234,7 @@ const Emocional: React.FC<EmocionalProps> = ({
                     <span className="text-xs font-black text-white bg-teal-500 px-3 py-1 rounded-full uppercase">{emo.name}</span>
                   </div>
                   
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                  <div className="grid grid-cols-1 gap-8 items-start">
                     {/* Campos de Identificação */}
                     <div className="grid grid-cols-1 gap-4">
                       <div>
@@ -255,19 +279,20 @@ const Emocional: React.FC<EmocionalProps> = ({
                         />
                       </div>
                     </div>
-
-                    {/* Comando de Liberação */}
-                    <div className="h-full flex flex-col">
-                      <p className="text-xs font-bold text-teal-700 uppercase mb-2">Comando de Liberação (Emoção):</p>
-                      <textarea 
-                        value={emo.command || ''} 
-                        onChange={(e) => updateEmotionField(emo.name, 'command', e.target.value)}
-                        className="w-full flex-grow text-xs p-3 bg-teal-50 border border-teal-100 rounded-lg text-slate-700 italic outline-none focus:ring-1 focus:ring-teal-500 min-h-[150px]"
-                      />
-                    </div>
                   </div>
                 </div>
               ))}
+
+              {/* Comando Unificado de Emoções */}
+              <div className="bg-teal-900 p-6 rounded-2xl border border-teal-700 shadow-xl space-y-4">
+                <h4 className="text-sm font-black text-teal-300 uppercase tracking-widest border-b border-teal-800 pb-2">Comando Unificado de Liberação (Emoções)</h4>
+                <textarea 
+                  value={getUnifiedEmotionCommand()}
+                  readOnly
+                  className="w-full text-sm p-4 bg-teal-950/50 border border-teal-800 rounded-xl text-teal-50 font-medium italic outline-none min-h-[150px] leading-relaxed shadow-inner"
+                />
+                <p className="text-[10px] text-teal-400 italic">Leia este comando uma única vez para liberar todas as emoções identificadas acima.</p>
+              </div>
             </div>
           </div>
         )}
@@ -350,7 +375,7 @@ const Emocional: React.FC<EmocionalProps> = ({
                     <span className="text-xs font-black text-white bg-orange-400 px-3 py-1 rounded-full uppercase">{sens.name}</span>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                  <div className="grid grid-cols-1 gap-8 items-start">
                     {/* Campos de Identificação */}
                     <div className="grid grid-cols-1 gap-4">
                       <div className="grid grid-cols-2 gap-3">
@@ -396,19 +421,20 @@ const Emocional: React.FC<EmocionalProps> = ({
                         />
                       </div>
                     </div>
-
-                    {/* Descrição da Sensação */}
-                    <div className="h-full flex flex-col">
-                      <p className="text-xs font-bold text-orange-800 uppercase mb-2">Descrição da Sensação:</p>
-                      <textarea 
-                        value={sens.description || ''} 
-                        onChange={(e) => updateSensationField(sens.name, 'description', e.target.value)}
-                        className="w-full flex-grow text-xs p-3 bg-orange-50 border border-orange-100 rounded-lg text-slate-700 italic outline-none focus:ring-1 focus:ring-orange-500 min-h-[150px]"
-                      />
-                    </div>
                   </div>
                 </div>
               ))}
+
+              {/* Comando Unificado de Sensações */}
+              <div className="bg-orange-900 p-6 rounded-2xl border border-orange-700 shadow-xl space-y-4">
+                <h4 className="text-sm font-black text-orange-300 uppercase tracking-widest border-b border-orange-800 pb-2">Comando Unificado de Liberação (Sensações)</h4>
+                <textarea 
+                  value={getUnifiedSensationCommand()}
+                  readOnly
+                  className="w-full text-sm p-4 bg-orange-950/50 border border-orange-800 rounded-xl text-orange-50 font-medium italic outline-none min-h-[150px] leading-relaxed shadow-inner"
+                />
+                <p className="text-[10px] text-orange-400 italic">Leia este comando uma única vez para liberar todas as sensações identificadas acima.</p>
+              </div>
             </div>
           </div>
         )}

@@ -387,10 +387,6 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
                   </div>
                   {emo.context && <p className="text-xs text-slate-600 mb-2"><strong>Contexto:</strong> {emo.context}</p>}
                   {emo.physicalSensation && <p className="text-xs text-slate-600 mb-2"><strong>Sensação Física:</strong> {emo.physicalSensation}</p>}
-                  <div className="mt-2 pt-2 border-t border-teal-100/50">
-                    <p className="text-[11px] font-bold text-teal-800 uppercase mb-1">Comando de Liberação:</p>
-                    <p className="text-sm text-slate-700 italic leading-relaxed">{emo.command}</p>
-                  </div>
                 </div>
               ))}
             </div>
@@ -430,10 +426,6 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
                     {sens.intensity !== undefined && <span className="text-[10px] text-orange-700 font-bold border border-orange-200 px-2 py-0.5 rounded bg-white">INTENSIDADE: {sens.intensity}/10</span>}
                   </div>
                   {sens.situation && <p className="text-xs text-slate-600 mb-2"><strong>Gatilho/Situação:</strong> {sens.situation}</p>}
-                  <div className="mt-2 pt-2 border-t border-orange-100/50">
-                    <p className="text-[11px] font-bold text-orange-800 uppercase mb-1">Descrição Final:</p>
-                    <p className="text-sm text-slate-700 italic leading-relaxed">{sens.description}</p>
-                  </div>
                 </div>
               ))}
             </div>
