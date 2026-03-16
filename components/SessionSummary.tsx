@@ -500,6 +500,45 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
           </div>
         </div>
 
+        {/* Termo de Ciência Completo - Integrado ao Relatório (Fim da página/Nova página na impressão) */}
+        {(consentForm?.status === 'signed_local' || consentForm?.status === 'signed_remote') && (
+            <div className="hidden print:block mt-12 pt-12 border-t-2 border-slate-100" style={{ pageBreakBefore: 'always' }}>
+                <div className="text-center border-b-2 border-teal-600 pb-6 mb-8">
+                    <h2 className="text-2xl font-bold text-teal-700 uppercase">Termo de Ciência e Autorização</h2>
+                    <p className="text-slate-500 mt-1">Anexo ao Relatório de Atendimento</p>
+                </div>
+
+                <div className="space-y-6 text-justify text-slate-800 leading-relaxed max-w-4xl mx-auto">
+                    <p>Eu, <strong>{consentForm.signedName || patient.name}</strong>, {consentForm.cpf ? `portador(a) do CPF nº ${consentForm.cpf},` : ''} declaro para os devidos fins estar plenamente ciente das seguintes informações acerca do atendimento de Biomagnetismo:</p>
+                    
+                    <div className="bg-slate-50 p-6 rounded border border-slate-200 space-y-4 italic">
+                        <p>1. O Biomagnetismo é uma terapia integrativa, complementar e não substitui, em hipótese alguma, o acompanhamento médico convencional, tratamentos alopáticos ou qualquer intervenção de saúde legalmente reconhecida.</p>
+                        <p>2. Compreendo que esta técnica utiliza campos magnéticos para auxiliar no equilíbrio do pH e na autorregulação natural do organismo, não sendo um método cirúrgico ou invasivo.</p>
+                        <p>3. Estou ciente de que não existem promessas de cura. Os resultados são individuais e podem variar de acordo com o organismo e o estilo de vida de cada pessoa.</p>
+                        <p>4. Comprometo-me a manter meus exames, consultas e tratamentos médicos em dia, informando ao terapeuta sobre qualquer condição preexistente relevante.</p>
+                    </div>
+
+                    <p className="font-bold text-teal-700 mt-8">Confirmação de Aceite:</p>
+                    <p>Declaro que li, compreendi e concordo com todos os termos acima citados, autorizando a realização da sessão de Biomagnetismo nesta data.</p>
+                    
+                    <div className="mt-12 flex flex-col items-center">
+                        <div className="w-full max-w-md border-b border-slate-400 pb-2 mb-2 flex flex-col items-center">
+                            {consentForm.signatureImage ? (
+                                <img src={consentForm.signatureImage} alt="Assinatura" className="h-24 object-contain mb-2" />
+                            ) : (
+                                <div className="h-24"></div>
+                            )}
+                            <p className="font-bold text-lg">{consentForm.signedName || patient.name}</p>
+                            <p className="text-xs text-slate-500 uppercase">Assinatura do Paciente / Responsável</p>
+                        </div>
+                        <div className="text-slate-400 text-sm mt-2">
+                            Assinado digitalmente em: {consentForm.dateSigned ? new Date(consentForm.dateSigned).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
+
         {/* Disclaimer Impressão */}
         <div className="hidden print:block mt-8 p-4 border border-slate-300 rounded bg-slate-50 text-[10px] text-slate-600 italic text-justify leading-tight max-w-4xl mx-auto">
             <p><strong>Aviso Importante:</strong> O Biomagnetismo é uma técnica integrativa e complementar (PICS). Os rastreios e impactações magnéticas registrados neste relatório não constituem diagnóstico médico, prescrição de tratamento alopático, nem promessa de cura para qualquer enfermidade. É de responsabilidade exclusiva do paciente manter seus acompanhamentos e tratamentos convencionais com os profissionais e médicos competentes. A terapia biomagnética atua equilibrando o pH do corpo e auxiliando na autorregulação natural do organismo.</p>
