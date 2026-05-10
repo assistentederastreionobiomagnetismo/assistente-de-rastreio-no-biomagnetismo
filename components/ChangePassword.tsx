@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { EyeIcon, EyeSlashIcon } from './icons/Icons';
 
 interface ChangePasswordProps {
   onUpdate: (newPassword: string) => void;
@@ -11,6 +12,8 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onUpdate, onLogout }) =
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,28 +53,46 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onUpdate, onLogout }) =
 
           <div>
             <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Nova Senha</label>
-            <input
-              type="password"
-              placeholder="Digite sua nova senha"
-              value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
-              className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium transition-all"
-              required
-              disabled={isSaving}
-            />
+            <div className="relative">
+              <input
+                type={showNewPassword ? "text" : "password"}
+                placeholder="Digite sua nova senha"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium transition-all pr-12"
+                required
+                disabled={isSaving}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 transition-colors"
+              >
+                {showNewPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
 
           <div>
             <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Confirmar Nova Senha</label>
-            <input
-              type="password"
-              placeholder="Repita a nova senha"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium transition-all"
-              required
-              disabled={isSaving}
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Repita a nova senha"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium transition-all pr-12"
+                required
+                disabled={isSaving}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 transition-colors"
+              >
+                {showConfirmPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
 
           <button type="submit" disabled={isSaving} className="w-full py-5 bg-teal-600 text-white font-black rounded-2xl shadow-xl hover:bg-teal-700 transition-all uppercase tracking-widest text-sm disabled:bg-slate-300">
