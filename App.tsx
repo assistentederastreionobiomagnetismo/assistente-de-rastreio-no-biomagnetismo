@@ -37,8 +37,8 @@ enum Step {
 
 type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager' | 'changePassword' | 'store' | 'offerManager';
 
-const StoreCTA: React.FC<{ onOpenStore: () => void }> = ({ onOpenStore }) => (
-  <div className="max-w-6xl mx-auto mt-12 mb-20 bg-gradient-to-r from-teal-600 to-indigo-700 rounded-3xl p-6 md:p-10 shadow-2xl overflow-hidden relative group animate-fade-in print:hidden">
+const StoreCTA: React.FC<{ onOpenStore: () => void, className?: string }> = ({ onOpenStore, className }) => (
+  <div className={`mx-auto mt-12 mb-20 bg-gradient-to-r from-teal-600 to-indigo-700 rounded-3xl p-6 md:p-10 shadow-2xl overflow-hidden relative group animate-fade-in print:hidden ${className || 'max-w-6xl'}`}>
     <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
     <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 bg-teal-400/20 rounded-full blur-2xl group-hover:translate-x-12 transition-transform duration-700"></div>
     
@@ -840,7 +840,10 @@ const App: React.FC = () => {
          currentUser.username !== 'vbsjunior.biomagnetismo' && 
          appView !== 'store' && 
          appView !== 'offerManager' && (
-          <StoreCTA onOpenStore={() => { setPreviousView(appView); setAppView('store'); }} />
+          <StoreCTA 
+            onOpenStore={() => { setPreviousView(appView); setAppView('store'); }} 
+            className={appView === 'dashboard' ? 'max-w-4xl' : 'max-w-6xl'}
+          />
         )}
       </div>
     </div >

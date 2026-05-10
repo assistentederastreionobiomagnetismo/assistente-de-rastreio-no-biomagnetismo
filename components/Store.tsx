@@ -9,100 +9,6 @@ interface StoreProps {
   onGoToDashboard: () => void;
 }
 
-const Store: React.FC<StoreProps> = ({ products, onExit, onGoToDashboard }) => {
-  const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
-  const featuredProducts = products.filter(p => p.isFeatured);
-  
-  // Auto-advance carousel
-  useEffect(() => {
-    if (featuredProducts.length <= 1) return;
-    
-    const timer = setInterval(() => {
-      setCurrentCarouselIndex(prev => (prev + 1) % featuredProducts.length);
-    }, 5000);
-    
-    return () => clearInterval(timer);
-  }, [featuredProducts.length]);
-
-  return (
-    <div className="animate-fade-in max-w-6xl mx-auto pb-20">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-teal-100 text-teal-600 rounded-xl">
-            <StoreIcon className="w-8 h-8" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Nossa Loja</h2>
-            <p className="text-slate-500 text-sm">Ofertas exclusivas e recomendações para você.</p>
-          </div>
-        </div>
-        <button 
-          onClick={onExit}
-          className="px-6 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg hover:bg-slate-200 transition-all border border-slate-200"
-        >
-          Voltar ao Painel
-        </button>
-      </div>
-
-      {/* Featured Carousel */}
-      {featuredProducts.length > 0 && (
-        <div className="relative mb-12 group">
-          <div className="overflow-hidden rounded-3xl shadow-2xl aspect-[21/9] md:aspect-[25/9] relative bg-slate-900">
-            {featuredProducts.map((product, index) => (
-              <div 
-                key={product.id}
-                className={`absolute inset-0 transition-all duration-1000 ease-in-out transform ${
-                  index === currentCarouselIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
-                }`}
-              >
-                {/* Background Image with Overlay */}
-                <img 
-                   src={product.imageUrls[0] || ''} 
-                   alt={product.title} 
-                   className="w-full h-full object-cover opacity-60"
-                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/60 to-transparent flex items-center p-8 md:p-16">
-                  <div className="max-w-xl space-y-4 md:space-y-6">
-                    <span className="inline-block px-3 py-1 bg-teal-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full">Destaque da Semana</span>
-                    <h3 className="text-3xl md:text-5xl font-black text-white leading-tight">{product.title}</h3>
-                    <p className="text-slate-200 text-sm md:text-lg line-clamp-2 md:line-clamp-3 leading-relaxed">
-                      {product.description}
-                    </p>
-                    <div className="pt-4">
-                      <a 
-                        href={product.affiliateLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-3 px-8 py-4 bg-teal-500 text-white font-bold rounded-2xl hover:bg-teal-400 transition-all shadow-lg hover:shadow-teal-500/40 group/btn transform hover:-translate-y-1"
-                      >
-                        {product.ctaText}
-                        <ExternalLinkIcon className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Carousel Indicators */}
-          {featuredProducts.length > 1 && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-              {featuredProducts.map((_, index) => (
-                <button 
-                  key={index}
-                  onClick={() => setCurrentCarouselIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === currentCarouselIndex ? 'w-8 bg-teal-500' : 'bg-white/40'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showVideoModal, setShowVideoModal] = useState<string | null>(null);
@@ -214,7 +120,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   );
 };
 
-const Store: React.FC<StoreProps> = ({ products, onExit }) => {
+const Store: React.FC<StoreProps> = ({ products, onExit, onGoToDashboard }) => {
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
   const featuredProducts = products.filter(p => p.isFeatured);
   
