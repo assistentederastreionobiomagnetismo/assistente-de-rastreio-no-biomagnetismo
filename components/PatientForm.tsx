@@ -17,6 +17,7 @@ interface PatientFormProps {
   therapistUsername: string;
   onNext: () => void;
   onLoadLastSessionAdminData?: () => void;
+  onResetSession?: () => void;
 }
 
 const PatientForm: React.FC<PatientFormProps> = ({ 
@@ -24,9 +25,15 @@ const PatientForm: React.FC<PatientFormProps> = ({
   safetyCheck, setSafetyCheck,
   consentForm, setConsentForm,
   scalesBefore, setScalesBefore,
-  patientsList, setPatientsList, therapistUsername, onNext, onLoadLastSessionAdminData 
+  patientsList, setPatientsList, therapistUsername, onNext, onLoadLastSessionAdminData, onResetSession
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(patient.name || '');
+
+  useEffect(() => {
+    if (patient.name && patient.name !== searchTerm) {
+      setSearchTerm(patient.name);
+    }
+  }, [patient.name]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
@@ -292,7 +299,33 @@ const PatientForm: React.FC<PatientFormProps> = ({
       signatureImage: dataUrl
     });
     
+    if (patient.name) {
+      localStorage.setItem(`biomagnetismo_patient_sig_${patient.name}`, JSON.stringify({
+        signedName: signatureName || patient.name,
+        cpf: signatureCpf,
+        signatureImage: dataUrl
+      }));
+    }
+    
     setIsSignatureModalOpen(false);
+  };
+
+  const loadSavedSignature = () => {
+    const saved = localStorage.getItem(`biomagnetismo_patient_sig_${patient.name}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setConsentForm({
+          status: 'signed_local',
+          dateSigned: new Date().toISOString(),
+          signedName: parsed.signedName || patient.name,
+          cpf: parsed.cpf || '',
+          signatureImage: parsed.signatureImage
+        });
+      } catch (e) {
+        console.error("Erro ao carregar assinatura salva do paciente", e);
+      }
+    }
   };
 
   useEffect(() => {
@@ -305,13 +338,23 @@ const PatientForm: React.FC<PatientFormProps> = ({
               if (statusData && statusData.status === 'signed' && statusData.signedData) {
                  setIsWaitingSignature(false);
                  setPendingSignatureId(null);
-                 setConsentForm({
-                   status: 'signed_remote',
+                 const newConsentData = {
+                   status: 'signed_remote' as const,
                    cpf: statusData.signedData.cpf || '',
                    dateSigned: new Date().toISOString(),
                    signedName: statusData.signedData.name || patient.name || '',
                    signatureImage: statusData.signedData.signatureImage || '',
-                 });
+                 };
+                 setConsentForm(newConsentData);
+                 
+                 if (patient.name && newConsentData.signatureImage) {
+                   localStorage.setItem(`biomagnetismo_patient_sig_${patient.name}`, JSON.stringify({
+                     signedName: newConsentData.signedName,
+                     cpf: newConsentData.cpf,
+                     signatureImage: newConsentData.signatureImage
+                   }));
+                 }
+                 
                  alert('✅ O paciente assinou o termo com sucesso!');
               }
            } catch (error) {
@@ -427,14 +470,18 @@ const PatientForm: React.FC<PatientFormProps> = ({
 
       {/* Main Form Content - Hidden on print */}
       <div className="print:hidden">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold text-slate-700">Informações do Atendimento</h2>
-        <button 
-          onClick={onLoadLastSessionAdminData} 
-          className="text-xs font-bold text-teal-600 border border-teal-600 px-3 py-1.5 rounded hover:bg-teal-50 shadow-sm flex items-center gap-1 transition-colors"
+        <button
           type="button"
+          onClick={() => {
+            if (window.confirm('Tem certeza que deseja reiniciar o atendimento? Todos os dados não salvos serão perdidos.')) {
+              if (onResetSession) onResetSession();
+            }
+          }}
+          className="px-4 py-2 text-xs md:text-sm font-bold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors shadow-sm flex items-center gap-2"
         >
-          <span>↺</span> Carregar última sessão do paciente
+          <TrashIcon className="w-4 h-4" /> Reiniciar Sessão
         </button>
       </div>
 
@@ -707,12 +754,13 @@ const PatientForm: React.FC<PatientFormProps> = ({
           {consentForm.status === 'pending' ? (
             <div className="flex flex-col sm:flex-row gap-4 mt-4">
                <button type="button" onClick={openSignatureModal} className="flex-1 px-4 py-3 bg-teal-600 text-white font-bold rounded-lg shadow hover:bg-teal-700 transition-colors">
-                   Assinar neste dispositivo
+                   Assinar Digitalmente
                </button>
-               <button type="button" onClick={handleSendWhatsApp} className="flex-1 px-4 py-3 bg-green-600 text-white font-bold rounded-lg shadow hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
-                   <WhatsAppIcon className="w-5 h-5" />
-                   Enviar termo via WhatsApp
-               </button>
+               {patient.name && localStorage.getItem(`biomagnetismo_patient_sig_${patient.name}`) && (
+                  <button type="button" onClick={loadSavedSignature} className="flex-1 px-4 py-3 bg-green-600 text-white font-bold rounded-lg shadow hover:bg-green-700 transition-colors">
+                      Reutilizar Assinatura Salva
+                  </button>
+               )}
             </div>
           ) : (
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
@@ -803,15 +851,13 @@ const PatientForm: React.FC<PatientFormProps> = ({
 
       {/* Termo de Ciência Modal */}
       {isSignatureModalOpen && (
-        <div className="fixed inset-0 bg-black/70 z-[70] flex justify-center items-center p-4">
-           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 animate-fade-in flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 bg-black/70 z-[70] flex justify-center items-center p-2 md:p-6">
+           <div className="bg-white rounded-lg shadow-xl max-w-[95vw] md:max-w-6xl w-full p-4 md:p-8 animate-fade-in flex flex-col max-h-[95vh]">
               <h3 className="text-xl font-bold text-teal-700 mb-4 border-b pb-2">Termo de Ciência do Paciente</h3>
               
               <div className="flex-1 overflow-y-auto pr-2 pb-4 space-y-4 text-sm text-slate-700">
                   <div className="bg-slate-50 p-4 rounded border border-slate-200">
-                      <p className="mb-2">O Biomagnetismo é uma terapia complementar e não substitui tratamento médico, terapêutico ou qualquer outro tratamento legalmente reconhecido.</p>
-                      <p className="mb-2">Não são feitas promessas de cura, e os resultados podem variar de pessoa para pessoa.</p>
-                      <p>O paciente deve manter seus exames, consultas e tratamentos em dia com os profissionais de saúde responsáveis.</p>
+                      <p className="leading-tight">O Biomagnetismo é uma terapia complementar e não substitui tratamento médico, terapêutico ou qualquer outro tratamento legalmente reconhecido. Não são feitas promessas de cura, e os resultados podem variar de pessoa para pessoa. O paciente deve manter seus exames, consultas e tratamentos em dia com os profissionais de saúde responsáveis.</p>
                   </div>
 
                   <label className={`flex items-start gap-3 bg-teal-50 p-3 rounded border border-teal-200 ${consentForm.status === 'pending' ? 'cursor-pointer' : 'opacity-80 cursor-default'}`}>
@@ -843,7 +889,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
                       </label>
                       
                       {(consentForm.status === 'signed_local' || consentForm.status === 'signed_remote') && consentForm.signatureImage ? (
-                         <div className="w-full h-40 border-2 border-slate-300 rounded-lg bg-slate-50 flex items-center justify-center p-2 relative">
+                         <div className="w-full h-80 md:h-[500px] border-2 border-slate-300 rounded-lg bg-slate-50 flex items-center justify-center p-2 relative">
                              <img src={consentForm.signatureImage} alt="Assinatura do Paciente" className="max-h-full max-w-full object-contain" />
                              <div className="absolute bottom-2 right-2 text-xs text-slate-400 bg-white/80 px-2 py-1 rounded shadow-sm">
                                 Assinado em: {consentForm.dateSigned ? new Date(consentForm.dateSigned).toLocaleDateString() : 'Data não registrada'}
@@ -852,8 +898,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
                       ) : (
                          <canvas 
                             ref={canvasRef}
-                            width={600}
-                            height={200}
+                            width={1200}
+                            height={600}
                             onMouseDown={startDrawing}
                             onMouseMove={draw}
                             onMouseUp={stopDrawing}
@@ -861,7 +907,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
                             onTouchStart={startDrawing}
                             onTouchMove={draw}
                             onTouchEnd={stopDrawing}
-                            className="w-full h-40 border-2 border-slate-300 rounded-lg bg-slate-50 cursor-crosshair touch-none"
+                            className="w-full h-80 md:h-[500px] border-2 border-slate-300 rounded-lg bg-slate-50 cursor-crosshair touch-none"
                          />
                       )}
                   </div>

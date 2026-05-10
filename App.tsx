@@ -646,7 +646,7 @@ const App: React.FC = () => {
               </nav>
             </div>
             <main className="p-6 md:p-10 relative">
-              {currentStep === Step.PATIENT_INFO && (
+              <div className={currentStep === Step.PATIENT_INFO ? 'block' : 'hidden'}>
                 <PatientForm 
                   patient={patient} 
                   setPatient={setPatient} 
@@ -694,15 +694,28 @@ const App: React.FC = () => {
                        alert("Não foi possível carregar os dados da última sessão.");
                      }
                   }}
+                  onResetSession={resetSessionState}
                 />
-              )}
-              {currentStep === Step.START_PROTOCOL && <StartProtocol data={protocolData} setData={setProtocolData} notes={protocolNotes} setNotes={setProtocolNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PATIENT_INFO)} patientName={patient.name} />}
-              {currentStep === Step.SCANNING_RESERVATORIOS && <Scanning levelTitle="Reservatórios" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={reservatoriosNotes} setNotes={setReservatoriosNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.START_PROTOCOL)} biomagneticPairs={biomagneticPairs} />}
-              {currentStep === Step.SCANNING_LEVEL_I && <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelINotes} setNotes={setLevelINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_RESERVATORIOS)} biomagneticPairs={biomagneticPairs} />}
-              {currentStep === Step.SCANNING_LEVEL_II && <Scanning levelTitle="Nível II" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIINotes} setNotes={setLevelIINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_I)} biomagneticPairs={biomagneticPairs} />}
-              {currentStep === Step.SCANNING_LEVEL_III && <Scanning levelTitle="Nível III" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIIINotes} setNotes={setLevelIIINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_II)} biomagneticPairs={biomagneticPairs} />}
-              {currentStep === Step.PHENOMENA && <Phenomena data={phenomena} setData={setPhenomena} notes={phenomenaNotes} setNotes={setPhenomenaNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_III)} />}
-              {currentStep === Step.EMOTIONAL && (
+              </div>
+              <div className={currentStep === Step.START_PROTOCOL ? 'block' : 'hidden'}>
+                <StartProtocol data={protocolData} setData={setProtocolData} notes={protocolNotes} setNotes={setProtocolNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.PATIENT_INFO)} patientName={patient.name} patientComplaint={patient.mainComplaint} />
+              </div>
+              <div className={currentStep === Step.SCANNING_RESERVATORIOS ? 'block' : 'hidden'}>
+                <Scanning levelTitle="Reservatórios" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={reservatoriosNotes} setNotes={setReservatoriosNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.START_PROTOCOL)} biomagneticPairs={biomagneticPairs} />
+              </div>
+              <div className={currentStep === Step.SCANNING_LEVEL_I ? 'block' : 'hidden'}>
+                <Scanning levelTitle="Nível I" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelINotes} setNotes={setLevelINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_RESERVATORIOS)} biomagneticPairs={biomagneticPairs} />
+              </div>
+              <div className={currentStep === Step.SCANNING_LEVEL_II ? 'block' : 'hidden'}>
+                <Scanning levelTitle="Nível II" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIINotes} setNotes={setLevelIINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_I)} biomagneticPairs={biomagneticPairs} />
+              </div>
+              <div className={currentStep === Step.SCANNING_LEVEL_III ? 'block' : 'hidden'}>
+                <Scanning levelTitle="Nível III" selectedPairs={selectedPairs} setSelectedPairs={setSelectedPairs} notes={levelIIINotes} setNotes={setLevelIIINotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_II)} biomagneticPairs={biomagneticPairs} />
+              </div>
+              <div className={currentStep === Step.PHENOMENA ? 'block' : 'hidden'}>
+                <Phenomena data={phenomena} setData={setPhenomena} notes={phenomenaNotes} setNotes={setPhenomenaNotes} onNext={nextStep} onBack={() => setCurrentStep(Step.SCANNING_LEVEL_III)} />
+              </div>
+              <div className={currentStep === Step.EMOTIONAL ? 'block' : 'hidden'}>
                 <Emocional 
                   selectedEmotions={selectedEmotions} 
                   setSelectedEmotions={setSelectedEmotions} 
@@ -720,9 +733,11 @@ const App: React.FC = () => {
                   onBack={() => setCurrentStep(Step.PHENOMENA)} 
                   patientName={patient.name}
                 />
-              )}
-              {currentStep === Step.TREATMENT && <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} scalesBefore={scalesBefore} scalesAfter={scalesAfter} setScalesAfter={setScalesAfter} onNext={nextStep} onBack={() => setCurrentStep(Step.EMOTIONAL)} sessionType={protocolData.sessionType} />}
-              {currentStep === Step.SUMMARY && (
+              </div>
+              <div className={currentStep === Step.TREATMENT ? 'block' : 'hidden'}>
+                <Treatment impactionTime={impactionTime} setImpactionTime={setImpactionTime} notes={sessionNotes} setNotes={setSessionNotes} scalesBefore={scalesBefore} scalesAfter={scalesAfter} setScalesAfter={setScalesAfter} onNext={nextStep} onBack={() => setCurrentStep(Step.EMOTIONAL)} sessionType={protocolData.sessionType} />
+              </div>
+              <div className={currentStep === Step.SUMMARY ? 'block' : 'hidden'}>
                 <SessionSummary 
                   patient={patient} 
                   protocolData={protocolData} 
@@ -753,18 +768,16 @@ const App: React.FC = () => {
                   onFinish={handleFinishSession} 
                   onBack={() => setCurrentStep(Step.TREATMENT)} 
                 />
-              )}
+              </div>
 
-              {currentStep === Step.PATIENT_INFO && (
-                <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 print:hidden">
-                  <button
-                    onClick={() => { resetSessionState(); setAppView('dashboard'); }}
-                    className="px-6 py-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm border border-slate-200"
-                  >
-                    Voltar ao Painel
-                  </button>
-                </div>
-              )}
+              <div className={`absolute bottom-6 left-6 md:bottom-10 md:left-10 print:hidden ${currentStep === Step.PATIENT_INFO ? 'block' : 'hidden'}`}>
+                <button
+                  onClick={() => { resetSessionState(); setAppView('dashboard'); }}
+                  className="px-6 py-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm border border-slate-200"
+                >
+                  Voltar ao Painel
+                </button>
+              </div>
             </main>
           </div>
         )}

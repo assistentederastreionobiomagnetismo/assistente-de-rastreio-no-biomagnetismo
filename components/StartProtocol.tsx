@@ -10,9 +10,10 @@ interface StartProtocolProps {
   onNext: () => void;
   onBack: () => void;
   patientName?: string;
+  patientComplaint?: string;
 }
 
-const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, setNotes, onNext, onBack, patientName }) => {
+const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, setNotes, onNext, onBack, patientName, patientComplaint }) => {
   const isDistancia = data.sessionType === 'distancia';
 
   const handleLegResponseChange = (val: 'Encurtado' | 'Estendido' | 'Normal') => {
@@ -178,9 +179,24 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
 
           <div className="flex gap-4">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '7' : '6'}</span>
-            <p className="pt-1">
-              Validar com o Organismo a queixa ou sintomas. Após validação da(s) queixa(s), dar o comando: <span className="text-purple-700 font-bold italic">Organismo, convenciono que a(s) sua(s) queixa(s) do dia é... (mencionar a(s) queixa(s) validadas pelo organismo).</span>
-            </p>
+            <div className="pt-1 w-full">
+              <p className="text-slate-700 font-medium">
+                Validar com o Organismo a(s) queixa(s) ou sintoma(s) do dia:
+              </p>
+              
+              {patientComplaint ? (
+                <div className="my-3 p-4 bg-rose-50 text-rose-800 font-black text-xl uppercase rounded-xl border-2 border-rose-200 shadow-sm text-center">
+                  "{patientComplaint}"
+                </div>
+              ) : (
+                <span className="text-slate-400 italic block my-2">(nenhuma queixa registrada)</span>
+              )}
+              
+              <p className="text-slate-500 text-sm italic mb-1 mt-2">Após validação, dar o comando:</p>
+              <p className="text-purple-700 font-bold italic text-lg">
+                "Organismo, convenciono que a(s) sua(s) queixa(s) do dia é/são... (mencionar a(s) queixa(s) acima validadas pelo organismo)."
+              </p>
+            </div>
           </div>
 
           <div className="flex gap-4">

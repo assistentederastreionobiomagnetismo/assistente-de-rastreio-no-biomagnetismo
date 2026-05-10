@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { BiomagneticPair } from '../types';
 import { PlusIcon, SearchIcon, InfoIcon, TrashIcon, CheckIcon } from './icons/Icons';
 import PairDetailModal from './PairDetailModal';
@@ -86,6 +86,23 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
     return "Nível " + lvl;
   };
 
+  const PAIRS_PER_PAGE = 6;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, levelTitle]);
+
+  const totalPages = Math.ceil(filteredPairs.length / PAIRS_PER_PAGE);
+  const currentPairs = filteredPairs.slice((currentPage - 1) * PAIRS_PER_PAGE, currentPage * PAIRS_PER_PAGE);
+
+  const isPageFullyChecked = (pageIndex: number) => {
+    const startIndex = (pageIndex - 1) * PAIRS_PER_PAGE;
+    const pagePairs = filteredPairs.slice(startIndex, startIndex + PAIRS_PER_PAGE);
+    if (pagePairs.length === 0) return false;
+    return pagePairs.every(p => (p.order !== undefined && guidedChecks.has(p.order)) || selectedPairs.some(sp => sp.order === p.order));
+  };
+
   return (
     <div className="animate-fade-in">
       {infoModalPair && <PairDetailModal pair={infoModalPair} onClose={() => setInfoModalPair(null)} />}
@@ -152,26 +169,30 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
             </div>
           )}
 
-          <div className="h-96 overflow-y-auto border rounded-2xl p-2 bg-slate-50 shadow-inner">
+          <div className={`h-[420px] overflow-y-auto border ${totalPages > 1 ? 'rounded-t-2xl border-b-0' : 'rounded-2xl'} p-2 bg-slate-50 shadow-inner`}>
             <ul className="divide-y divide-slate-200">
-              {filteredPairs.map((pair, idx) => {
+              {currentPairs.map((pair, idx) => {
                 const isChecked = pair.order !== undefined && guidedChecks.has(pair.order);
                 const isSelected = selectedPairs.some(p => p.order === pair.order);
 
                 return (
                   <li key={pair.order || idx} className={`flex items-center justify-between p-3 rounded-xl transition-all group ${isChecked ? 'bg-slate-100 opacity-70' : 'hover:bg-white'}`}>
-                    <div className="flex items-center gap-3 flex-1 overflow-hidden">
+                    <div 
+                      className="flex items-center gap-3 flex-1 overflow-hidden cursor-pointer group/item"
+                      onClick={() => toggleGuidedCheck(pair.order)}
+                      role="button"
+                      tabIndex={0}
+                    >
                       {/* BOTAO DE CHECK (GUIA) */}
-                      <button
-                        onClick={() => toggleGuidedCheck(pair.order)}
-                        className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isChecked ? 'bg-green-500 border-green-500 text-white shadow-sm' : 'border-slate-300 text-transparent hover:border-green-400'}`}
+                      <div
+                        className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isChecked ? 'bg-green-500 border-green-500 text-white shadow-sm' : 'border-slate-300 text-transparent group-hover/item:border-green-400'}`}
                         title="Marcar como Testado (Guia)"
                       >
                         <CheckIcon className="w-4 h-4" />
-                      </button>
+                      </div>
 
                       <div className="flex flex-col min-w-0">
-                        <span className={`text-sm md:text-base font-bold transition-colors break-words leading-tight ${isSelected ? 'text-teal-700' : isChecked ? 'text-slate-400' : 'text-slate-800'}`}>
+                        <span className={`text-sm md:text-base font-bold transition-colors break-words leading-tight ${isSelected ? 'text-teal-700' : isChecked ? 'text-slate-400' : 'text-slate-800 group-hover/item:text-slate-600'}`}>
                           {pair.name}
                         </span>
                         <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">{pair.point1} / {pair.point2}</span>
@@ -205,6 +226,34 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
               )}
             </ul>
           </div>
+          {totalPages > 1 && (
+            <div className="flex flex-wrap border border-slate-200 rounded-b-2xl bg-slate-100 p-2 gap-1 items-center justify-center shadow-sm">
+              {Array.from({ length: totalPages }).map((_, i) => {
+                const pageNum = i + 1;
+                const isCurrent = currentPage === pageNum;
+                const isFullyChecked = isPageFullyChecked(pageNum);
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all border ${
+                      isCurrent 
+                        ? 'ring-2 ring-offset-1 ring-teal-500 bg-white shadow-sm' 
+                        : ''
+                    } ${
+                      isFullyChecked 
+                        ? 'bg-green-100 text-green-700 border-green-300 shadow-sm' 
+                        : isCurrent ? 'text-slate-700 border-slate-300' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-200'
+                    }`}
+                    title={isFullyChecked ? "Todos os pares desta página foram testados" : "Faltam pares a serem testados nesta página"}
+                  >
+                    Pág {pageNum} {isFullyChecked && <CheckIcon className="inline w-3 h-3 ml-1 mb-0.5" />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col">

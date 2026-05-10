@@ -71,14 +71,27 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
 
   // Focus effect for signature to ensure consistency if it re-renders
   React.useEffect(() => {
-     if (canvasRef.current && therapistSignature) {
+     let sigToLoad = therapistSignature;
+     
+     // Load from localStorage if state is empty and not historical
+     if (!sigToLoad && !isHistorical) {
+         const savedSig = localStorage.getItem('biomagnetismo_therapist_signature');
+         if (savedSig) {
+             sigToLoad = savedSig;
+             if (setTherapistSignature) {
+                 setTherapistSignature(savedSig);
+             }
+         }
+     }
+
+     if (canvasRef.current && sigToLoad) {
          const ctx = canvasRef.current.getContext('2d');
          const img = new Image();
          img.onload = () => {
              ctx?.clearRect(0,0, canvasRef.current!.width, canvasRef.current!.height);
              ctx?.drawImage(img, 0, 0);
          };
-         img.src = therapistSignature;
+         img.src = sigToLoad;
      }
   }, []); // Only once on mount to restore if navigating back
 
@@ -127,6 +140,7 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (setTherapistSignature) setTherapistSignature('');
+    localStorage.removeItem('biomagnetismo_therapist_signature');
   };
 
   const saveSignature = () => {
@@ -155,6 +169,10 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
         if (hasDrawn) {
             finalSig = canvas.toDataURL('image/png');
         }
+      }
+      
+      if (finalSig) {
+          localStorage.setItem('biomagnetismo_therapist_signature', finalSig);
       }
       
       onFinish(finalSig);
@@ -515,24 +533,24 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
             </h4>
             
             {isHistorical && therapistSignature ? (
-                <div className="w-full max-w-sm h-32 border-2 border-slate-200 rounded-lg bg-slate-50 flex items-center justify-center p-2 mx-auto md:mx-0">
+                <div className="w-full h-80 border-2 border-slate-200 rounded-lg bg-slate-50 flex items-center justify-center p-2 mx-auto md:mx-0">
                    <img src={therapistSignature} alt="Assinatura do Terapeuta" className="max-h-full max-w-full object-contain" />
                 </div>
             ) : isHistorical && !therapistSignature ? (
-                <div className="w-full max-w-sm h-32 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50 flex items-center justify-center p-2 mx-auto md:mx-0">
+                <div className="w-full h-80 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50 flex items-center justify-center p-2 mx-auto md:mx-0">
                     <span className="text-sm text-slate-400 italic">Atendimento salvo sem assinatura do terapeuta.</span>
                 </div>
             ) : (
-                <div className="max-w-sm relative">
+                <div className="w-full relative">
                     {!therapistSignature && !isDrawing && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
-                           <span className="text-slate-400 font-medium">Assine Aqui</span>
+                           <span className="text-slate-400 font-medium text-2xl">Assine Aqui</span>
                         </div>
                     )}
                     <canvas 
                         ref={canvasRef}
-                        width={400}
-                        height={120}
+                        width={1200}
+                        height={350}
                         onMouseDown={startDrawing}
                         onMouseMove={draw}
                         onMouseUp={stopDrawing}
@@ -540,7 +558,7 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
                         onTouchStart={startDrawing}
                         onTouchMove={draw}
                         onTouchEnd={stopDrawing}
-                        className="w-full h-32 border-2 border-slate-300 rounded-lg bg-white shadow-inner cursor-crosshair touch-none"
+                        className="w-full h-80 border-2 border-slate-300 rounded-lg bg-white shadow-inner cursor-crosshair touch-none"
                     />
                 </div>
             )}
@@ -608,8 +626,8 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
         <div className="hidden print:block mt-16 pt-8">
             <div className="flex justify-around items-end">
                 {therapistSignature ? (
-                    <div className="text-center w-64 flex flex-col items-center">
-                        <img src={therapistSignature} alt="Assinatura Terapeuta" className="h-16 object-contain mb-1" />
+                    <div className="text-center w-72 flex flex-col items-center">
+                        <img src={therapistSignature} alt="Assinatura Terapeuta" className="h-20 w-full object-contain mb-1" />
                         <div className="w-full border-t border-slate-400 pt-1">
                             <p className="text-sm font-bold text-slate-700">Assinatura do Terapeuta</p>
                             <p className="text-[10px] text-slate-400 uppercase">Especialista em Biomagnetismo</p>
@@ -632,8 +650,8 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="text-center w-64 flex flex-col items-center">
-                        <img src={consentForm.signatureImage} alt="Assinatura" className="h-16 object-contain mb-1" />
+                    <div className="text-center w-72 flex flex-col items-center">
+                        <img src={consentForm.signatureImage} alt="Assinatura" className="h-20 w-full object-contain mb-1" />
                         <div className="w-full border-t border-slate-400 pt-1">
                             <p className="text-sm font-bold text-slate-700">{consentForm.signedName}</p>
                             <p className="text-[10px] text-slate-400 uppercase">Termo Assinado Digitalmente</p>
