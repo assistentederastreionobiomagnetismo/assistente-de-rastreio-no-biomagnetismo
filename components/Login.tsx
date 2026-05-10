@@ -143,7 +143,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegister }) => {
                 <div className="mt-4 text-center">
                   <button
                     onClick={() => setViewMode('register')}
-                    className="w-full py-4 bg-slate-800 text-white font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-900 transition-all text-xs uppercase tracking-widest shadow-lg transform active:scale-95"
+                    className="w-full py-4 bg-sky-600 text-white font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-sky-700 transition-all text-xs uppercase tracking-widest shadow-lg transform active:scale-95"
                   >
                     Não tem conta? Cadastre-se Grátis
                   </button>
