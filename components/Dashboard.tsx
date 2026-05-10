@@ -94,13 +94,15 @@ const Dashboard: React.FC<DashboardProps> = ({
             <span className="text-sm font-semibold text-center">Pacientes</span>
           </button>
 
-          <button
-            onClick={onOpenStore}
-            className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-amber-500 hover:text-amber-600 hover:bg-amber-50 transition-all transform hover:scale-105"
-          >
-            <StoreIcon className="w-10 h-10 mb-2" />
-            <span className="text-sm font-semibold text-center">Nossa Loja</span>
-          </button>
+          {!isCurrentUserAdmin && (
+            <button
+              onClick={onOpenStore}
+              className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-amber-500 hover:text-amber-600 hover:bg-amber-50 transition-all transform hover:scale-105"
+            >
+              <StoreIcon className="w-10 h-10 mb-2" />
+              <span className="text-sm font-semibold text-center">Nossa Loja</span>
+            </button>
+          )}
 
           {isCurrentUserAdmin && (
             <>

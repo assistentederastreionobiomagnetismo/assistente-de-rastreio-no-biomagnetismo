@@ -4,6 +4,25 @@ import { Product } from '../types';
 import { PlusIcon, TrashIcon, PencilIcon, CheckIcon, InfoIcon } from './icons/Icons';
 import { dbService } from '../services/dbService';
 
+const EMOJIS = ['🚀', '✨', '💎', '🔥', '✅', '🎁', '📦', '💰', '🎯', '📢', '💡', '👉', '👇', '⭐', '❤️', '📍', '📱', '💻', '🛒', '⚡'];
+
+const EmojiPicker: React.FC<{ onSelect: (emoji: string) => void }> = ({ onSelect }) => {
+  return (
+    <div className="absolute z-20 bg-white border border-slate-200 shadow-xl rounded-xl p-3 grid grid-cols-5 gap-2 animate-fade-in mt-1 right-0 top-full">
+      {EMOJIS.map(emoji => (
+        <button
+          key={emoji}
+          type="button"
+          onClick={() => onSelect(emoji)}
+          className="text-xl hover:bg-slate-100 p-1 rounded transition-colors"
+        >
+          {emoji}
+        </button>
+      ))}
+    </div>
+  );
+};
+
 interface OfferManagerProps {
   products: Product[];
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
@@ -12,6 +31,8 @@ interface OfferManagerProps {
 
 const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onExit }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState<'title' | 'description' | 'copyText' | null>(null);
+  const [isUploading, setIsUploading] = useState<'image' | 'video' | null>(null);
   const [currentProduct, setCurrentProduct] = useState<Partial<Product>>({
     title: '',
     description: '',
@@ -23,6 +44,34 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
     isFeatured: false,
     displayOrder: 0
   });
+
+  const addEmoji = (emoji: string, field: 'title' | 'description' | 'copyText') => {
+    setCurrentProduct(prev => ({
+      ...prev,
+      [field]: (prev[field] || '') + emoji
+    }));
+    setShowEmojiPicker(null);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(type);
+    try {
+      const url = await dbService.uploadStoreMedia(file);
+      setCurrentProduct(prev => ({
+        ...prev,
+        [type === 'image' ? 'imageUrl' : 'videoUrl']: url
+      }));
+    } catch (error) {
+      console.error('Erro no upload:', error);
+      alert('Erro ao subir arquivo. Verifique se o bucket "store-media" foi criado no Supabase.');
+    } finally {
+      setIsUploading(null);
+    }
+  };
+
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -101,8 +150,17 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
             <h3 className="text-lg font-bold text-slate-700 mb-4">{currentProduct.id ? 'Editar Oferta' : 'Nova Oferta'}</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Título do Produto</label>
+              <div className="space-y-2 relative">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Título do Produto</label>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowEmojiPicker(showEmojiPicker === 'title' ? null : 'title')}
+                    className="text-lg hover:scale-110 transition-transform"
+                  >
+                    😀
+                  </button>
+                </div>
                 <input
                   required
                   type="text"
@@ -111,6 +169,7 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all"
                   placeholder="Ex: Curso de Biomagnetismo Avançado"
                 />
+                {showEmojiPicker === 'title' && <EmojiPicker onSelect={(e) => addEmoji(e, 'title')} />}
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Texto do Botão (CTA)</label>
@@ -125,8 +184,18 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Descrição Curta</label>
+            <div className="space-y-2 relative">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Descrição Curta</label>
+                <button 
+                  type="button" 
+                  onClick={() => setShowEmojiPicker(showEmojiPicker === 'description' ? null : 'description')}
+                  className="text-lg hover:scale-110 transition-transform"
+                  title="Inserir Emoji"
+                >
+                  😀
+                </button>
+              </div>
               <input
                 required
                 type="text"
@@ -135,10 +204,21 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all"
                 placeholder="Uma frase curta que resume o benefício."
               />
+              {showEmojiPicker === 'description' && <EmojiPicker onSelect={(e) => addEmoji(e, 'description')} />}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Texto de Venda (Copy)</label>
+            <div className="space-y-2 relative">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Texto de Venda (Copy)</label>
+                <button 
+                  type="button" 
+                  onClick={() => setShowEmojiPicker(showEmojiPicker === 'copyText' ? null : 'copyText')}
+                  className="text-lg hover:scale-110 transition-transform"
+                  title="Inserir Emoji"
+                >
+                  😀
+                </button>
+              </div>
               <textarea
                 required
                 rows={3}
@@ -147,29 +227,42 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all"
                 placeholder="Escreva aqui o texto persuasivo que aparecerá no post."
               />
+              {showEmojiPicker === 'copyText' && <EmojiPicker onSelect={(e) => addEmoji(e, 'copyText')} />}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">URL da Imagem</label>
-                <input
-                  required
-                  type="url"
-                  value={currentProduct.imageUrl}
-                  onChange={e => setCurrentProduct({ ...currentProduct, imageUrl: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all"
-                  placeholder="https://..."
-                />
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Imagem (URL ou Upload)</label>
+                <div className="flex gap-2">
+                  <input
+                    required
+                    type="url"
+                    value={currentProduct.imageUrl}
+                    onChange={e => setCurrentProduct({ ...currentProduct, imageUrl: e.target.value })}
+                    className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all text-sm"
+                    placeholder="https://..."
+                  />
+                  <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl flex items-center justify-center transition-all min-w-[100px]">
+                    <span className="text-xs font-bold">{isUploading === 'image' ? '...' : 'Upload'}</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={e => handleFileUpload(e, 'image')} />
+                  </label>
+                </div>
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">URL do Vídeo (Opcional)</label>
-                <input
-                  type="url"
-                  value={currentProduct.videoUrl}
-                  onChange={e => setCurrentProduct({ ...currentProduct, videoUrl: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all"
-                  placeholder="Link do YouTube ou arquivo mp4"
-                />
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Vídeo (URL ou Upload)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={currentProduct.videoUrl}
+                    onChange={e => setCurrentProduct({ ...currentProduct, videoUrl: e.target.value })}
+                    className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all text-sm"
+                    placeholder="Link ou arquivo"
+                  />
+                  <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl flex items-center justify-center transition-all min-w-[100px]">
+                    <span className="text-xs font-bold">{isUploading === 'video' ? '...' : 'Upload'}</span>
+                    <input type="file" accept="video/*" className="hidden" onChange={e => handleFileUpload(e, 'video')} />
+                  </label>
+                </div>
               </div>
             </div>
 

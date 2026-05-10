@@ -333,5 +333,25 @@ export const dbService = {
             .delete()
             .eq('id', id);
         if (error) throw error;
+    },
+
+    async uploadStoreMedia(file: File): Promise<string> {
+        if (!supabase) throw new Error("Supabase não configurado");
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('store-media')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('store-media')
+            .getPublicUrl(filePath);
+
+        return publicUrl;
     }
 };
