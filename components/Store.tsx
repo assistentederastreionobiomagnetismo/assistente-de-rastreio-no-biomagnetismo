@@ -68,16 +68,13 @@ const Store: React.FC<StoreProps> = ({ products, onExit, onGoToDashboard }) => {
               >
                 {/* Background Image with Overlay */}
                 <div className="absolute inset-0">
-                  {(product.imageUrls || []).map((url, imgIdx) => (
+                  {product.imageUrls?.[0] && (
                     <img 
-                      key={imgIdx}
-                      src={url} 
+                      src={product.imageUrls[0]} 
                       alt={product.title} 
-                      className={`absolute inset-0 w-full h-full object-cover opacity-60 transition-opacity duration-1000 ${
-                        imgIdx === 0 ? 'opacity-60' : 'opacity-0' 
-                      }`}
+                      className="absolute inset-0 w-full h-full object-cover opacity-60"
                     />
-                  ))}
+                  )}
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/60 to-transparent flex items-center p-8 md:p-16">
                   <div className="max-w-xl space-y-4 md:space-y-6">
