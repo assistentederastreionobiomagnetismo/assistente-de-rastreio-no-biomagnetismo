@@ -57,10 +57,10 @@ const Store: React.FC<StoreProps> = ({ products, onExit }) => {
               >
                 {/* Background Image with Overlay */}
                 <img 
-                  src={product.imageUrl} 
-                  alt={product.title} 
-                  className="w-full h-full object-cover opacity-60"
-                />
+                   src={product.imageUrls[0] || ''} 
+                   alt={product.title} 
+                   className="w-full h-full object-cover opacity-60"
+                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/60 to-transparent flex items-center p-8 md:p-16">
                   <div className="max-w-xl space-y-4 md:space-y-6">
                     <span className="inline-block px-3 py-1 bg-teal-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full">Destaque da Semana</span>
@@ -111,20 +111,19 @@ const Store: React.FC<StoreProps> = ({ products, onExit }) => {
           >
             {/* Visual Content (Photo or Video) */}
             <div className="relative aspect-video overflow-hidden bg-slate-100">
-              {product.videoUrl ? (
+              {product.videoUrls && product.videoUrls.length > 0 ? (
                 <div className="w-full h-full flex items-center justify-center bg-slate-900">
-                   {/* This is a simple placeholder for video. In a real app, you'd use a player */}
-                   <img src={product.imageUrl} className="w-full h-full object-cover opacity-50 absolute inset-0" />
+                   <img src={product.imageUrls[0] || ''} className="w-full h-full object-cover opacity-50 absolute inset-0" />
                    <div className="z-10 flex flex-col items-center gap-2">
                       <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30">
                          <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                       </div>
-                      <span className="text-[10px] text-white/70 uppercase font-bold tracking-widest">Vídeo Demonstrativo</span>
+                      <span className="text-[10px] text-white/70 uppercase font-bold tracking-widest">{product.videoUrls.length} Vídeo(s) Disponível(is)</span>
                    </div>
                 </div>
               ) : (
                 <img 
-                  src={product.imageUrl} 
+                  src={product.imageUrls[0] || ''} 
                   alt={product.title} 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />

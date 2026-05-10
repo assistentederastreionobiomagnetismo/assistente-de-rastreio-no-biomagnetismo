@@ -137,8 +137,8 @@ export interface Product {
   title: string;
   description: string;
   copyText: string;
-  imageUrl: string;
-  videoUrl?: string;
+  imageUrls: string[];
+  videoUrls: string[];
   affiliateLink: string;
   ctaText: string;
   isFeatured: boolean;
