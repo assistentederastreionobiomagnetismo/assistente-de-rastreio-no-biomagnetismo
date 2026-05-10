@@ -22,6 +22,7 @@ import { dbService } from './services/dbService';
 import RemoteSignature from './components/RemoteSignature';
 import { hashPassword } from './lib/crypto';
 import StoreCTA from './components/StoreCTA';
+import SubscriptionGate from './components/SubscriptionGate';
 
 // --- SUPABASE MIGRATION IN PROGRESS ---
 // IndexedDB utils will be removed after full verification.
@@ -98,6 +99,8 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [showSubscriptionGate, setShowSubscriptionGate] = useState(false);
+  const [monthlyUsage, setMonthlyUsage] = useState(0);
 
   const handleLogout = useCallback(() => {
     setIsAuthenticated(false);
@@ -248,6 +251,21 @@ const App: React.FC = () => {
           }
 
           if (authenticatedUser.requiresPasswordChange) setAppView('changePassword');
+
+          // Verificação de Trial de 30 dias
+          const createdDate = authenticatedUser.createdAt ? new Date(authenticatedUser.createdAt) : new Date();
+          const trialExpiry = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+          const isTrialExpired = (authenticatedUser.planType === 'trial' || !authenticatedUser.planType) && trialExpiry < new Date();
+          
+          if (isTrialExpired && authenticatedUser.username !== 'vbsjunior.biomagnetismo') {
+            setShowSubscriptionGate(true);
+          }
+
+          // Carregar uso mensal se for plano híbrido
+          if (authenticatedUser.planType === 'hybrid') {
+            const usage = await dbService.getMonthlyUsage(authenticatedUser.username);
+            setMonthlyUsage(usage);
+          }
         }
 
         // Carrega usuários para login (inicialmente necessário para o componente Login)
@@ -450,6 +468,33 @@ const App: React.FC = () => {
     if (currentStep < Step.SUMMARY) setCurrentStep(currentStep + 1);
   };
 
+  const handleStartSession = async () => {
+    if (!currentUser) return;
+    
+    // Verificação de Limites (Plano Híbrido)
+    if (currentUser.planType === 'hybrid' && currentUser.username !== 'vbsjunior.biomagnetismo') {
+        const usage = await dbService.getMonthlyUsage(currentUser.username);
+        const totalAvailable = 5 + (currentUser.extraSessions || 0);
+        if (usage >= totalAvailable) {
+            setShowSubscriptionGate(true);
+            return;
+        }
+    }
+
+    // Verificação de Expiração Anual / Trial
+    if (currentUser.approvalExpiry) {
+        const expiry = new Date(currentUser.approvalExpiry);
+        if (expiry < new Date() && currentUser.username !== 'vbsjunior.biomagnetismo') {
+            setShowSubscriptionGate(true);
+            return;
+        }
+    }
+
+    resetSessionState(); 
+    setSessionStartTime(new Date()); 
+    setAppView('sessionWorkflow');
+  };
+
   const handleFinishSession = async (finalTherapistSig?: string) => {
     const isEditing = !!editingSessionId;
     const currentTherapistSig = finalTherapistSig !== undefined ? finalTherapistSig : therapistSignature;
@@ -486,6 +531,14 @@ const App: React.FC = () => {
 
     try {
       await dbService.saveSession(currentUser!.username, newSession);
+      
+      // Registrar log de uso se não for edição
+      if (!isEditing) {
+          await dbService.logUsage(currentUser!.username, newSession.id);
+          if (currentUser!.planType === 'hybrid') {
+              setMonthlyUsage(prev => prev + 1);
+          }
+      }
 
       if (isEditing) {
         // Substituir a sessão existente no array (sem duplicar)
@@ -622,6 +675,7 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-slate-100 min-h-screen text-slate-800 relative notranslate" translate="no">
+      {showSubscriptionGate && <SubscriptionGate user={currentUser} />}
       {viewingHistoricalSession && <SessionDetailModal session={viewingHistoricalSession} onClose={() => setViewingHistoricalSession(null)} />}
       <div className="absolute top-4 right-4 z-10 print:hidden">
         <button onClick={handleLogout} className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 text-sm font-medium rounded-md shadow-sm text-slate-700 bg-white hover:bg-slate-100 transition-colors"><LogoutIcon className="w-5 h-5" /> Sair</button>
@@ -638,7 +692,7 @@ const App: React.FC = () => {
         {appView === 'dashboard' && (
           <Dashboard
             currentUser={currentUser}
-            onStartNewSession={() => { resetSessionState(); setSessionStartTime(new Date()); setAppView('sessionWorkflow'); }}
+            onStartNewSession={handleStartSession}
             sessions={sessions}
             patients={patients}
             setPatients={setPatients}
@@ -653,6 +707,7 @@ const App: React.FC = () => {
             onManageOffers={() => setAppView('offerManager')}
             onOpenTutorials={() => { setPreviousView(appView); setAppView('tutorials'); }}
             onManageTutorials={() => setAppView('tutorialManager')}
+            monthlyUsage={monthlyUsage}
           />
         )}
 

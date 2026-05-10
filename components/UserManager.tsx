@@ -23,7 +23,8 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         whatsapp: '',
         username: '',
         password: '',
-        approvalType: 'permanent' as ApprovalPeriod
+        approvalType: 'permanent' as ApprovalPeriod,
+        planType: 'annual' as PlanType
     });
 
     const [showPassword, setShowPassword] = useState(false);
@@ -90,6 +91,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
             isApproved: true,
             approvalType: newUser.approvalType,
             approvalExpiry: expiry,
+            planType: newUser.planType,
             requiresPasswordChange: true
         };
 
@@ -118,7 +120,9 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                     ...userToUpdate,
                     approvalType: period,
                     approvalExpiry: newExpiry,
-                    isApproved: true
+                    isApproved: true,
+                    // Se for permanente, garante plano anual (ilimitado)
+                    planType: period === 'permanent' ? 'annual' : userToUpdate.planType
                 };
                 await dbService.updateUser(updatedUser);
                 setUsers(prev => prev.map(u => u.username === username ? updatedUser : u));
@@ -300,6 +304,18 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                             <option value="permanent">Permanente</option>
                         </select>
                     </div>
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Tipo de Plano</label>
+                        <select
+                            value={newUser.planType}
+                            onChange={e => setNewUser({ ...newUser, planType: e.target.value as PlanType })}
+                            className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-black text-xs uppercase"
+                        >
+                            <option value="trial">Trial (30 dias)</option>
+                            <option value="annual">Anual / Vitalício (Ilimitado)</option>
+                            <option value="hybrid">Start (5 sessões/mês)</option>
+                        </select>
+                    </div>
                     <div className="flex items-end">
                         <button type="submit" className="w-full py-4 bg-teal-600 text-white font-black rounded-2xl shadow-lg hover:bg-teal-700 transition-all uppercase text-xs tracking-widest flex items-center justify-center gap-2">
                             <CheckIcon className="w-5 h-5" /> Ativar Novo Terapeuta
@@ -323,6 +339,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                         <thead>
                             <tr className="bg-slate-50/30">
                                 <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Terapeuta / Login</th>
+                                <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Plano / Créditos</th>
                                 <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Status de Acesso</th>
                                 <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Validade / Alteração</th>
                                 <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Ações de Gestão</th>
@@ -353,6 +370,22 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                                                     <span className="text-[10px] text-teal-600 font-black uppercase tracking-widest">@{user.username}</span>
                                                     <span className="text-[9px] text-slate-400 font-medium">{user.email || 'Sem e-mail'}</span>
                                                 </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6 text-center">
+                                            <div className="flex flex-col items-center gap-1">
+                                                <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${
+                                                    user.planType === 'annual' ? 'bg-teal-100 text-teal-700' : 
+                                                    user.planType === 'hybrid' ? 'bg-amber-100 text-amber-700' : 
+                                                    'bg-slate-100 text-slate-500'
+                                                }`}>
+                                                    {user.planType === 'annual' ? 'Anual' : user.planType === 'hybrid' ? 'Start' : 'Trial'}
+                                                </span>
+                                                {user.planType === 'hybrid' && (
+                                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">
+                                                        +{user.extraSessions || 0} Extras
+                                                    </span>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6 text-center">

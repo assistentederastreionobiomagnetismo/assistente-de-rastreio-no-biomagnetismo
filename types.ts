@@ -37,6 +37,7 @@ export interface PhenomenaData {
 }
 
 export type ApprovalPeriod = '5min' | '1month' | '3months' | '6months' | '1year' | 'permanent';
+export type PlanType = 'trial' | 'annual' | 'hybrid' | 'expired';
 
 export interface User {
   username: string;
@@ -50,6 +51,9 @@ export interface User {
   passwordResetPending?: boolean;
   pendingPassword?: string;
   requiresPasswordChange?: boolean;
+  planType?: PlanType;
+  extraSessions?: number;
+  createdAt?: string;
 }
 
 export interface ProtocolData {

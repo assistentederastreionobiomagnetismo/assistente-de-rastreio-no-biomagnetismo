@@ -24,6 +24,7 @@ interface DashboardProps {
   onManageOffers: () => void;
   onOpenTutorials: () => void;
   onManageTutorials: () => void;
+  monthlyUsage?: number;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -42,7 +43,8 @@ const Dashboard: React.FC<DashboardProps> = ({
   onOpenStore,
   onManageOffers,
   onOpenTutorials,
-  onManageTutorials
+  onManageTutorials,
+  monthlyUsage = 0
 }) => {
   const [view, setView] = useState<'main' | 'pairManagement' | 'patientManagement'>('main');
 
@@ -75,12 +77,30 @@ const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="animate-fade-in max-w-4xl mx-auto">
       <div className="bg-white rounded-xl shadow-2xl overflow-hidden p-6 md:p-10">
-        <div className="text-center relative mb-10">
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-800">Painel Principal</h2>
-          <div className="flex flex-col items-center mt-2 gap-2">
-            <p className="text-slate-500 italic">Selecione uma ação abaixo.</p>
+          <div className="text-center relative mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-800">Painel Principal</h2>
+            <div className="flex flex-col items-center mt-2 gap-2">
+              <p className="text-slate-500 italic">Selecione uma ação abaixo.</p>
+              
+              {/* Contador de Sessões (Plano Start) */}
+              {currentUser?.planType === 'hybrid' && !isCurrentUserAdmin && (
+                <div className="mt-4 bg-teal-50 border border-teal-100 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm animate-fade-in">
+                  <div className="flex flex-col items-start">
+                    <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Sessões Disponíveis</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-black text-teal-700">{Math.max(0, (5 + (currentUser.extraSessions || 0)) - monthlyUsage)}</span>
+                      <span className="text-xs font-bold text-teal-600">restantes este mês</span>
+                    </div>
+                  </div>
+                  <div className="h-8 w-px bg-teal-200" />
+                  <div className="text-left">
+                    <p className="text-[9px] font-bold text-teal-600 uppercase leading-tight">Plano Start Ativo</p>
+                    <p className="text-[9px] text-teal-500 leading-tight">Renova 5 sessões automaticamente todo dia 01.</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <button

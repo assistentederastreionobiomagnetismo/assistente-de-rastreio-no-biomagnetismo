@@ -18,7 +18,10 @@ export const dbService = {
             approvalExpiry: u.approval_expiry,
             requiresPasswordChange: u.requires_password_change,
             email: u.email,
-            whatsapp: u.whatsapp
+            whatsapp: u.whatsapp,
+            planType: u.plan_type,
+            extraSessions: u.extra_sessions,
+            createdAt: u.created_at
         }));
     },
 
@@ -35,7 +38,9 @@ export const dbService = {
                 is_approved: user.isApproved,
                 approval_type: user.approvalType,
                 approval_expiry: user.approvalExpiry,
-                requires_password_change: user.requiresPasswordChange
+                requires_password_change: user.requiresPasswordChange,
+                plan_type: user.planType || 'trial',
+                extra_sessions: user.extraSessions || 0
             }, { onConflict: 'username' });
         if (error) throw error;
     },
@@ -396,5 +401,30 @@ export const dbService = {
             .delete()
             .eq('id', id);
         if (error) throw error;
+    },
+
+    // Usage Logs
+    async logUsage(username: string, sessionId: string): Promise<void> {
+        if (!supabase) return;
+        const { error } = await supabase
+            .from('usage_logs')
+            .insert({ username, session_id: sessionId });
+        if (error) throw error;
+    },
+
+    async getMonthlyUsage(username: string): Promise<number> {
+        if (!supabase) return 0;
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const { count, error } = await supabase
+            .from('usage_logs')
+            .select('*', { count: 'exact', head: true })
+            .eq('username', username)
+            .gte('created_at', startOfMonth.toISOString());
+        
+        if (error) throw error;
+        return count || 0;
     }
 };
