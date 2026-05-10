@@ -14,10 +14,13 @@ import ChangePassword from './components/ChangePassword';
 import SessionDetailModal from './components/SessionDetailModal';
 import Store from './components/Store';
 import OfferManager from './components/OfferManager';
+import Tutorials from './components/Tutorials';
+import TutorialManager from './components/TutorialManager';
 import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon, BrainIcon, SuccessIcon, ReportIcon, CheckIcon, DropletIcon, LayerOneIcon, LayerTwoIcon, LayerThreeIcon, HeartPulseIcon, StoreIcon, ExternalLinkIcon } from './components/icons/Icons';
 import { BIOMAGNETIC_PAIRS } from './constants';
 import { dbService } from './services/dbService';
 import RemoteSignature from './components/RemoteSignature';
+import { hashPassword } from './lib/crypto';
 import StoreCTA from './components/StoreCTA';
 
 // --- SUPABASE MIGRATION IN PROGRESS ---
@@ -36,7 +39,7 @@ enum Step {
   SUMMARY
 }
 
-type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager' | 'changePassword' | 'store' | 'offerManager';
+type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager' | 'changePassword' | 'store' | 'offerManager' | 'tutorials' | 'tutorialManager';
 
 
 
@@ -351,16 +354,43 @@ const App: React.FC = () => {
     return false;
   };
 
-  const handleTherapistLogin = (username: string, password: string): { success: boolean, message?: string } => {
-    // 1. Verificar se o usuário e senha existem (case-insensitive no username)
-    const foundUser = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+  const handleTherapistLogin = async (username: string, password: string): Promise<{ success: boolean, message?: string }> => {
+    const inputHash = await hashPassword(password);
+    
+    // 1. Verificar se o usuário existe (case-insensitive no username)
+    const foundUser = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (!foundUser) return { success: false, message: 'Usuário ou senha inválidos.' };
 
-    // 2. Verificar se está bloqueado manualmente
+    // 2. Verificação de Segurança (Hash vs Plaintext)
+    // Se a senha no banco tiver 64 caracteres, é provavelmente um hash SHA-256
+    const isStoredAsHash = foundUser.password && foundUser.password.length === 64;
+    
+    let isMatch = false;
+    if (isStoredAsHash) {
+      isMatch = (foundUser.password === inputHash);
+    } else {
+      // Compatibilidade com usuários antigos: verifica texto puro
+      isMatch = (foundUser.password === password);
+      
+      // MIGRAÇÃO AUTOMÁTICA: Se o texto puro bateu, converte agora para hash no banco
+      if (isMatch) {
+        try {
+          const migratedUser = { ...foundUser, password: inputHash };
+          await dbService.updateUser(migratedUser);
+          // Atualiza o estado local também
+          setAllUsers(prev => prev.map(u => u.username === foundUser.username ? migratedUser : u));
+        } catch (e) {
+          console.error("Erro na migração silenciosa de senha:", e);
+        }
+      }
+    }
+
+    if (!isMatch) return { success: false, message: 'Usuário ou senha inválidos.' };
+
+    // 3. Verificar se está bloqueado manualmente
     if (!foundUser.isApproved) return { success: false, message: 'Seu cadastro está bloqueado. Entre em contato com o administrador.' };
 
-    // 3. Se precisa trocar senha (resultado de reset), deixar entrar independentemente de expiração
-    //    Assim o fluxo de reset funciona mesmo que o acesso esteja expirado
+    // 4. Se precisa trocar senha (resultado de reset), deixar entrar independentemente de expiração
     if (foundUser.requiresPasswordChange) {
       const normalizedUser = { ...foundUser, username: foundUser.username.toLowerCase() };
       setIsAuthenticated(true);
@@ -370,7 +400,7 @@ const App: React.FC = () => {
       return { success: true };
     }
 
-    // 4. Verificar expiração (apenas para usuários que já trocaram a senha)
+    // 5. Verificar expiração
     if (foundUser.approvalExpiry) {
       const expiry = new Date(foundUser.approvalExpiry);
       if (expiry < new Date()) {
@@ -389,15 +419,16 @@ const App: React.FC = () => {
   const handleUpdatePassword = async (newPassword: string) => {
     if (!currentUser) return;
     try {
+      const secureHash = await hashPassword(newPassword);
       const updatedUser: User = {
         ...currentUser,
         username: currentUser.username.toLowerCase(),
-        password: newPassword,
+        password: secureHash,
         requiresPasswordChange: false
       };
 
       await dbService.updateUser(updatedUser);
-
+      
       const updatedUsers = allUsers.map(u => u.username.toLowerCase() === currentUser.username.toLowerCase() ? updatedUser : u);
       setAllUsers(updatedUsers);
       setCurrentUser(updatedUser);
@@ -620,6 +651,20 @@ const App: React.FC = () => {
             lastSyncDate={lastSyncDate}
             onOpenStore={() => { setPreviousView(appView); setAppView('store'); }}
             onManageOffers={() => setAppView('offerManager')}
+            onOpenTutorials={() => { setPreviousView(appView); setAppView('tutorials'); }}
+            onManageTutorials={() => setAppView('tutorialManager')}
+          />
+        )}
+
+        {appView === 'tutorials' && (
+          <Tutorials 
+            onBack={() => setAppView(previousView)}
+          />
+        )}
+
+        {appView === 'tutorialManager' && (
+          <TutorialManager 
+            onBack={() => setAppView('dashboard')}
           />
         )}
 

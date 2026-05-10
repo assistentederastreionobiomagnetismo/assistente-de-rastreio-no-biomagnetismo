@@ -145,3 +145,13 @@ export interface Product {
   displayOrder: number;
   createdAt?: string;
 }
+
+export interface Tutorial {
+  id?: string;
+  title: string;
+  category: string;
+  videoUrl: string;
+  description?: string;
+  displayOrder: number;
+  createdAt?: string;
+}

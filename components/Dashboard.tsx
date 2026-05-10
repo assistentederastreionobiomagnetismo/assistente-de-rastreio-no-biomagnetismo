@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { BiomagneticPair, Session, User, Patient } from '../types';
-import { PlusIcon, MagnetIcon, UserIcon, CheckIcon, ClipboardIcon, StoreIcon } from './icons/Icons';
+import { PlusIcon, MagnetIcon, UserIcon, CheckIcon, ClipboardIcon, StoreIcon, PlayIcon } from './icons/Icons';
 import SessionHistory from './SessionHistory';
 import PairListManager from './PairListManager';
 import PatientManager from './PatientManager';
@@ -22,6 +22,8 @@ interface DashboardProps {
   lastSyncDate: string;
   onOpenStore: () => void;
   onManageOffers: () => void;
+  onOpenTutorials: () => void;
+  onManageTutorials: () => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -38,7 +40,9 @@ const Dashboard: React.FC<DashboardProps> = ({
   onDeleteSession,
   lastSyncDate,
   onOpenStore,
-  onManageOffers
+  onManageOffers,
+  onOpenTutorials,
+  onManageTutorials
 }) => {
   const [view, setView] = useState<'main' | 'pairManagement' | 'patientManagement'>('main');
 
@@ -96,13 +100,23 @@ const Dashboard: React.FC<DashboardProps> = ({
           </button>
 
           {!isCurrentUserAdmin && (
-            <button
-              onClick={onOpenStore}
-              className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-amber-500 hover:text-amber-600 hover:bg-amber-50 transition-all transform hover:scale-105"
-            >
-              <StoreIcon className="w-10 h-10 mb-2" />
-              <span className="text-sm font-semibold text-center">Nossa Loja</span>
-            </button>
+            <>
+              <button
+                onClick={onOpenStore}
+                className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-amber-500 hover:text-amber-600 hover:bg-amber-50 transition-all transform hover:scale-105"
+              >
+                <StoreIcon className="w-10 h-10 mb-2" />
+                <span className="text-sm font-semibold text-center">Nossa Loja</span>
+              </button>
+
+              <button
+                onClick={onOpenTutorials}
+                className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-violet-500 hover:text-violet-600 hover:bg-violet-50 transition-all transform hover:scale-105"
+              >
+                <PlayIcon className="w-10 h-10 mb-2" />
+                <span className="text-sm font-semibold text-center">Tutoriais</span>
+              </button>
+            </>
           )}
 
           {isCurrentUserAdmin && (
@@ -132,6 +146,17 @@ const Dashboard: React.FC<DashboardProps> = ({
                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-indigo-500 rounded-full animate-pulse"></div>
                 </div>
                 <span className="text-sm font-semibold text-center">Gerenciar Ofertas</span>
+              </button>
+
+              <button
+                onClick={onManageTutorials}
+                className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-violet-500 hover:text-violet-600 hover:bg-violet-50 transition-all transform hover:scale-105"
+              >
+                <div className="relative">
+                  <PlayIcon className="w-10 h-10 mb-2" />
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-violet-500 rounded-full animate-pulse"></div>
+                </div>
+                <span className="text-sm font-semibold text-center">Gerenciar Tutoriais</span>
               </button>
             </>
           )}

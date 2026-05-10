@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { Patient, Session, BiomagneticPair, User, ConsentForm, Product } from '../types';
+import { Patient, Session, BiomagneticPair, User, ConsentForm, Product, Tutorial } from '../types';
 
 export const dbService = {
     // Profiles / Auth
@@ -353,5 +353,48 @@ export const dbService = {
             .getPublicUrl(filePath);
 
         return publicUrl;
+    },
+
+    // Tutorials
+    async getTutorials(): Promise<Tutorial[]> {
+        if (!supabase) return [];
+        const { data, error } = await supabase
+            .from('tutorials')
+            .select('*')
+            .order('display_order', { ascending: true });
+        if (error) throw error;
+        return data.map(t => ({
+            id: t.id,
+            title: t.title,
+            category: t.category,
+            videoUrl: t.video_url,
+            description: t.description,
+            displayOrder: t.display_order,
+            createdAt: t.created_at
+        }));
+    },
+
+    async saveTutorial(tutorial: Tutorial): Promise<void> {
+        if (!supabase) return;
+        const { error } = await supabase
+            .from('tutorials')
+            .upsert({
+                id: tutorial.id,
+                title: tutorial.title,
+                category: tutorial.category,
+                video_url: tutorial.videoUrl,
+                description: tutorial.description,
+                display_order: tutorial.displayOrder
+            });
+        if (error) throw error;
+    },
+
+    async deleteTutorial(id: string): Promise<void> {
+        if (!supabase) return;
+        const { error } = await supabase
+            .from('tutorials')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
     }
 };

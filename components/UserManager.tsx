@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, BiomagneticPair, ApprovalPeriod } from '../types';
 import { TrashIcon, ClipboardIcon, WhatsAppIcon, UserIcon, PlusIcon, InfoIcon, CheckIcon, KeyIcon } from './icons/Icons';
 import { dbService } from '../services/dbService';
+import { hashPassword } from '../lib/crypto';
 
 interface UserManagerProps {
     users: User[];
@@ -76,10 +77,11 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         }
 
         const expiry = calculateExpiry(newUser.approvalType);
+        const secureHash = await hashPassword(newUser.password.trim());
 
         const createdUser: User = {
             username: newUser.username.trim(),
-            password: newUser.password.trim(),
+            password: secureHash,
             fullName: newUser.fullName.trim(),
             email: newUser.email.trim(),
             whatsapp: newUser.whatsapp.trim(),
@@ -93,7 +95,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
             await dbService.updateUser(createdUser);
             setUsers(prev => [...prev, createdUser]);
             setNewUser({ fullName: '', email: '', whatsapp: '', username: '', password: '', approvalType: 'permanent' });
-            alert(`Terapeuta ${createdUser.fullName} cadastrado com sucesso no Supabase!`);
+            alert(`Terapeuta ${createdUser.fullName} cadastrado com sucesso e protegido com criptografia!`);
         } catch (error) {
             console.error("Erro ao registrar no Supabase:", error);
             alert("Erro ao salvar no Supabase.");
@@ -158,16 +160,17 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
 
         if (window.confirm(`Confirmar reset de senha para "${fullName}"?\n\nNova senha: ${finalPassword}\n\nO terapeuta deverá alterá-la no próximo login.`)) {
             try {
-                await dbService.resetUserPassword(username, finalPassword);
+                const secureHash = await hashPassword(finalPassword);
+                await dbService.resetUserPassword(username, secureHash);
 
                 // Atualiza o estado local para que o login funcione imediatamente sem reload
                 setUsers(prev => prev.map(u =>
                     u.username === username
-                        ? { ...u, password: finalPassword, requiresPasswordChange: true }
+                        ? { ...u, password: secureHash, requiresPasswordChange: true }
                         : u
                 ));
 
-                alert(`Senha de ${fullName} resetada com sucesso!\n\nSenha provisória: ${finalPassword}`);
+                alert(`Senha de ${fullName} resetada com sucesso!\n\nSenha provisória: ${finalPassword}\n(O sistema guardou apenas o hash seguro)`);
             } catch (error) {
                 console.error("Erro ao resetar senha:", error);
                 alert("Erro ao resetar senha no Supabase.");

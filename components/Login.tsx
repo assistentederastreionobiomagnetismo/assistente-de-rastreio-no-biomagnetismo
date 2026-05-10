@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { ClipboardIcon, WhatsAppIcon } from './icons/Icons';
+import React, { useState } from 'react';
+import { WhatsAppIcon } from './icons/Icons';
 
 interface LoginProps {
-  onLogin: (username: string, password: string) => { success: boolean; message?: string };
+  onLogin: (username: string, password: string) => Promise<{ success: boolean; message?: string }>;
   onRequestReset: (username: string, newPass: string) => { success: boolean; message: string };
   onImportSync?: (code: string) => Promise<boolean>;
 }
@@ -14,17 +14,22 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('login');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const result = onLogin(username.trim(), password.trim());
-    if (!result.success) setError(result.message || 'Dados de acesso incorretos.');
+    setIsLoggingIn(true);
+    try {
+      const result = await onLogin(username.trim(), password.trim());
+      if (!result.success) setError(result.message || 'Dados de acesso incorretos.');
+    } catch (err) {
+      console.error(err);
+      setError('Erro ao processar login. Tente novamente.');
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
-
-
 
   const adminWhatsApp = "5562982458451";
 
@@ -85,14 +90,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     required
                   />
                 </div>
-                <button type="submit" className="w-full py-5 bg-teal-600 text-white font-black rounded-2xl shadow-xl hover:bg-teal-700 transition-all transform active:scale-95 uppercase tracking-widest text-sm">
-                  Entrar no Painel
+                <button 
+                  type="submit" 
+                  disabled={isLoggingIn}
+                  className="w-full py-5 bg-teal-600 text-white font-black rounded-2xl shadow-xl hover:bg-teal-700 transition-all transform active:scale-95 uppercase tracking-widest text-sm disabled:opacity-50 flex items-center justify-center gap-3"
+                >
+                  {isLoggingIn && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+                  {isLoggingIn ? 'Verificando Segurança...' : 'Entrar no Painel'}
                 </button>
               </form>
 
               <div className="pt-6 border-t border-slate-100 flex flex-col gap-4">
-
-
                 <div className="mt-4 text-center">
                   <button
                     onClick={handleRequestAccess}
@@ -104,8 +112,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               </div>
             </div>
           )}
-
-
 
           {viewMode === 'forgot' && (
             <div className="space-y-6 animate-fade-in">
