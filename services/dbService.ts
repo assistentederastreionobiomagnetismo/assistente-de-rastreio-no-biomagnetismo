@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { Patient, Session, BiomagneticPair, User, ConsentForm } from '../types';
+import { Patient, Session, BiomagneticPair, User, ConsentForm, Product } from '../types';
 
 export const dbService = {
     // Profiles / Auth
@@ -281,6 +281,57 @@ export const dbService = {
             .eq('id', signatureId)
             .eq('status', 'pending');
 
+        if (error) throw error;
+    },
+
+    // Products / Store
+    async getProducts(): Promise<Product[]> {
+        if (!supabase) return [];
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('display_order', { ascending: true });
+        if (error) throw error;
+        return (data || []).map(p => ({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            copyText: p.copy_text,
+            imageUrl: p.image_url,
+            videoUrl: p.video_url,
+            affiliateLink: p.affiliate_link,
+            ctaText: p.cta_text,
+            isFeatured: p.is_featured,
+            displayOrder: p.display_order,
+            createdAt: p.created_at
+        }));
+    },
+
+    async saveProduct(product: Product): Promise<void> {
+        if (!supabase) return;
+        const { error } = await supabase
+            .from('products')
+            .upsert({
+                id: product.id || undefined,
+                title: product.title,
+                description: product.description,
+                copy_text: product.copyText,
+                image_url: product.imageUrl,
+                video_url: product.videoUrl,
+                affiliate_link: product.affiliateLink,
+                cta_text: product.ctaText,
+                is_featured: product.isFeatured,
+                display_order: product.displayOrder
+            });
+        if (error) throw error;
+    },
+
+    async deleteProduct(id: string): Promise<void> {
+        if (!supabase) return;
+        const { error } = await supabase
+            .from('products')
+            .delete()
+            .eq('id', id);
         if (error) throw error;
     }
 };

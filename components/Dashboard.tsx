@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { BiomagneticPair, Session, User, Patient } from '../types';
-import { PlusIcon, MagnetIcon, UserIcon, CheckIcon, ClipboardIcon } from './icons/Icons';
+import { PlusIcon, MagnetIcon, UserIcon, CheckIcon, ClipboardIcon, StoreIcon } from './icons/Icons';
 import SessionHistory from './SessionHistory';
 import PairListManager from './PairListManager';
 import PatientManager from './PatientManager';
@@ -19,6 +19,8 @@ interface DashboardProps {
   onEditSession: (session: Session) => void;
   onDeleteSession: (id: string, e: React.MouseEvent) => void;
   lastSyncDate: string;
+  onOpenStore: () => void;
+  onManageOffers: () => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -33,7 +35,9 @@ const Dashboard: React.FC<DashboardProps> = ({
   onViewSessionDetail,
   onEditSession,
   onDeleteSession,
-  lastSyncDate
+  lastSyncDate,
+  onOpenStore,
+  onManageOffers
 }) => {
   const [view, setView] = useState<'main' | 'pairManagement' | 'patientManagement'>('main');
 
@@ -90,6 +94,14 @@ const Dashboard: React.FC<DashboardProps> = ({
             <span className="text-sm font-semibold text-center">Pacientes</span>
           </button>
 
+          <button
+            onClick={onOpenStore}
+            className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-amber-500 hover:text-amber-600 hover:bg-amber-50 transition-all transform hover:scale-105"
+          >
+            <StoreIcon className="w-10 h-10 mb-2" />
+            <span className="text-sm font-semibold text-center">Nossa Loja</span>
+          </button>
+
           {isCurrentUserAdmin && (
             <>
               <button
@@ -106,6 +118,17 @@ const Dashboard: React.FC<DashboardProps> = ({
               >
                 <CheckIcon className="w-10 h-10 mb-2" />
                 <span className="text-sm font-semibold text-center">Acessos</span>
+              </button>
+
+              <button
+                onClick={onManageOffers}
+                className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all transform hover:scale-105"
+              >
+                <div className="relative">
+                  <StoreIcon className="w-10 h-10 mb-2" />
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-indigo-500 rounded-full animate-pulse"></div>
+                </div>
+                <span className="text-sm font-semibold text-center">Gerenciar Ofertas</span>
               </button>
             </>
           )}

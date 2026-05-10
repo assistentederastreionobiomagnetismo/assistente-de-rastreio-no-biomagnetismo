@@ -157,3 +157,16 @@ export const HeartPulseIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) =
     <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 12h2l1.5-3 2 6 1.5-3H17" />
   </svg>
 );
+
+export const StoreIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H22.25m-12.917-2.107c-.131.275-.446.407-.744.314a1.09 1.09 0 0 1-.744-1.025V7.957A.473.473 0 0 1 9.318 7.5h5.364a.473.473 0 0 1 .454.457v10.225a1.09 1.09 0 0 1-.744 1.025c-.298.093-.613-.039-.744-.314l-.531-1.116a.473.473 0 0 0-.853 0l-.531 1.116Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12h3.375c.621 0 1.125-.504 1.125-1.125V3.75m12.75 8.25h3.375c.621 0 1.125-.504 1.125-1.125V3.75m-17.25 4.5h12.75" />
+  </svg>
+);
+
+export const ExternalLinkIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+  </svg>
+);

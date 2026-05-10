@@ -131,3 +131,17 @@ export interface Session {
   editedAt?: string; // ISO date string — preenchido quando a sessão é editada
   therapistSignature?: string; // base64 da assinatura do terapeuta
 }
+
+export interface Product {
+  id?: string;
+  title: string;
+  description: string;
+  copyText: string;
+  imageUrl: string;
+  videoUrl?: string;
+  affiliateLink: string;
+  ctaText: string;
+  isFeatured: boolean;
+  displayOrder: number;
+  createdAt?: string;
+}

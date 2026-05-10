@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Patient, BiomagneticPair, User, Session, PhenomenaData, ProtocolData, SafetyCheck, ConsentForm, SessionScales, EmotionRelease, SensationRelease } from './types';
+import { Patient, BiomagneticPair, User, Session, PhenomenaData, ProtocolData, SafetyCheck, ConsentForm, SessionScales, EmotionRelease, SensationRelease, Product } from './types';
 import PatientForm from './components/PatientForm';
 import StartProtocol from './components/StartProtocol';
 import Scanning from './components/Scanning';
@@ -12,6 +12,8 @@ import Dashboard from './components/Dashboard';
 import UserManager from './components/UserManager';
 import ChangePassword from './components/ChangePassword';
 import SessionDetailModal from './components/SessionDetailModal';
+import Store from './components/Store';
+import OfferManager from './components/OfferManager';
 import { UserIcon, ClipboardIcon, MagnetIcon, LogoutIcon, SparklesIcon, InfoIcon, BrainIcon, SuccessIcon, ReportIcon, CheckIcon, DropletIcon, LayerOneIcon, LayerTwoIcon, LayerThreeIcon, HeartPulseIcon } from './components/icons/Icons';
 import { BIOMAGNETIC_PAIRS } from './constants';
 import { dbService } from './services/dbService';
@@ -33,7 +35,7 @@ enum Step {
   SUMMARY
 }
 
-type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager' | 'changePassword';
+type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager' | 'changePassword' | 'store' | 'offerManager';
 
 const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<Step>(Step.PATIENT_INFO);
@@ -80,6 +82,7 @@ const App: React.FC = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [biomagneticPairs, setBiomagneticPairs] = useState<BiomagneticPair[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [lastSyncDate, setLastSyncDate] = useState<string>('');
   const [viewingHistoricalSession, setViewingHistoricalSession] = useState<Session | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -320,11 +323,19 @@ const App: React.FC = () => {
   useEffect(() => {
     if (currentUser && !isLoading) {
       const loadUserBoundData = async () => {
-        const storedSessions = await dbService.getSessions(currentUser.username);
-        const storedPatients = await dbService.getPatients(currentUser.username);
-
-        setSessions(storedSessions);
-        setPatients(storedPatients);
+        try {
+          const [storedSessions, storedPatients, storedProducts] = await Promise.all([
+            dbService.getSessions(currentUser.username),
+            dbService.getPatients(currentUser.username),
+            dbService.getProducts()
+          ]);
+  
+          setSessions(storedSessions);
+          setPatients(storedPatients);
+          setProducts(storedProducts);
+        } catch (error) {
+          console.error("Erro ao carregar dados do usuário:", error);
+        }
       };
       loadUserBoundData();
     }
@@ -603,6 +614,23 @@ const App: React.FC = () => {
             onEditSession={handleEditSession}
             onDeleteSession={handleDeleteSession}
             lastSyncDate={lastSyncDate}
+            onOpenStore={() => setAppView('store')}
+            onManageOffers={() => setAppView('offerManager')}
+          />
+        )}
+
+        {appView === 'store' && (
+          <Store 
+            products={products} 
+            onExit={() => setAppView('dashboard')} 
+          />
+        )}
+
+        {appView === 'offerManager' && (
+          <OfferManager 
+            products={products} 
+            setProducts={setProducts} 
+            onExit={() => setAppView('dashboard')} 
           />
         )}
 
