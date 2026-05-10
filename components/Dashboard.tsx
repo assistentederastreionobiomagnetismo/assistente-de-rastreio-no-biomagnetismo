@@ -5,6 +5,7 @@ import { PlusIcon, MagnetIcon, UserIcon, CheckIcon, ClipboardIcon, StoreIcon } f
 import SessionHistory from './SessionHistory';
 import PairListManager from './PairListManager';
 import PatientManager from './PatientManager';
+import StoreCTA from './StoreCTA';
 
 interface DashboardProps {
   onStartNewSession: () => void;
@@ -143,6 +144,10 @@ const Dashboard: React.FC<DashboardProps> = ({
           onDelete={onDeleteSession}
         />
       </div>
+      
+      {!isCurrentUserAdmin && (
+        <StoreCTA onOpenStore={onOpenStore} className="max-w-4xl" />
+      )}
     </div>
   );
 };
