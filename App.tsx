@@ -60,6 +60,8 @@ const StoreCTA: React.FC<{ onOpenStore: () => void }> = ({ onOpenStore }) => (
 );
 
 const App: React.FC = () => {
+  const [appView, setAppView] = useState<AppView>('dashboard');
+  const [previousView, setPreviousView] = useState<AppView>('dashboard');
   const [currentStep, setCurrentStep] = useState<Step>(Step.PATIENT_INFO);
   const [patient, setPatient] = useState<Patient>({ name: '', mainComplaint: '' });
   const [safetyCheck, setSafetyCheck] = useState<SafetyCheck>({
@@ -636,7 +638,7 @@ const App: React.FC = () => {
             onEditSession={handleEditSession}
             onDeleteSession={handleDeleteSession}
             lastSyncDate={lastSyncDate}
-            onOpenStore={() => setAppView('store')}
+            onOpenStore={() => { setPreviousView(appView); setAppView('store'); }}
             onManageOffers={() => setAppView('offerManager')}
           />
         )}
@@ -644,7 +646,8 @@ const App: React.FC = () => {
         {appView === 'store' && (
           <Store 
             products={products} 
-            onExit={() => setAppView('dashboard')} 
+            onExit={() => setAppView(previousView)}
+            onGoToDashboard={() => setAppView('dashboard')}
           />
         )}
 
@@ -837,7 +840,7 @@ const App: React.FC = () => {
          currentUser.username !== 'vbsjunior.biomagnetismo' && 
          appView !== 'store' && 
          appView !== 'offerManager' && (
-          <StoreCTA onOpenStore={() => setAppView('store')} />
+          <StoreCTA onOpenStore={() => { setPreviousView(appView); setAppView('store'); }} />
         )}
       </div>
     </div >

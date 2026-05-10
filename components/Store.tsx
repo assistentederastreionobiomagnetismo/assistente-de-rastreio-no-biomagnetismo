@@ -6,9 +6,10 @@ import { StoreIcon, ExternalLinkIcon, CheckIcon } from './icons/Icons';
 interface StoreProps {
   products: Product[];
   onExit: () => void;
+  onGoToDashboard: () => void;
 }
 
-const Store: React.FC<StoreProps> = ({ products, onExit }) => {
+const Store: React.FC<StoreProps> = ({ products, onExit, onGoToDashboard }) => {
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
   const featuredProducts = products.filter(p => p.isFeatured);
   
@@ -241,12 +242,21 @@ const Store: React.FC<StoreProps> = ({ products, onExit }) => {
             <p className="text-slate-500 text-sm">Ofertas exclusivas e recomendações para você.</p>
           </div>
         </div>
-        <button 
-          onClick={onExit}
-          className="px-6 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg hover:bg-slate-200 transition-all border border-slate-200"
-        >
-          Voltar ao Painel
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={onExit}
+            className="px-6 py-2.5 bg-teal-600 text-white font-black rounded-xl hover:bg-teal-700 transition-all shadow-lg hover:shadow-teal-500/20 flex items-center gap-2 group/back"
+          >
+            <svg className="w-4 h-4 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7 7-7" /></svg>
+            Voltar de onde parei
+          </button>
+          <button 
+            onClick={onGoToDashboard}
+            className="px-6 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all border border-slate-200"
+          >
+            Ir para o Painel
+          </button>
+        </div>
       </div>
 
       {/* Featured Carousel */}
