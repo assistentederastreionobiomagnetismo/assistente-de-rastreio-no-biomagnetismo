@@ -450,6 +450,7 @@ const App: React.FC = () => {
             username: data.username.toLowerCase(),
             password: secureHash,
             fullName: data.fullName,
+            email: data.username.toLowerCase(), // O login é o e-mail
             whatsapp: data.whatsapp,
             isApproved: true,
             planType: 'trial',

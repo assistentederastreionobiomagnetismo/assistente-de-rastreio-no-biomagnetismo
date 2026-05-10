@@ -89,10 +89,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegister }) => {
               <form onSubmit={handleLogin} className="space-y-5">
                 {error && <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-xs font-black border border-red-100 animate-shake">{error}</div>}
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Usuário / Login</label>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Seu E-mail de Acesso</label>
                   <input
-                    type="text"
-                    placeholder="Digite seu login"
+                    type="email"
+                    placeholder="seu@email.com"
                     value={username}
                     onChange={e => setUsername(e.target.value)}
                     className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-bold transition-all"
@@ -170,12 +170,13 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegister }) => {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Usuário / Login (Será usado para entrar)</label>
+                  <label className="block text-[10px] font-black text-teal-600 uppercase mb-2 tracking-widest ml-1">Seu Melhor E-mail (Será seu login de acesso)</label>
+                  <p className="text-[9px] text-slate-400 font-bold mb-2 ml-1">* O e-mail é obrigatório para garantir seu acesso e suporte.</p>
                   <input
-                    type="text"
-                    placeholder="Ex: maria2024"
+                    type="email"
+                    placeholder="exemplo@email.com"
                     value={regUsername}
-                    onChange={e => setRegUsername(e.target.value.replace(/\s/g, ''))}
+                    onChange={e => setRegUsername(e.target.value.replace(/\s/g, '').toLowerCase())}
                     className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-bold text-teal-600"
                     required
                   />
