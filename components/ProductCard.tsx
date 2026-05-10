@@ -112,9 +112,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
              </span>
              <button 
                 onClick={() => setIsGalleryOpen(false)}
-                className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur-md transition-all border border-white/10 active:scale-90"
+                className="bg-white hover:bg-red-50 text-slate-900 hover:text-red-600 p-3 rounded-full shadow-2xl transition-all active:scale-90 border-2 border-white/20 group/close"
+                title="Fechar Galeria"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                <svg className="w-6 h-6 transition-transform group-hover/close:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
           </div>
 
