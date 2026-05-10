@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, BiomagneticPair, ApprovalPeriod } from '../types';
-import { TrashIcon, ClipboardIcon, WhatsAppIcon, UserIcon, PlusIcon, InfoIcon, CheckIcon, KeyIcon } from './icons/Icons';
+import { TrashIcon, ClipboardIcon, WhatsAppIcon, UserIcon, PlusIcon, InfoIcon, CheckIcon, KeyIcon, EyeIcon, EyeSlashIcon } from './icons/Icons';
 import { dbService } from '../services/dbService';
 import { hashPassword } from '../lib/crypto';
 
@@ -25,6 +25,8 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         password: '',
         approvalType: 'permanent' as ApprovalPeriod
     });
+
+    const [showPassword, setShowPassword] = useState(false);
 
     const bytesToBase64 = (bytes: Uint8Array): string => {
         let binary = "";
@@ -244,14 +246,23 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                         </div>
                         <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Senha Prov.</label>
-                            <input
-                                type="text"
-                                required
-                                value={newUser.password}
-                                onChange={e => setNewUser({ ...newUser, password: e.target.value })}
-                                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-bold text-slate-600"
-                                placeholder="123456"
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    required
+                                    value={newUser.password}
+                                    onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-bold text-slate-600 pr-12"
+                                    placeholder="123456"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 transition-colors"
+                                >
+                                    {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div>
