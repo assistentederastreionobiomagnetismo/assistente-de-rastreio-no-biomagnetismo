@@ -54,28 +54,55 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const currentCount = (type === 'image' ? currentProduct.imageUrls?.length : currentProduct.videoUrls?.length) || 0;
+    const limit = type === 'image' ? 5 : 2;
+
+    if (currentCount + files.length > limit) {
+      alert(`Você só pode adicionar mais ${limit - currentCount} ${type === 'image' ? 'imagens' : 'vídeos'}.`);
+      return;
+    }
 
     setIsUploading(type);
+    
     try {
-      const url = await dbService.uploadStoreMedia(file);
+      const uploadPromises = files.map(async (file) => {
+        const url = await dbService.uploadStoreMedia(file);
+        return url;
+      });
+
+      const urls = await Promise.all(uploadPromises);
+      
       setCurrentProduct(prev => ({
         ...prev,
-        [type === 'image' ? 'imageUrl' : 'videoUrl']: url
+        [type === 'image' ? 'imageUrls' : 'videoUrls']: [...(prev[type === 'image' ? 'imageUrls' : 'videoUrls'] || []), ...urls]
       }));
     } catch (error) {
       console.error('Erro no upload:', error);
-      alert('Erro ao subir arquivo. Verifique se o bucket "store-media" foi criado no Supabase.');
+      alert('Erro ao subir um ou mais arquivos. Verifique sua conexão e o bucket no Supabase.');
     } finally {
       setIsUploading(null);
     }
+  };
+
+  const removeMedia = (index: number, type: 'image' | 'video') => {
+    const field = type === 'image' ? 'imageUrls' : 'videoUrls';
+    setCurrentProduct(prev => ({
+      ...prev,
+      [field]: (prev[field] || []).filter((_, i) => i !== index)
+    }));
   };
 
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentProduct.imageUrls?.length) {
+      alert('Adicione pelo menos uma imagem.');
+      return;
+    }
     setIsSaving(true);
     try {
       await dbService.saveProduct(currentProduct as Product);
@@ -234,26 +261,38 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
               <div className="flex justify-between items-center">
                 <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Imagens (Até 5)</label>
                 {(currentProduct.imageUrls?.length || 0) < 5 && (
-                  <label className="cursor-pointer bg-teal-500 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase hover:bg-teal-600 transition-all">
-                    {isUploading === 'image' ? 'Subindo...' : '+ Adicionar Imagem'}
-                    <input type="file" accept="image/*" className="hidden" onChange={e => handleFileUpload(e, 'image')} />
+                  <label className="cursor-pointer bg-teal-500 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase hover:bg-teal-600 transition-all flex items-center gap-2">
+                    {isUploading === 'image' ? (
+                      <>
+                        <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Subindo...</span>
+                      </>
+                    ) : (
+                      <span>+ Adicionar Imagem (Pode selecionar várias)</span>
+                    )}
+                    <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleFileUpload(e, 'image')} disabled={!!isUploading} />
                   </label>
                 )}
               </div>
               <div className="grid grid-cols-5 gap-2">
                 {currentProduct.imageUrls?.map((url, idx) => (
-                  <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 group">
+                  <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 group bg-white shadow-sm">
                     <img src={url} className="w-full h-full object-cover" />
                     <button 
                       type="button"
                       onClick={() => removeMedia(idx, 'image')}
-                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                     >
                       <TrashIcon className="w-3 h-3" />
                     </button>
                   </div>
                 ))}
-                {Array.from({ length: 5 - (currentProduct.imageUrls?.length || 0) }).map((_, i) => (
+                {isUploading === 'image' && (
+                  <div className="aspect-square rounded-lg border-2 border-teal-500 bg-teal-50 flex items-center justify-center animate-pulse">
+                    <div className="w-6 h-6 border-2 border-teal-200 border-t-teal-500 rounded-full animate-spin"></div>
+                  </div>
+                )}
+                {Array.from({ length: Math.max(0, 5 - (currentProduct.imageUrls?.length || 0) - (isUploading === 'image' ? 1 : 0)) }).map((_, i) => (
                   <div key={i} className="aspect-square rounded-lg border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300">
                     <PlusIcon className="w-4 h-4" />
                   </div>
@@ -265,26 +304,41 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
               <div className="flex justify-between items-center">
                 <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Vídeos (Até 2)</label>
                 {(currentProduct.videoUrls?.length || 0) < 2 && (
-                  <label className="cursor-pointer bg-indigo-500 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase hover:bg-indigo-600 transition-all">
-                    {isUploading === 'video' ? 'Subindo...' : '+ Adicionar Vídeo'}
-                    <input type="file" accept="video/*" className="hidden" onChange={e => handleFileUpload(e, 'video')} />
+                  <label className="cursor-pointer bg-indigo-500 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase hover:bg-indigo-600 transition-all flex items-center gap-2">
+                    {isUploading === 'video' ? (
+                      <>
+                        <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Subindo...</span>
+                      </>
+                    ) : (
+                      <span>+ Adicionar Vídeo (Pode selecionar várias)</span>
+                    )}
+                    <input type="file" multiple accept="video/*" className="hidden" onChange={e => handleFileUpload(e, 'video')} disabled={!!isUploading} />
                   </label>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {currentProduct.videoUrls?.map((url, idx) => (
-                  <div key={idx} className="relative aspect-video rounded-lg overflow-hidden border border-slate-200 bg-black group">
-                    <video src={url} className="w-full h-full object-cover" />
+                  <div key={idx} className="relative aspect-video rounded-lg overflow-hidden border border-slate-200 bg-black group shadow-lg">
+                    <video src={url} className="w-full h-full object-cover" controls={false} />
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none">
+                      <svg className="w-8 h-8 text-white/50" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
                     <button 
                       type="button"
                       onClick={() => removeMedia(idx, 'video')}
-                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-xl"
                     >
-                      <TrashIcon className="w-3 h-3" />
+                      <TrashIcon className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
-                {Array.from({ length: 2 - (currentProduct.videoUrls?.length || 0) }).map((_, i) => (
+                {isUploading === 'video' && (
+                  <div className="aspect-video rounded-lg border-2 border-indigo-500 bg-indigo-50 flex items-center justify-center animate-pulse">
+                    <div className="w-8 h-8 border-3 border-indigo-200 border-t-indigo-500 rounded-full animate-spin"></div>
+                  </div>
+                )}
+                {Array.from({ length: Math.max(0, 2 - (currentProduct.videoUrls?.length || 0) - (isUploading === 'video' ? 1 : 0)) }).map((_, i) => (
                   <div key={i} className="aspect-video rounded-lg border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300">
                     <PlusIcon className="w-6 h-6" />
                   </div>
