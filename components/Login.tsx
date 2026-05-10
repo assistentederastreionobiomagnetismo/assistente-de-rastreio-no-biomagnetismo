@@ -89,10 +89,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegister }) => {
               <form onSubmit={handleLogin} className="space-y-5">
                 {error && <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-xs font-black border border-red-100 animate-shake">{error}</div>}
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Seu E-mail de Acesso</label>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Seu E-mail ou Usuário de Acesso</label>
                   <input
-                    type="email"
-                    placeholder="seu@email.com"
+                    type="text"
+                    placeholder="seu@email.com ou usuário"
                     value={username}
                     onChange={e => setUsername(e.target.value)}
                     className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-bold transition-all"
