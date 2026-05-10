@@ -43,6 +43,8 @@ type AppView = 'dashboard' | 'sessionWorkflow' | 'userManager' | 'changePassword
 const App: React.FC = () => {
   const [appView, setAppView] = useState<AppView>('dashboard');
   const [previousView, setPreviousView] = useState<AppView>('dashboard');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentStep, setCurrentStep] = useState<Step>(Step.PATIENT_INFO);
   const [patient, setPatient] = useState<Patient>({ name: '', mainComplaint: '' });
   const [safetyCheck, setSafetyCheck] = useState<SafetyCheck>({
@@ -90,9 +92,6 @@ const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [lastSyncDate, setLastSyncDate] = useState<string>('');
   const [viewingHistoricalSession, setViewingHistoricalSession] = useState<Session | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [appView, setAppView] = useState<AppView>('dashboard');
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
