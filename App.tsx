@@ -655,8 +655,15 @@ const App: React.FC = () => {
     setCurrentStep(Step.PATIENT_INFO);
   };
 
-  const ValidityHeader = ({ user }: { user: User }) => {
-    if (!user.approvalExpiry || user.approvalType === 'permanent') {
+  const ValidityHeader = ({ user, currentTime }: { user: User, currentTime: Date }) => {
+    const isTrial = user.planType === 'trial' || !user.planType;
+    const createdDate = user.createdAt ? new Date(user.createdAt) : new Date();
+    const trialExpiry = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    // Se não tiver expiração manual e não for vitalício, assume o trial de 30 dias
+    const effectiveExpiry = user.approvalExpiry ? new Date(user.approvalExpiry) : (isTrial ? trialExpiry : null);
+
+    if (!effectiveExpiry || user.approvalType === 'permanent') {
       return (
         <div className="flex flex-col items-center mt-1">
           <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Validade</p>
@@ -665,14 +672,13 @@ const App: React.FC = () => {
       );
     }
 
-    const expiry = new Date(user.approvalExpiry);
-    const diff = expiry.getTime() - currentTime.getTime();
-    const formattedExpiryDay = expiry.toLocaleDateString('pt-BR');
-    const formattedExpiryTime = expiry.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const diff = effectiveExpiry.getTime() - currentTime.getTime();
+    const formattedExpiryDay = effectiveExpiry.toLocaleDateString('pt-BR');
+    const formattedExpiryTime = effectiveExpiry.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-    // Período de carência de 5 minutos solicitado
+    // Período de carência de 5 minutos
     const gracePeriodMs = 5 * 60 * 1000;
-    const timeSinceExpiry = currentTime.getTime() - expiry.getTime();
+    const timeSinceExpiry = currentTime.getTime() - effectiveExpiry.getTime();
     const remainingGraceMs = gracePeriodMs - timeSinceExpiry;
 
     if (diff <= 0) {
@@ -683,7 +689,7 @@ const App: React.FC = () => {
           <p className="text-[11px] font-bold text-red-500 mt-1">
             Logout automático em aproximadamente {minutesRemaining} minuto{minutesRemaining !== 1 ? 's' : ''}.
           </p>
-          <p className="text-[9px] font-medium text-red-400 uppercase tracking-widest mt-1">Procure o administrador para revalidar agora.</p>
+          <p className="text-[9px] font-medium text-red-400 uppercase tracking-widest mt-1">Escolha um plano para continuar utilizando.</p>
         </div>
       );
     }
@@ -693,12 +699,15 @@ const App: React.FC = () => {
 
     const isTest = user.approvalType === '5min';
     const isStandardTerm = ['1month', '3months', '6months', '1year'].includes(user.approvalType || '');
-
-    const isUrgent = (isTest && minutesRemaining <= 2) || (isStandardTerm && daysRemaining <= 5);
+    
+    // Alerta urgente para Trial (< 5 dias) ou Termos curtos
+    const isUrgent = (isTest && minutesRemaining <= 2) || (isStandardTerm && daysRemaining <= 5) || (isTrial && daysRemaining <= 5);
 
     return (
       <div className="flex flex-col items-center mt-1">
-        <p className={`text-xs font-bold uppercase tracking-widest ${isUrgent ? 'text-red-600' : 'text-slate-500'}`}>Validade</p>
+        <p className={`text-xs font-bold uppercase tracking-widest ${isUrgent ? 'text-red-600' : 'text-slate-500'}`}>
+          {isTrial ? 'Período de Teste (30 dias)' : 'Validade do Acesso'}
+        </p>
         <p className={`text-sm font-black text-center max-w-xl ${isUrgent ? 'text-red-600 animate-pulse' : 'text-slate-500'}`}>
           Seu acesso expira em {formattedExpiryDay} às {formattedExpiryTime}.
         </p>
@@ -735,7 +744,7 @@ const App: React.FC = () => {
           <h1 className="text-4xl font-bold text-teal-600">Assistente para Rastreios no Biomagnetismo</h1>
           <div className="flex flex-col items-center mt-4">
             <p className="text-slate-600 text-sm font-medium">Terapeuta: <span className="text-lg font-black text-slate-800 uppercase">{currentUser?.fullName || currentUser?.username}</span></p>
-            {currentUser && <ValidityHeader user={currentUser} />}
+            {currentUser && <ValidityHeader user={currentUser} currentTime={currentTime} />}
           </div>
         </header>
 
