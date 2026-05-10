@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { WhatsAppIcon } from './icons/Icons';
+import { WhatsAppIcon, EyeIcon, EyeSlashIcon } from './icons/Icons';
 
 interface LoginProps {
   onLogin: (username: string, password: string) => Promise<{ success: boolean; message?: string }>;
@@ -15,6 +15,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('login');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,17 +79,26 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Senha</label>
                     <button type="button" onClick={() => setViewMode('forgot')} className="text-[9px] font-black text-teal-600 uppercase tracking-widest hover:underline">Esqueci a senha</button>
                   </div>
-                  <input
-                    type="password"
-                    placeholder="Sua senha"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium transition-all"
-                    autoComplete="current-password"
-                    autoCorrect="off"
-                    autoCapitalize="none"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Sua senha"
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium transition-all pr-12"
+                      autoComplete="current-password"
+                      autoCorrect="off"
+                      autoCapitalize="none"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 transition-colors"
+                    >
+                      {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                    </button>
+                  </div>
                 </div>
                 <button 
                   type="submit" 
