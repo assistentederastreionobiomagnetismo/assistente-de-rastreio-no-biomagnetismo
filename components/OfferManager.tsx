@@ -37,8 +37,8 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
     title: '',
     description: '',
     copyText: '',
-    imageUrl: '',
-    videoUrl: '',
+    imageUrls: [],
+    videoUrls: [],
     affiliateLink: '',
     ctaText: 'Clique Aqui',
     isFeatured: false,
@@ -138,8 +138,8 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
       title: '',
       description: '',
       copyText: '',
-      imageUrl: '',
-      videoUrl: '',
+      imageUrls: [],
+      videoUrls: [],
       affiliateLink: '',
       ctaText: 'Clique Aqui',
       isFeatured: false,
@@ -426,7 +426,7 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
                       <tr key={product.id} className="hover:bg-slate-50/50 transition-colors group">
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-3">
-                            <img src={product.imageUrl} className="w-10 h-10 rounded-lg object-cover" />
+                            <img src={product.imageUrls?.[0] || ''} className="w-10 h-10 rounded-lg object-cover" />
                             <div>
                               <p className="font-bold text-slate-800 text-sm">{product.title}</p>
                               <p className="text-slate-500 text-xs truncate max-w-[200px]">{product.description}</p>
