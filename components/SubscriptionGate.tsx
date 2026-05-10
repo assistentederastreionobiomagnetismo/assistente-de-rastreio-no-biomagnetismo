@@ -4,9 +4,18 @@ import { CheckIcon, SparklesIcon, WhatsAppIcon, MagnetIcon } from './icons/Icons
 
 interface SubscriptionGateProps {
     user: User;
+    onClose?: () => void;
 }
 
-const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user }) => {
+const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) => {
+    
+    // Verificação se é bloqueio total (Trial expirado)
+    const createdDate = user.createdAt ? new Date(user.createdAt) : new Date();
+    const trialExpiry = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const isTrialExpired = (user.planType === 'trial' || !user.planType) && trialExpiry < new Date();
+    const isAnnualExpired = user.approvalExpiry && new Date(user.approvalExpiry) < new Date();
+    
+    const isHardBlocked = (isTrialExpired || isAnnualExpired) && user.username !== 'vbsjunior.biomagnetismo';
     
     // Links de Pagamento (Você precisará substituir pelos seus links reais da InfinitePay)
     const PAYMENT_LINKS = {
@@ -31,6 +40,16 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user }) => {
                     <div className="absolute top-4 left-1/2 -translate-x-1/2 opacity-10">
                         <MagnetIcon className="w-32 h-32" />
                     </div>
+                    
+                    {!isHardBlocked && onClose && (
+                        <button 
+                            onClick={onClose}
+                            className="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors z-20"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    )}
+
                     <h2 className="text-3xl font-black uppercase tracking-tight mb-2 relative z-10">Escolha seu Plano de Acesso</h2>
                     <p className="text-teal-100 font-medium relative z-10">Continue transformando vidas com o Assistente de Biomagnetismo</p>
                 </div>

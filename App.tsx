@@ -434,6 +434,42 @@ const App: React.FC = () => {
     return { success: true };
   };
 
+  const handleTherapistRegister = async (data: { fullName: string; username: string; password: string; whatsapp: string }): Promise<{ success: boolean, message?: string }> => {
+    try {
+        // 1. Verificar se usuário já existe
+        const existingUsers = await dbService.getUsers();
+        if (existingUsers.some(u => u.username.toLowerCase() === data.username.toLowerCase())) {
+            return { success: false, message: 'Este login já está em uso. Escolha outro.' };
+        }
+
+        // 2. Criar hash da senha
+        const secureHash = await hashPassword(data.password);
+
+        // 3. Criar objeto de usuário (Trial por padrão)
+        const newUser: User = {
+            username: data.username.toLowerCase(),
+            password: secureHash,
+            fullName: data.fullName,
+            whatsapp: data.whatsapp,
+            isApproved: true,
+            planType: 'trial',
+            createdAt: new Date().toISOString(),
+            requiresPasswordChange: false
+        };
+
+        // 4. Salvar no Supabase
+        await dbService.updateUser(newUser);
+        
+        // 5. Atualizar lista local de usuários para permitir login imediato
+        setAllUsers(prev => [...prev, newUser]);
+        
+        return { success: true };
+    } catch (error) {
+        console.error("Erro ao registrar terapeuta:", error);
+        return { success: false, message: 'Erro ao salvar cadastro no banco de dados.' };
+    }
+  };
+
   const handleUpdatePassword = async (newPassword: string) => {
     if (!currentUser) return;
     try {
@@ -663,19 +699,32 @@ const App: React.FC = () => {
       <div className="flex flex-col items-center mt-1">
         <p className={`text-xs font-bold uppercase tracking-widest ${isUrgent ? 'text-red-600' : 'text-slate-500'}`}>Validade</p>
         <p className={`text-sm font-black text-center max-w-xl ${isUrgent ? 'text-red-600 animate-pulse' : 'text-slate-500'}`}>
-          Seu acesso expira em {formattedExpiryDay} às {formattedExpiryTime}. {isUrgent && 'Por favor, procure o administrador para revalidar seu acesso.'}
+          Seu acesso expira em {formattedExpiryDay} às {formattedExpiryTime}.
         </p>
+        {isUrgent && (
+            <button 
+                onClick={() => setShowSubscriptionGate(true)}
+                className="mt-2 px-6 py-2 bg-teal-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg hover:bg-teal-700 transition-all transform hover:scale-105 active:scale-95"
+            >
+                Renovar Acesso Agora
+            </button>
+        )}
       </div>
     );
   };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-100 font-bold text-teal-600">Carregando Banco de Dados...</div>;
-  if (!isAuthenticated) return <Login onLogin={handleTherapistLogin} onRequestReset={() => ({ success: false, message: '' })} />;
+  if (!isAuthenticated) return <Login onLogin={handleTherapistLogin} onRegister={handleTherapistRegister} onRequestReset={() => ({ success: false, message: '' })} />;
   if (appView === 'changePassword') return <ChangePassword onUpdate={handleUpdatePassword} onLogout={handleLogout} />;
 
   return (
     <div className="bg-slate-100 min-h-screen text-slate-800 relative notranslate" translate="no">
-      {showSubscriptionGate && <SubscriptionGate user={currentUser} />}
+      {showSubscriptionGate && currentUser && (
+        <SubscriptionGate 
+          user={currentUser} 
+          onClose={() => setShowSubscriptionGate(false)} 
+        />
+      )}
       {viewingHistoricalSession && <SessionDetailModal session={viewingHistoricalSession} onClose={() => setViewingHistoricalSession(null)} />}
       <div className="absolute top-4 right-4 z-10 print:hidden">
         <button onClick={handleLogout} className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 text-sm font-medium rounded-md shadow-sm text-slate-700 bg-white hover:bg-slate-100 transition-colors"><LogoutIcon className="w-5 h-5" /> Sair</button>
