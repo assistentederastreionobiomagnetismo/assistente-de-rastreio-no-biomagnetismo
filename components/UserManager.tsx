@@ -244,7 +244,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                 </div>
             </div>
 
-            {activeTab === 'users' ? (
+            {activeTab === 'users' ?
                 <>
                     {/* 2. CADASTRO DE TERAPEUTA */}
             <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-200">
@@ -531,11 +531,11 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                     </table>
                 </div>
                 </>
-            ) : activeTab === 'settings' ? (
+            : activeTab === 'settings' ?
                 <ConfigManager />
-            ) : (
+            :
                 <TutorialManager />
-            )}
+            }
         </div>
     );
 };
