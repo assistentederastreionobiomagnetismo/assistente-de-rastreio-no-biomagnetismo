@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { CheckIcon, SparklesIcon, WhatsAppIcon, MagnetIcon } from './icons/Icons';
+import { dbService } from '../services/dbService';
 
 interface SubscriptionGateProps {
     user: User;
@@ -8,7 +9,12 @@ interface SubscriptionGateProps {
 }
 
 const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) => {
+    const [settings, setSettings] = useState<{[key: string]: string}>({});
     
+    useEffect(() => {
+        dbService.getSettings().then(setSettings);
+    }, []);
+
     // Verificação se é bloqueio total (Trial expirado)
     const createdDate = user.createdAt ? new Date(user.createdAt) : new Date();
     const trialExpiry = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -17,18 +23,43 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) =>
     
     const isHardBlocked = (isTrialExpired || isAnnualExpired) && user.username !== 'vbsjunior.biomagnetismo';
     
-    // Links de Pagamento (Você precisará substituir pelos seus links reais da InfinitePay)
+    // Links de Pagamento Dinâmicos (Carregados do Admin)
     const PAYMENT_LINKS = {
-        ANNUAL: "https://pay.infinitepay.io/seu-link-anual",
-        ADHESION: "https://pay.infinitepay.io/seu-link-adesao",
-        REFILL_5: "https://pay.infinitepay.io/refill-5",
-        REFILL_10: "https://pay.infinitepay.io/refill-10",
-        REFILL_20: "https://pay.infinitepay.io/refill-20",
-        REFILL_50: "https://pay.infinitepay.io/refill-50"
+        ANNUAL: settings.link_anual || "https://pay.infinitepay.io/seu-link-anual",
+        ADHESION: settings.link_adesao || "https://pay.infinitepay.io/seu-link-adesao",
+        REFILL_5: settings.link_pacote_5 || "https://pay.infinitepay.io/refill-5",
+        REFILL_10: settings.link_pacote_10 || "https://pay.infinitepay.io/refill-10",
+        REFILL_20: settings.link_pacote_20 || "https://pay.infinitepay.io/refill-20",
+        REFILL_50: settings.link_pacote_50 || "https://pay.infinitepay.io/refill-50"
     };
 
     const handlePayment = (url: string) => {
         window.open(url, '_blank');
+    };
+
+    const handleNotifyPayment = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!confirm("Confirmar envio de comprovante para análise?")) return;
+
+        try {
+            // Reutilizando upload de fotos (pode usar o mesmo bucket ou outro)
+            const publicUrl = await dbService.uploadPairImage(file);
+            
+            const updatedUser = {
+                ...user,
+                paymentStatus: 'pending' as const,
+                paymentProofUrl: publicUrl
+            };
+            
+            await dbService.updateUser(updatedUser);
+            alert("Comprovante enviado com sucesso! O administrador foi notificado e seu acesso será liberado em breve.");
+            if (onClose && !isHardBlocked) onClose();
+        } catch (error) {
+            console.error("Erro ao enviar comprovante:", error);
+            alert("Erro ao enviar arquivo. Tente novamente.");
+        }
     };
 
     return (
@@ -173,17 +204,29 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) =>
                     </div>
 
                     {/* Footer Info */}
-                    <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 opacity-60">
-                        <div className="flex items-center gap-4">
-                            <img src="https://infinitepay.io/favicon.ico" className="w-5 h-5 grayscale" alt="InfinitePay" />
-                            <span className="text-xs font-bold text-slate-500">Pagamento Processado com Segurança via InfinitePay</span>
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div className="flex items-center gap-4">
+                                <img src="https://infinitepay.io/favicon.ico" className="w-5 h-5 grayscale" alt="InfinitePay" />
+                                <span className="text-xs font-bold text-slate-500">Pagamento Seguro via InfinitePay</span>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                                <label className="flex items-center gap-2 px-6 py-3 bg-amber-100 text-amber-700 font-black rounded-xl cursor-pointer hover:bg-amber-200 transition-all text-[10px] uppercase tracking-widest shadow-sm">
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        className="hidden" 
+                                        onChange={handleNotifyPayment}
+                                    />
+                                    <span>JÁ PAGUEI / ENVIAR COMPROVANTE</span>
+                                </label>
+                                <button className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest hover:text-teal-600 transition-colors">
+                                    <WhatsAppIcon className="w-4 h-4" /> Dúvidas?
+                                </button>
+                            </div>
                         </div>
-                        <button className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest hover:text-teal-600 transition-colors">
-                            <WhatsAppIcon className="w-4 h-4" /> Dúvidas? Fale Conosco
-                        </button>
                     </div>
                 </div>
-            </div>
         </div>
     );
 };

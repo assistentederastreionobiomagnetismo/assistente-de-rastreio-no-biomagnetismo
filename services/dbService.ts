@@ -21,6 +21,8 @@ export const dbService = {
             whatsapp: u.whatsapp,
             planType: u.plan_type,
             extraSessions: u.extra_sessions,
+            paymentStatus: u.payment_status,
+            paymentProofUrl: u.payment_proof_url,
             createdAt: u.created_at
         }));
     },
@@ -40,7 +42,9 @@ export const dbService = {
                 approval_expiry: user.approvalExpiry,
                 requires_password_change: user.requiresPasswordChange,
                 plan_type: user.planType || 'trial',
-                extra_sessions: user.extraSessions || 0
+                extra_sessions: user.extraSessions || 0,
+                payment_status: user.paymentStatus || 'none',
+                payment_proof_url: user.paymentProofUrl
             }, { onConflict: 'username' });
         if (error) throw error;
     },
@@ -426,5 +430,23 @@ export const dbService = {
         
         if (error) throw error;
         return count || 0;
+    },
+
+    // Settings / Config
+    async getSettings(): Promise<{[key: string]: string}> {
+        if (!supabase) return {};
+        const { data, error } = await supabase
+            .from('settings')
+            .select('*');
+        if (error) return {};
+        return (data || []).reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {});
+    },
+
+    async updateSetting(key: string, value: string): Promise<void> {
+        if (!supabase) return;
+        const { error } = await supabase
+            .from('settings')
+            .upsert({ key, value, updated_at: new Date().toISOString() });
+        if (error) throw error;
     }
 };

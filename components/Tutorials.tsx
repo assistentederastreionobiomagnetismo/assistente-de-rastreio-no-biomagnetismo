@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Tutorial } from '../types';
 import { dbService } from '../services/dbService';
-import { PlayIcon, ChevronLeftIcon, XIcon } from './icons/Icons';
+import { Tutorial } from '../types';
+import { PlayIcon, MagnetIcon, ChevronLeftIcon } from './icons/Icons';
 
 interface TutorialsProps {
     onBack: () => void;
@@ -9,9 +9,8 @@ interface TutorialsProps {
 
 const Tutorials: React.FC<TutorialsProps> = ({ onBack }) => {
     const [tutorials, setTutorials] = useState<Tutorial[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-    const [activeCategory, setActiveCategory] = useState<string>('Todos');
 
     useEffect(() => {
         loadTutorials();
@@ -24,15 +23,9 @@ const Tutorials: React.FC<TutorialsProps> = ({ onBack }) => {
         } catch (error) {
             console.error("Erro ao carregar tutoriais:", error);
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
-
-    const categories = ['Todos', ...Array.from(new Set(tutorials.map(t => t.category)))];
-
-    const filteredTutorials = activeCategory === 'Todos'
-        ? tutorials
-        : tutorials.filter(t => t.category === activeCategory);
 
     const getYoutubeId = (url: string) => {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -40,104 +33,96 @@ const Tutorials: React.FC<TutorialsProps> = ({ onBack }) => {
         return (match && match[2].length === 11) ? match[2] : null;
     };
 
+    if (isLoading) return <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest animate-pulse">Carregando Treinamentos...</div>;
+
+    const categories = Array.from(new Set(tutorials.map(t => t.category)));
+
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="animate-fade-in space-y-10 max-w-6xl mx-auto pb-20">
             {/* Header */}
-            <div className="bg-white border-b sticky top-0 z-30 px-4 py-4 flex items-center justify-between">
-                <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                    <ChevronLeftIcon className="w-6 h-6 text-gray-600" />
-                </button>
-                <h2 className="text-xl font-bold text-gray-800">Centro de Treinamento</h2>
-                <div className="w-10"></div>
-            </div>
-
-            <div className="max-w-4xl mx-auto px-4 pt-6">
-                {/* Categorias */}
-                <div className="flex overflow-x-auto gap-2 pb-4 no-scrollbar">
-                    {categories.map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => setActiveCategory(cat)}
-                            className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all ${
-                                activeCategory === cat
-                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                    : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300'
-                            }`}
-                        >
-                            {cat}
-                        </button>
-                    ))}
-                </div>
-
-                {loading ? (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                        <p className="mt-4 text-gray-500">Carregando aulas...</p>
-                    </div>
-                ) : filteredTutorials.length === 0 ? (
-                    <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
-                        <PlayIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500">Nenhum tutorial encontrado nesta categoria.</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                        {filteredTutorials.map(tutorial => (
-                            <div 
-                                key={tutorial.id}
-                                className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all group cursor-pointer"
-                                onClick={() => setSelectedVideo(tutorial.videoUrl)}
-                            >
-                                <div className="relative aspect-video bg-gray-900">
-                                    <img 
-                                        src={`https://img.youtube.com/vi/${getYoutubeId(tutorial.videoUrl)}/mqdefault.jpg`}
-                                        alt={tutorial.title}
-                                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                                            <PlayIcon className="w-8 h-8 text-blue-600 ml-1" />
-                                        </div>
-                                    </div>
-                                    <div className="absolute bottom-3 left-3">
-                                        <span className="px-2 py-1 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold rounded uppercase tracking-wider">
-                                            {tutorial.category}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="p-4">
-                                    <h3 className="font-bold text-gray-800 line-clamp-1 group-hover:text-blue-600 transition-colors">
-                                        {tutorial.title}
-                                    </h3>
-                                    {tutorial.description && (
-                                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                                            {tutorial.description}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Modal Player */}
-            {selectedVideo && (
-                <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4">
-                    <button 
-                        onClick={() => setSelectedVideo(null)}
-                        className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all"
-                    >
-                        <XIcon className="w-8 h-8" />
+            <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="flex items-center gap-6">
+                    <button onClick={onBack} className="p-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 transition-all border border-slate-200">
+                        <ChevronLeftIcon className="w-6 h-6" />
                     </button>
-                    
-                    <div className="w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
-                        <iframe
-                            width="100%"
-                            height="100%"
+                    <div>
+                        <h2 className="text-3xl font-black text-slate-800 tracking-tight uppercase leading-none">Treinamentos</h2>
+                        <p className="text-slate-500 text-sm font-medium mt-1">Domine o Assistente de Biomagnetismo.</p>
+                    </div>
+                </div>
+                <div className="hidden md:block p-4 bg-teal-50 text-teal-600 rounded-2xl">
+                    <PlayIcon className="w-8 h-8" />
+                </div>
+            </div>
+
+            {tutorials.length === 0 ? (
+                <div className="bg-white rounded-3xl p-20 text-center border-2 border-dashed border-slate-200">
+                    <MagnetIcon className="w-16 h-16 text-slate-200 mx-auto mb-4" />
+                    <p className="text-slate-400 font-black uppercase tracking-widest text-sm">Nenhum tutorial disponível no momento.</p>
+                </div>
+            ) : (
+                categories.map(category => (
+                    <div key={category} className="space-y-6">
+                        <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.3em] ml-2 flex items-center gap-3">
+                            <span className="w-8 h-px bg-slate-200"></span>
+                            {category}
+                        </h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {tutorials.filter(t => t.category === category).map(tutorial => (
+                                <div key={tutorial.id} className="bg-white rounded-[32px] shadow-lg border border-slate-100 overflow-hidden group hover:shadow-2xl transition-all duration-500 flex flex-col">
+                                    {/* Video Placeholder/Thumbnail */}
+                                    <div 
+                                        className="aspect-video bg-slate-900 relative cursor-pointer overflow-hidden"
+                                        onClick={() => setSelectedVideo(tutorial.videoUrl)}
+                                    >
+                                        <div className="absolute inset-0 bg-teal-600/20 group-hover:bg-teal-600/0 transition-all z-10" />
+                                        <div className="absolute inset-0 flex items-center justify-center z-20 group-hover:scale-110 transition-transform duration-500">
+                                            <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white ring-4 ring-white/30">
+                                                <PlayIcon className="w-8 h-8 fill-current" />
+                                            </div>
+                                        </div>
+                                        <img 
+                                            src={`https://img.youtube.com/vi/${getYoutubeId(tutorial.videoUrl)}/maxresdefault.jpg`} 
+                                            className="w-full h-full object-cover opacity-60"
+                                            alt={tutorial.title}
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop";
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="p-6 flex-grow flex flex-col">
+                                        <h4 className="text-lg font-black text-slate-800 leading-tight mb-2 uppercase tracking-tight">{tutorial.title}</h4>
+                                        <p className="text-slate-500 text-[11px] font-medium line-clamp-3 mb-6 flex-grow leading-relaxed">{tutorial.description || 'Assista a este treinamento para aprender mais sobre este módulo.'}</p>
+                                        <button 
+                                            onClick={() => setSelectedVideo(tutorial.videoUrl)}
+                                            className="w-full py-4 bg-slate-100 text-slate-600 font-black rounded-2xl hover:bg-teal-600 hover:text-white transition-all uppercase text-[10px] tracking-widest"
+                                        >
+                                            Assistir Aula
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))
+            )}
+
+            {/* Modal de Vídeo */}
+            {selectedVideo && (
+                <div className="fixed inset-0 z-[200] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setSelectedVideo(null)}>
+                    <div className="max-w-5xl w-full aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl relative animate-scale-in" onClick={e => e.stopPropagation()}>
+                        <button 
+                            className="absolute top-4 right-4 z-30 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all"
+                            onClick={() => setSelectedVideo(null)}
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                        <iframe 
                             src={`https://www.youtube.com/embed/${getYoutubeId(selectedVideo)}?autoplay=1`}
-                            title="YouTube video player"
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            className="w-full h-full"
+                            allow="autoplay; encrypted-media; picture-in-picture"
                             allowFullScreen
                         ></iframe>
                     </div>

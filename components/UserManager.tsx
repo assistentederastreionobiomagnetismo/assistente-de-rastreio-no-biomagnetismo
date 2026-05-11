@@ -1,21 +1,28 @@
 import React, { useState } from 'react';
 import { User, BiomagneticPair, ApprovalPeriod } from '../types';
-import { TrashIcon, ClipboardIcon, WhatsAppIcon, UserIcon, PlusIcon, InfoIcon, CheckIcon, KeyIcon, EyeIcon, EyeSlashIcon } from './icons/Icons';
+import { TrashIcon, ClipboardIcon, WhatsAppIcon, UserIcon, PlusIcon, InfoIcon, CheckIcon, KeyIcon, EyeIcon, EyeSlashIcon, UsersIcon, CogIcon, PlayIcon } from './icons/Icons';
 import { dbService } from '../services/dbService';
 import { hashPassword } from '../lib/crypto';
+import ConfigManager from './ConfigManager';
+import TutorialManager from './TutorialManager';
+import { PlanType } from '../types';
 
 interface UserManagerProps {
     users: User[];
     setUsers: React.Dispatch<React.SetStateAction<User[]>>;
     biomagneticPairs: BiomagneticPair[];
     onBack: () => void;
+    initialTab?: 'users' | 'settings' | 'tutorials';
 }
 
-const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticPairs, onBack }) => {
+const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticPairs, onBack, initialTab = 'users' }) => {
     const [isGenerating, setIsGenerating] = useState(false);
 
     const [pendingExpiries, setPendingExpiries] = useState<{ [key: string]: ApprovalPeriod }>({});
+    const [pendingPlans, setPendingPlans] = useState<{ [key: string]: PlanType }>({});
+    const [pendingExtras, setPendingExtras] = useState<{ [key: string]: number }>({});
     const [savingUsername, setSavingUsername] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'users' | 'settings' | 'tutorials'>(initialTab);
 
     const [newUser, setNewUser] = useState({
         fullName: '',
@@ -58,10 +65,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         if (type === 'permanent') return undefined;
         const now = new Date();
         switch (type) {
-            case '5min': return new Date(now.getTime() + 5 * 60 * 1000).toISOString();
             case '1month': return new Date(now.setMonth(now.getMonth() + 1)).toISOString();
-            case '3months': return new Date(now.setMonth(now.getMonth() + 3)).toISOString();
-            case '6months': return new Date(now.setMonth(now.getMonth() + 6)).toISOString();
             case '1year': return new Date(now.setFullYear(now.getFullYear() + 1)).toISOString();
             default: return undefined;
         }
@@ -109,9 +113,10 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
     const handleUpdateExpiry = async (username: string) => {
         const period = pendingExpiries[username];
         if (!period) return;
-
         setSavingUsername(username);
         const newExpiry = calculateExpiry(period);
+        const newPlan = pendingPlans[username];
+        const newExtras = pendingExtras[username];
 
         try {
             const userToUpdate = users.find(u => u.username === username);
@@ -121,21 +126,21 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                     approvalType: period,
                     approvalExpiry: newExpiry,
                     isApproved: true,
-                    // Se for permanente, garante plano anual (ilimitado)
-                    planType: period === 'permanent' ? 'annual' : userToUpdate.planType
+                    planType: newPlan || (period === 'permanent' ? 'annual' : userToUpdate.planType),
+                    extraSessions: newExtras !== undefined ? newExtras : userToUpdate.extraSessions,
+                    paymentStatus: 'approved' as const // Resetar status de pagamento ao aprovar/alterar
                 };
                 await dbService.updateUser(updatedUser);
                 setUsers(prev => prev.map(u => u.username === username ? updatedUser : u));
 
-                setPendingExpiries(prev => {
-                    const next = { ...prev };
-                    delete next[username];
-                    return next;
-                });
-                alert("Prazo de validade atualizado no Supabase!");
+                setPendingExpiries(prev => { const next = { ...prev }; delete next[username]; return next; });
+                setPendingPlans(prev => { const next = { ...prev }; delete next[username]; return next; });
+                setPendingExtras(prev => { const next = { ...prev }; delete next[username]; return next; });
+                
+                alert("Dados atualizados com sucesso!");
             }
         } catch (error) {
-            console.error("Erro ao atualizar validade:", error);
+            console.error("Erro ao atualizar usuário:", error);
             alert("Erro ao salvar no Supabase.");
         } finally {
             setSavingUsername(null);
@@ -211,8 +216,37 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                     <button onClick={onBack} className="px-8 py-4 bg-slate-100 text-slate-600 font-black rounded-2xl hover:bg-slate-200 transition-all border border-slate-200 uppercase text-xs tracking-widest">Voltar</button>
                 </div>
             </div>
+ 
+            {/* Header com Abas */}
+            <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+                <div className="flex border-b border-slate-100">
+                    <button 
+                        onClick={() => setActiveTab('users')}
+                        className={`flex-1 py-6 flex items-center justify-center gap-3 font-black uppercase tracking-widest text-xs transition-all ${activeTab === 'users' ? 'text-teal-600 bg-slate-50 border-b-4 border-teal-600' : 'text-slate-400 hover:text-slate-600'}`}
+                    >
+                        <UsersIcon className="w-5 h-5" />
+                        Gestão de Usuários
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('settings')}
+                        className={`flex-1 py-6 flex items-center justify-center gap-3 font-black uppercase tracking-widest text-xs transition-all ${activeTab === 'settings' ? 'text-teal-600 bg-slate-50 border-b-4 border-teal-600' : 'text-slate-400 hover:text-slate-600'}`}
+                    >
+                        <CogIcon className="w-5 h-5" />
+                        Links de Pagamento
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('tutorials')}
+                        className={`flex-1 py-6 flex items-center justify-center gap-3 font-black uppercase tracking-widest text-xs transition-all ${activeTab === 'tutorials' ? 'text-teal-600 bg-slate-50 border-b-4 border-teal-600' : 'text-slate-400 hover:text-slate-600'}`}
+                    >
+                        <PlayIcon className="w-5 h-5" />
+                        Vídeo Tutoriais
+                    </button>
+                </div>
+            </div>
 
-            {/* 2. CADASTRO DE TERAPEUTA */}
+            {activeTab === 'users' ? (
+                <>
+                    {/* 2. CADASTRO DE TERAPEUTA */}
             <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-200">
                 <div className="flex items-center gap-3 mb-8">
                     <div className="p-3 bg-teal-100 text-teal-600 rounded-2xl shadow-sm">
@@ -296,10 +330,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                             onChange={e => setNewUser({ ...newUser, approvalType: e.target.value as ApprovalPeriod })}
                             className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-black text-xs uppercase"
                         >
-                            <option value="5min">5 Minutos (Teste)</option>
-                            <option value="1month">1 Mês</option>
-                            <option value="3months">3 Meses</option>
-                            <option value="6months">6 Meses</option>
+                            <option value="1month">30 Dias (Trial)</option>
                             <option value="1year">1 Ano</option>
                             <option value="permanent">Permanente</option>
                         </select>
@@ -369,36 +400,65 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                                                     <span className={`font-black text-sm ${isBlocked ? 'text-slate-400 line-through' : 'text-slate-800'}`}>{user.fullName || 'Sem Nome'}</span>
                                                     <span className="text-[10px] text-teal-600 font-black uppercase tracking-widest">@{user.username}</span>
                                                     <span className="text-[9px] text-slate-400 font-medium">{user.email || 'Sem e-mail'}</span>
+                                                    {user.paymentStatus === 'pending' && (
+                                                        <div className="flex items-center gap-2 mt-1.5">
+                                                            <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-ping"></span>
+                                                            <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-md">
+                                                                <span className="text-[8px] font-black text-amber-700 uppercase tracking-widest">🔔 Pagamento</span>
+                                                                {user.paymentProofUrl && (
+                                                                    <a 
+                                                                        href={user.paymentProofUrl} 
+                                                                        target="_blank" 
+                                                                        rel="noreferrer"
+                                                                        className="text-[8px] font-black text-blue-600 hover:underline uppercase tracking-widest"
+                                                                    >
+                                                                        (Ver Comprovante)
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6 text-center">
-                                            <div className="flex flex-col items-center gap-1">
-                                                <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${
-                                                    user.planType === 'annual' ? 'bg-teal-100 text-teal-700' : 
-                                                    user.planType === 'hybrid' ? 'bg-amber-100 text-amber-700' : 
-                                                    'bg-slate-100 text-slate-500'
-                                                }`}>
-                                                    {user.planType === 'annual' ? 'Anual' : user.planType === 'hybrid' ? 'Start' : 'Trial'}
-                                                </span>
-                                                {user.planType === 'hybrid' && (
-                                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">
-                                                        +{user.extraSessions || 0} Extras
-                                                    </span>
+                                            <div className="flex flex-col items-center gap-2">
+                                                <select
+                                                    value={pendingPlans[user.username] || user.planType}
+                                                    onChange={(e) => setPendingPlans(prev => ({ ...prev, [user.username]: e.target.value as PlanType }))}
+                                                    className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-2 py-1.5 outline-none cursor-pointer transition-colors ${pendingPlans[user.username] ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' : 'bg-slate-100 text-slate-500'}`}
+                                                >
+                                                    <option value="trial">Trial</option>
+                                                    <option value="annual">Anual/Vitalício</option>
+                                                    <option value="hybrid">Start (Sessões)</option>
+                                                </select>
+
+                                                {(pendingPlans[user.username] === 'hybrid' || (!pendingPlans[user.username] && user.planType === 'hybrid')) && (
+                                                    <div className="flex items-center gap-1 mt-1">
+                                                        <span className="text-[8px] font-black text-slate-400">Extras:</span>
+                                                        <input 
+                                                            type="number"
+                                                            value={pendingExtras[user.username] !== undefined ? pendingExtras[user.username] : (user.extraSessions || 0)}
+                                                            onChange={(e) => setPendingExtras(prev => ({ ...prev, [user.username]: parseInt(e.target.value) || 0 }))}
+                                                            className={`w-12 text-center text-[9px] font-black border-none rounded bg-slate-50 outline-none ${pendingExtras[user.username] !== undefined ? 'ring-2 ring-amber-400' : ''}`}
+                                                        />
+                                                    </div>
                                                 )}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6 text-center">
-                                            {isAdmin ? (
-                                                <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-4 py-1.5 rounded-full border border-amber-100">Mestre</span>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleToggleBlock(user.username)}
-                                                    className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all shadow-sm ${isBlocked ? 'bg-red-50 text-red-500 border-red-100 hover:bg-red-100' : 'bg-green-50 text-green-600 border-green-100 hover:bg-green-100'}`}
-                                                >
-                                                    {isExpired ? 'Bloqueado (Expirado)' : isBlocked ? 'Bloqueado' : 'Acesso Ativo'}
-                                                </button>
-                                            )}
+                                            <div className="flex justify-center">
+                                                {isAdmin ? (
+                                                    <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-4 py-1.5 rounded-full border border-amber-100">Mestre</span>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleToggleBlock(user.username)}
+                                                        className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all shadow-sm ${isBlocked ? 'bg-red-50 text-red-500 border-red-100 hover:bg-red-100' : 'bg-green-50 text-green-600 border-green-100 hover:bg-green-100'}`}
+                                                    >
+                                                        {isExpired ? 'Bloqueado (Expirado)' : isBlocked ? 'Bloqueado' : 'Acesso Ativo'}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-8 py-6">
                                             {isAdmin ? (
@@ -412,26 +472,23 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                                                     </span>
                                                     <div className="flex items-center gap-1">
                                                         <select
-                                                            value={currentSelection}
+                                                            value={pendingExpiries[user.username] || user.approvalType}
                                                             onChange={(e) => setPendingExpiries(prev => ({ ...prev, [user.username]: e.target.value as ApprovalPeriod }))}
-                                                            className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-2 py-1.5 outline-none cursor-pointer transition-colors ${hasPendingChange ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                                                            className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-2 py-1.5 outline-none cursor-pointer transition-colors ${pendingExpiries[user.username] ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
                                                         >
-                                                            <option value="5min">5 Minutos</option>
-                                                            <option value="1month">1 Mês</option>
-                                                            <option value="3months">3 Meses</option>
-                                                            <option value="6months">6 Meses</option>
+                                                            <option value="1month">30 Dias</option>
                                                             <option value="1year">1 Ano</option>
                                                             <option value="permanent">Permanente</option>
                                                         </select>
 
-                                                        {hasPendingChange && (
+                                                        {(pendingExpiries[user.username] || pendingPlans[user.username] || pendingExtras[user.username] !== undefined) && (
                                                             <button
                                                                 onClick={() => handleUpdateExpiry(user.username)}
-                                                                disabled={isCurrentlySaving}
+                                                                disabled={savingUsername === user.username}
                                                                 className="p-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 shadow-md transition-all animate-pulse flex items-center justify-center min-w-[30px]"
-                                                                title="Salvar Novo Prazo e Reativar"
+                                                                title="Salvar Alterações"
                                                             >
-                                                                {isCurrentlySaving ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <CheckIcon className="w-4 h-4" />}
+                                                                {savingUsername === user.username ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <CheckIcon className="w-4 h-4" />}
                                                             </button>
                                                         )}
                                                     </div>
@@ -473,7 +530,11 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                         </tbody>
                     </table>
                 </div>
-            </div>
+            ) : activeTab === 'settings' ? (
+                <ConfigManager />
+            ) : (
+                <TutorialManager />
+            )}
         </div>
     );
 };

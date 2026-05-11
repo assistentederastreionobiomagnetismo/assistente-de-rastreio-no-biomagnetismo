@@ -98,6 +98,7 @@ const App: React.FC = () => {
   const [viewingHistoricalSession, setViewingHistoricalSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [userManagerTab, setUserManagerTab] = useState<'users' | 'settings' | 'tutorials'>('users');
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [showSubscriptionGate, setShowSubscriptionGate] = useState(false);
   const [monthlyUsage, setMonthlyUsage] = useState(0);
@@ -757,7 +758,7 @@ const App: React.FC = () => {
             setPatients={setPatients}
             biomagneticPairs={biomagneticPairs}
             setBiomagneticPairs={setBiomagneticPairs}
-            onManageUsers={() => setAppView('userManager')}
+            onManageUsers={() => { setUserManagerTab('users'); setAppView('userManager'); }}
             onViewSessionDetail={(s) => setViewingHistoricalSession(s)}
             onEditSession={handleEditSession}
             onDeleteSession={handleDeleteSession}
@@ -765,7 +766,7 @@ const App: React.FC = () => {
             onOpenStore={() => { setPreviousView(appView); setAppView('store'); }}
             onManageOffers={() => setAppView('offerManager')}
             onOpenTutorials={() => { setPreviousView(appView); setAppView('tutorials'); }}
-            onManageTutorials={() => setAppView('tutorialManager')}
+            onManageTutorials={() => { setUserManagerTab('tutorials'); setAppView('userManager'); }}
             monthlyUsage={monthlyUsage}
           />
         )}
@@ -776,11 +777,6 @@ const App: React.FC = () => {
           />
         )}
 
-        {appView === 'tutorialManager' && (
-          <TutorialManager 
-            onBack={() => setAppView('dashboard')}
-          />
-        )}
 
         {appView === 'store' && (
           <Store 
@@ -804,6 +800,7 @@ const App: React.FC = () => {
             setUsers={setAllUsers}
             biomagneticPairs={biomagneticPairs}
             onBack={() => setAppView('dashboard')}
+            initialTab={userManagerTab}
           />
         )}
 
