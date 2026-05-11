@@ -102,7 +102,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         try {
             await dbService.updateUser(createdUser);
             setUsers(prev => [...prev, createdUser]);
-            setNewUser({ fullName: '', email: '', whatsapp: '', username: '', password: '', approvalType: 'permanent' });
+            setNewUser({ fullName: '', email: '', whatsapp: '', username: '', password: '', approvalType: 'permanent', planType: 'annual' });
             alert(`Terapeuta ${createdUser.fullName} cadastrado com sucesso e protegido com criptografia!`);
         } catch (error) {
             console.error("Erro ao registrar no Supabase:", error);

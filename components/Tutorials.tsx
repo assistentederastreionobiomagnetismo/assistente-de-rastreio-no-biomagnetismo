@@ -117,7 +117,7 @@ const Tutorials: React.FC<TutorialsProps> = ({ onBack }) => {
                             className="absolute top-4 right-4 z-30 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all"
                             onClick={() => setSelectedVideo(null)}
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                         <iframe 
                             src={`https://www.youtube.com/embed/${getYoutubeId(selectedVideo)}?autoplay=1`}
