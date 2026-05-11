@@ -27,12 +27,12 @@ const ConfigManager: React.FC = () => {
         setSavingKey(key);
         try {
             await dbService.updateSetting(key, value);
+            setSavingKey(null); // Clear before alert to update UI
             alert("Configuração salva com sucesso!");
-        } catch (error) {
+        } catch (error: any) {
             console.error("Erro ao salvar:", error);
-            alert("Erro ao salvar no banco de dados.");
-        } finally {
-            setSavingKey(null);
+            setSavingKey(null); // Clear before alert to update UI
+            alert(`Erro ao salvar no banco de dados: ${error.message || 'Erro desconhecido'}`);
         }
     };
 
