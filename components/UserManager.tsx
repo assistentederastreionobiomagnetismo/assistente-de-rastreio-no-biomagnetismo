@@ -128,7 +128,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                     isApproved: true,
                     planType: newPlan || (period === 'permanent' ? 'annual' : userToUpdate.planType),
                     extraSessions: newExtras !== undefined ? newExtras : userToUpdate.extraSessions,
-                    paymentStatus: 'approved' as const // Resetar status de pagamento ao aprovar/alterar
+                    paymentStatus: 'approved' as const
                 };
                 await dbService.updateUser(updatedUser);
                 setUsers(prev => prev.map(u => u.username === username ? updatedUser : u));
@@ -165,7 +165,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         const generatedPassword = Math.random().toString(36).substring(2, 8).toUpperCase();
         const tempPassword = window.prompt(`Defina a senha provisória para "${fullName}":\n(Sugestão gerada abaixo)`, generatedPassword);
 
-        if (tempPassword === null) return; // Cancelado pelo usuário
+        if (tempPassword === null) return;
 
         const finalPassword = tempPassword.trim() || generatedPassword;
 
@@ -174,14 +174,13 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                 const secureHash = await hashPassword(finalPassword);
                 await dbService.resetUserPassword(username, secureHash);
 
-                // Atualiza o estado local para que o login funcione imediatamente sem reload
                 setUsers(prev => prev.map(u =>
                     u.username === username
                         ? { ...u, password: secureHash, requiresPasswordChange: true }
                         : u
                 ));
 
-                alert(`Senha de ${fullName} resetada com sucesso!\n\nSenha provisória: ${finalPassword}\n(O sistema guardou apenas o hash seguro)`);
+                alert(`Senha de ${fullName} resetada com sucesso!\n\nSenha provisória: ${finalPassword}`);
             } catch (error) {
                 console.error("Erro ao resetar senha:", error);
                 alert("Erro ao resetar senha no Supabase.");
@@ -244,296 +243,245 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                 </div>
             </div>
 
-            {activeTab === 'users' ? (
+            {activeTab === 'users' && (
                 <>
                     {/* 2. CADASTRO DE TERAPEUTA */}
-            <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-200">
-                <div className="flex items-center gap-3 mb-8">
-                    <div className="p-3 bg-teal-100 text-teal-600 rounded-2xl shadow-sm">
-                        <PlusIcon className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Novo Cadastro de Terapeuta</h3>
-                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Defina as credenciais de acesso inicial</p>
-                    </div>
-                </div>
-
-                <form onSubmit={handleRegisterUser} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Nome Completo</label>
-                        <input
-                            type="text"
-                            required
-                            value={newUser.fullName}
-                            onChange={e => setNewUser({ ...newUser, fullName: e.target.value })}
-                            className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium"
-                            placeholder="Nome do terapeuta"
-                        />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Login (Acesso)</label>
-                            <input
-                                type="text"
-                                required
-                                value={newUser.username}
-                                onChange={e => setNewUser({ ...newUser, username: e.target.value.replace(/\s/g, '').toLowerCase() })}
-                                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-bold text-teal-700"
-                                placeholder="ex: maria"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Senha Prov.</label>
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    required
-                                    value={newUser.password}
-                                    onChange={e => setNewUser({ ...newUser, password: e.target.value })}
-                                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-bold text-slate-600 pr-12"
-                                    placeholder="123456"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 transition-colors"
-                                >
-                                    {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
-                                </button>
+                    <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-200">
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="p-3 bg-teal-100 text-teal-600 rounded-2xl shadow-sm">
+                                <PlusIcon className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Novo Cadastro de Terapeuta</h3>
+                                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Defina as credenciais de acesso inicial</p>
                             </div>
                         </div>
-                    </div>
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">E-mail</label>
-                        <input
-                            type="email"
-                            value={newUser.email}
-                            onChange={e => setNewUser({ ...newUser, email: e.target.value })}
-                            className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium"
-                            placeholder="email@exemplo.com"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">WhatsApp (DDD + Número)</label>
-                        <input
-                            type="tel"
-                            value={newUser.whatsapp}
-                            onChange={e => setNewUser({ ...newUser, whatsapp: e.target.value })}
-                            className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium"
-                            placeholder="5562988887777"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Prazo de Acesso</label>
-                        <select
-                            value={newUser.approvalType}
-                            onChange={e => setNewUser({ ...newUser, approvalType: e.target.value as ApprovalPeriod })}
-                            className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-black text-xs uppercase"
-                        >
-                            <option value="1month">30 Dias (Trial)</option>
-                            <option value="1year">1 Ano</option>
-                            <option value="permanent">Permanente</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Tipo de Plano</label>
-                        <select
-                            value={newUser.planType}
-                            onChange={e => setNewUser({ ...newUser, planType: e.target.value as PlanType })}
-                            className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-black text-xs uppercase"
-                        >
-                            <option value="trial">Trial (30 dias)</option>
-                            <option value="annual">Anual / Vitalício (Ilimitado)</option>
-                            <option value="hybrid">Start (5 sessões/mês)</option>
-                        </select>
-                    </div>
-                    <div className="flex items-end">
-                        <button type="submit" className="w-full py-4 bg-teal-600 text-white font-black rounded-2xl shadow-lg hover:bg-teal-700 transition-all uppercase text-xs tracking-widest flex items-center justify-center gap-2">
-                            <CheckIcon className="w-5 h-5" /> Ativar Novo Terapeuta
-                        </button>
-                    </div>
-                </form>
-            </div>
 
-            {/* 3. TERAPEUTAS NA BASE */}
-            <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
-                <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <div>
-                        <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Terapeutas na Base</h3>
-                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Controle de ativação e validade dos acessos</p>
+                        <form onSubmit={handleRegisterUser} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Nome Completo</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={newUser.fullName}
+                                    onChange={e => setNewUser({ ...newUser, fullName: e.target.value })}
+                                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                                    placeholder="Nome do terapeuta"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Login (Acesso)</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={newUser.username}
+                                        onChange={e => setNewUser({ ...newUser, username: e.target.value.replace(/\s/g, '').toLowerCase() })}
+                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-bold text-teal-700"
+                                        placeholder="ex: maria"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Senha Prov.</label>
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            required
+                                            value={newUser.password}
+                                            onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                                            className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-bold text-slate-600 pr-12"
+                                            placeholder="123456"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 transition-colors"
+                                        >
+                                            {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">E-mail</label>
+                                <input
+                                    type="email"
+                                    value={newUser.email}
+                                    onChange={e => setNewUser({ ...newUser, email: e.target.value })}
+                                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                                    placeholder="email@exemplo.com"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">WhatsApp (DDD + Número)</label>
+                                <input
+                                    type="tel"
+                                    value={newUser.whatsapp}
+                                    onChange={e => setNewUser({ ...newUser, whatsapp: e.target.value })}
+                                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                                    placeholder="5562988887777"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Prazo de Acesso</label>
+                                <select
+                                    value={newUser.approvalType}
+                                    onChange={e => setNewUser({ ...newUser, approvalType: e.target.value as ApprovalPeriod })}
+                                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-black text-xs uppercase"
+                                >
+                                    <option value="1month">30 Dias (Trial)</option>
+                                    <option value="1year">1 Ano</option>
+                                    <option value="permanent">Permanente</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest ml-1">Tipo de Plano</label>
+                                <select
+                                    value={newUser.planType}
+                                    onChange={e => setNewUser({ ...newUser, planType: e.target.value as PlanType })}
+                                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-black text-xs uppercase"
+                                >
+                                    <option value="trial">Trial (30 dias)</option>
+                                    <option value="annual">Anual / Vitalício (Ilimitado)</option>
+                                    <option value="hybrid">Start (5 sessões/mês)</option>
+                                </select>
+                            </div>
+                            <div className="flex items-end">
+                                <button type="submit" className="w-full py-4 bg-teal-600 text-white font-black rounded-2xl shadow-lg hover:bg-teal-700 transition-all uppercase text-xs tracking-widest flex items-center justify-center gap-2">
+                                    <CheckIcon className="w-5 h-5" /> Ativar Novo Terapeuta
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    <span className="bg-white px-4 py-1.5 rounded-full text-[10px] font-black text-slate-400 border border-slate-200 uppercase tracking-widest shadow-sm">{users.length} Registros</span>
-                </div>
 
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-100">
-                        <thead>
-                            <tr className="bg-slate-50/30">
-                                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Terapeuta / Login</th>
-                                <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Plano / Créditos</th>
-                                <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Status de Acesso</th>
-                                <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Validade / Alteração</th>
-                                <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Ações de Gestão</th>
-                                <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                            {users.map(user => {
-                                const isAdmin = user.username.toLowerCase() === 'vbsjunior.biomagnetismo';
-                                const expiryDate = user.approvalExpiry ? new Date(user.approvalExpiry) : null;
-                                const isExpired = expiryDate && expiryDate < new Date();
-                                // O status é considerado bloqueado se não estiver aprovado OU se estiver expirado
-                                const isBlocked = !user.isApproved || isExpired;
+                    {/* 3. TERAPEUTAS NA BASE */}
+                    <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+                        <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <div>
+                                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Terapeutas na Base</h3>
+                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Controle de ativação e validade dos acessos</p>
+                            </div>
+                            <span className="bg-white px-4 py-1.5 rounded-full text-[10px] font-black text-slate-400 border border-slate-200 uppercase tracking-widest shadow-sm">{users.length} Registros</span>
+                        </div>
 
-                                const currentSelection = pendingExpiries[user.username] || user.approvalType;
-                                const hasPendingChange = currentSelection !== user.approvalType;
-                                const isCurrentlySaving = savingUsername === user.username;
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-slate-100">
+                                <thead>
+                                    <tr className="bg-slate-50/30">
+                                        <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Terapeuta / Login</th>
+                                        <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Plano / Créditos</th>
+                                        <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Status de Acesso</th>
+                                        <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Validade / Alteração</th>
+                                        <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Ações de Gestão</th>
+                                        <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {users.map(user => {
+                                        const isAdmin = user.username.toLowerCase() === 'vbsjunior.biomagnetismo';
+                                        const expiryDate = user.approvalExpiry ? new Date(user.approvalExpiry) : null;
+                                        const isExpired = expiryDate && expiryDate < new Date();
+                                        const isBlocked = !user.isApproved || isExpired;
 
-                                return (
-                                    <tr key={user.username} className={`hover:bg-slate-50/50 transition-colors group ${isBlocked ? 'bg-slate-50/20' : ''}`}>
-                                        <td className="px-8 py-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className={`p-4 rounded-2xl transition-all shadow-sm ${isAdmin ? 'bg-amber-100 text-amber-600' : isBlocked ? 'bg-red-50 text-red-400' : 'bg-teal-50 text-teal-600'}`}>
-                                                    <UserIcon className="w-6 h-6" />
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className={`font-black text-sm ${isBlocked ? 'text-slate-400 line-through' : 'text-slate-800'}`}>{user.fullName || 'Sem Nome'}</span>
-                                                    <span className="text-[10px] text-teal-600 font-black uppercase tracking-widest">@{user.username}</span>
-                                                    <span className="text-[9px] text-slate-400 font-medium">{user.email || 'Sem e-mail'}</span>
-                                                    {user.paymentStatus === 'pending' && (
-                                                        <div className="flex items-center gap-2 mt-1.5">
-                                                            <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-ping"></span>
-                                                            <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-md">
-                                                                <span className="text-[8px] font-black text-amber-700 uppercase tracking-widest">🔔 Pagamento</span>
-                                                                {user.paymentProofUrl && (
-                                                                    <a 
-                                                                        href={user.paymentProofUrl} 
-                                                                        target="_blank" 
-                                                                        rel="noreferrer"
-                                                                        className="text-[8px] font-black text-blue-600 hover:underline uppercase tracking-widest"
-                                                                    >
-                                                                        (Ver Comprovante)
-                                                                    </a>
+                                        return (
+                                            <tr key={user.username} className={`hover:bg-slate-50/50 transition-colors group ${isBlocked ? 'bg-slate-50/20' : ''}`}>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={`p-4 rounded-2xl transition-all shadow-sm ${isAdmin ? 'bg-amber-100 text-amber-600' : isBlocked ? 'bg-red-50 text-red-400' : 'bg-teal-50 text-teal-600'}`}>
+                                                            <UserIcon className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className={`font-black text-sm ${isBlocked ? 'text-slate-400 line-through' : 'text-slate-800'}`}>{user.fullName || 'Sem Nome'}</span>
+                                                            <span className="text-[10px] text-teal-600 font-black uppercase tracking-widest">@{user.username}</span>
+                                                            <span className="text-[9px] text-slate-400 font-medium">{user.email || 'Sem e-mail'}</span>
+                                                            {user.paymentStatus === 'pending' && (
+                                                                <div className="flex items-center gap-2 mt-1.5">
+                                                                    <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-ping"></span>
+                                                                    <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-md">
+                                                                        <span className="text-[8px] font-black text-amber-700 uppercase tracking-widest">🔔 Pagamento</span>
+                                                                        {user.paymentProofUrl && (
+                                                                            <a href={user.paymentProofUrl} target="_blank" rel="noreferrer" className="text-[8px] font-black text-blue-600 hover:underline uppercase tracking-widest">(Ver Comprovante)</a>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-6 text-center">
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <select
+                                                            value={pendingPlans[user.username] || user.planType}
+                                                            onChange={(e) => setPendingPlans(prev => ({ ...prev, [user.username]: e.target.value as PlanType }))}
+                                                            className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-2 py-1.5 outline-none cursor-pointer transition-colors ${pendingPlans[user.username] ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' : 'bg-slate-100 text-slate-500'}`}
+                                                        >
+                                                            <option value="trial">Trial</option>
+                                                            <option value="annual">Anual/Vitalício</option>
+                                                            <option value="hybrid">Start (Sessões)</option>
+                                                        </select>
+                                                        {(pendingPlans[user.username] === 'hybrid' || (!pendingPlans[user.username] && user.planType === 'hybrid')) && (
+                                                            <div className="flex items-center gap-1 mt-1">
+                                                                <span className="text-[8px] font-black text-slate-400">Extras:</span>
+                                                                <input type="number" value={pendingExtras[user.username] !== undefined ? pendingExtras[user.username] : (user.extraSessions || 0)} onChange={(e) => setPendingExtras(prev => ({ ...prev, [user.username]: parseInt(e.target.value) || 0 }))} className="w-12 text-center text-[9px] font-black border-none rounded bg-slate-50 outline-none" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-6 text-center">
+                                                    <div className="flex justify-center">
+                                                        {isAdmin ? (
+                                                            <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-4 py-1.5 rounded-full border border-amber-100">Mestre</span>
+                                                        ) : (
+                                                            <button onClick={() => handleToggleBlock(user.username)} className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all shadow-sm ${isBlocked ? 'bg-red-50 text-red-500 border-red-100 hover:bg-red-100' : 'bg-green-50 text-green-600 border-green-100 hover:bg-green-100'}`}>
+                                                                {isExpired ? 'Bloqueado (Expirado)' : isBlocked ? 'Bloqueado' : 'Acesso Ativo'}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    {isAdmin ? (
+                                                        <div className="text-center"><span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Vitalício</span></div>
+                                                    ) : (
+                                                        <div className="flex flex-col items-center gap-3">
+                                                            <span className={`text-[10px] font-black uppercase ${isExpired ? 'text-red-500' : 'text-slate-500'}`}>{user.approvalExpiry ? expiryDate?.toLocaleDateString('pt-BR') : 'Permanente'}</span>
+                                                            <div className="flex items-center gap-1">
+                                                                <select value={pendingExpiries[user.username] || user.approvalType} onChange={(e) => setPendingExpiries(prev => ({ ...prev, [user.username]: e.target.value as ApprovalPeriod }))} className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-2 py-1.5 outline-none cursor-pointer transition-colors ${pendingExpiries[user.username] ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' : 'bg-slate-100 text-slate-500'}`}><option value="1month">30 Dias</option><option value="1year">1 Ano</option><option value="permanent">Permanente</option></select>
+                                                                {(pendingExpiries[user.username] || pendingPlans[user.username] || pendingExtras[user.username] !== undefined) && (
+                                                                    <button onClick={() => handleUpdateExpiry(user.username)} disabled={savingUsername === user.username} className="p-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 shadow-md transition-all animate-pulse flex items-center justify-center min-w-[30px]">{savingUsername === user.username ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <CheckIcon className="w-4 h-4" />}</button>
                                                                 )}
                                                             </div>
                                                         </div>
                                                     )}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6 text-center">
-                                            <div className="flex flex-col items-center gap-2">
-                                                <select
-                                                    value={pendingPlans[user.username] || user.planType}
-                                                    onChange={(e) => setPendingPlans(prev => ({ ...prev, [user.username]: e.target.value as PlanType }))}
-                                                    className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-2 py-1.5 outline-none cursor-pointer transition-colors ${pendingPlans[user.username] ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' : 'bg-slate-100 text-slate-500'}`}
-                                                >
-                                                    <option value="trial">Trial</option>
-                                                    <option value="annual">Anual/Vitalício</option>
-                                                    <option value="hybrid">Start (Sessões)</option>
-                                                </select>
-
-                                                {(pendingPlans[user.username] === 'hybrid' || (!pendingPlans[user.username] && user.planType === 'hybrid')) && (
-                                                    <div className="flex items-center gap-1 mt-1">
-                                                        <span className="text-[8px] font-black text-slate-400">Extras:</span>
-                                                        <input 
-                                                            type="number"
-                                                            value={pendingExtras[user.username] !== undefined ? pendingExtras[user.username] : (user.extraSessions || 0)}
-                                                            onChange={(e) => setPendingExtras(prev => ({ ...prev, [user.username]: parseInt(e.target.value) || 0 }))}
-                                                            className={`w-12 text-center text-[9px] font-black border-none rounded bg-slate-50 outline-none ${pendingExtras[user.username] !== undefined ? 'ring-2 ring-amber-400' : ''}`}
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6 text-center">
-                                            <div className="flex justify-center">
-                                                {isAdmin ? (
-                                                    <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-4 py-1.5 rounded-full border border-amber-100">Mestre</span>
-                                                ) : (
-                                                    <button
-                                                        onClick={() => handleToggleBlock(user.username)}
-                                                        className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all shadow-sm ${isBlocked ? 'bg-red-50 text-red-500 border-red-100 hover:bg-red-100' : 'bg-green-50 text-green-600 border-green-100 hover:bg-green-100'}`}
-                                                    >
-                                                        {isExpired ? 'Bloqueado (Expirado)' : isBlocked ? 'Bloqueado' : 'Acesso Ativo'}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            {isAdmin ? (
-                                                <div className="text-center">
-                                                    <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Vitalício</span>
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col items-center gap-3">
-                                                    <span className={`text-[10px] font-black uppercase ${isExpired ? 'text-red-500' : 'text-slate-500'}`}>
-                                                        {user.approvalExpiry ? expiryDate?.toLocaleDateString('pt-BR') : 'Permanente'}
-                                                    </span>
-                                                    <div className="flex items-center gap-1">
-                                                        <select
-                                                            value={pendingExpiries[user.username] || user.approvalType}
-                                                            onChange={(e) => setPendingExpiries(prev => ({ ...prev, [user.username]: e.target.value as ApprovalPeriod }))}
-                                                            className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-2 py-1.5 outline-none cursor-pointer transition-colors ${pendingExpiries[user.username] ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-                                                        >
-                                                            <option value="1month">30 Dias</option>
-                                                            <option value="1year">1 Ano</option>
-                                                            <option value="permanent">Permanente</option>
-                                                        </select>
-
-                                                        {(pendingExpiries[user.username] || pendingPlans[user.username] || pendingExtras[user.username] !== undefined) && (
-                                                            <button
-                                                                onClick={() => handleUpdateExpiry(user.username)}
-                                                                disabled={savingUsername === user.username}
-                                                                className="p-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 shadow-md transition-all animate-pulse flex items-center justify-center min-w-[30px]"
-                                                                title="Salvar Alterações"
-                                                            >
-                                                                {savingUsername === user.username ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <CheckIcon className="w-4 h-4" />}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            {!isAdmin ? (
-                                                <div className="flex justify-center gap-3">
-                                                    <button
-                                                        onClick={() => handleResetPassword(user.username, user.fullName)}
-                                                        className="px-4 py-2 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-600 hover:text-white transition-all shadow-sm flex flex-col items-center gap-1 group"
-                                                        title="Resetar Senha de Acesso"
-                                                    >
-                                                        <KeyIcon className="w-5 h-5" />
-                                                        <span className="text-[7px] font-black uppercase">Resetar Senha</span>
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <div className="text-center">
-                                                    <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-3 py-1 rounded-full border border-amber-100">Admin Mestre</span>
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="px-8 py-6 text-center">
-                                            {!isAdmin && (
-                                                <button
-                                                    onClick={() => deleteUser(user.username)}
-                                                    className="p-3 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all"
-                                                    title="Excluir Terapeuta"
-                                                >
-                                                    <TrashIcon className="w-6 h-6" />
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    {!isAdmin ? (
+                                                        <div className="flex justify-center gap-3">
+                                                            <button onClick={() => handleResetPassword(user.username, user.fullName)} className="px-4 py-2 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-600 hover:text-white transition-all shadow-sm flex flex-col items-center gap-1 group"><KeyIcon className="w-5 h-5" /><span className="text-[7px] font-black uppercase">Resetar Senha</span></button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center"><span className="text-[9px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-3 py-1 rounded-full border border-amber-100">Admin Mestre</span></div>
+                                                    )}
+                                                </td>
+                                                <td className="px-8 py-6 text-center">
+                                                    {!isAdmin && (
+                                                        <button onClick={() => deleteUser(user.username)} className="p-3 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all"><TrashIcon className="w-6 h-6" /></button>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </>
-            ) : activeTab === 'settings' ? (
+            )}
+
+            {activeTab === 'settings' && (
                 <ConfigManager />
-            ) : (
+            )}
+
+            {activeTab === 'tutorials' && (
                 <TutorialManager />
             )}
         </div>
