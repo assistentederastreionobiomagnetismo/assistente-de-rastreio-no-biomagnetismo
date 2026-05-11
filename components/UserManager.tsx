@@ -111,37 +111,37 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
     };
 
     const handleUpdateExpiry = async (username: string) => {
-        const period = pendingExpiries[username];
-        if (!period) return;
+        const userToUpdate = users.find(u => u.username === username);
+        if (!userToUpdate) return;
+
+        const period = pendingExpiries[username] || userToUpdate.approvalType;
+        const newPlan = pendingPlans[username] || userToUpdate.planType;
+        const newExtras = pendingExtras[username] !== undefined ? pendingExtras[username] : userToUpdate.extraSessions;
+
         setSavingUsername(username);
         const newExpiry = calculateExpiry(period);
-        const newPlan = pendingPlans[username];
-        const newExtras = pendingExtras[username];
 
         try {
-            const userToUpdate = users.find(u => u.username === username);
-            if (userToUpdate) {
-                const updatedUser = {
-                    ...userToUpdate,
-                    approvalType: period,
-                    approvalExpiry: newExpiry,
-                    isApproved: true,
-                    planType: newPlan || (period === 'permanent' ? 'annual' : userToUpdate.planType),
-                    extraSessions: newExtras !== undefined ? newExtras : userToUpdate.extraSessions,
-                    paymentStatus: 'approved' as const
-                };
-                await dbService.updateUser(updatedUser);
-                setUsers(prev => prev.map(u => u.username === username ? updatedUser : u));
+            const updatedUser = {
+                ...userToUpdate,
+                approvalType: period,
+                approvalExpiry: newExpiry,
+                isApproved: true,
+                planType: newPlan || (period === 'permanent' ? 'annual' : userToUpdate.planType),
+                extraSessions: newExtras,
+                paymentStatus: 'approved' as const
+            };
+            await dbService.updateUser(updatedUser);
+            setUsers(prev => prev.map(u => u.username === username ? updatedUser : u));
 
-                setPendingExpiries(prev => { const next = { ...prev }; delete next[username]; return next; });
-                setPendingPlans(prev => { const next = { ...prev }; delete next[username]; return next; });
-                setPendingExtras(prev => { const next = { ...prev }; delete next[username]; return next; });
-                
-                alert("Dados atualizados com sucesso!");
-            }
+            setPendingExpiries(prev => { const next = { ...prev }; delete next[username]; return next; });
+            setPendingPlans(prev => { const next = { ...prev }; delete next[username]; return next; });
+            setPendingExtras(prev => { const next = { ...prev }; delete next[username]; return next; });
+            
+            alert("Dados atualizados com sucesso!");
         } catch (error) {
             console.error("Erro ao atualizar usuário:", error);
-            alert("Erro ao salvar no Supabase.");
+            alert("Erro ao salvar no banco de dados.");
         } finally {
             setSavingUsername(null);
         }
