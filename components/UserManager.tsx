@@ -530,6 +530,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                         </tbody>
                     </table>
                 </div>
+                </>
             ) : activeTab === 'settings' ? (
                 <ConfigManager />
             ) : (
