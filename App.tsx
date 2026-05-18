@@ -419,15 +419,27 @@ const App: React.FC = () => {
       return { success: true };
     }
 
-    // 5. Verificar expiração
+    // 5. Verificar expiração (anual antigo)
     if (foundUser.approvalExpiry) {
       const expiry = new Date(foundUser.approvalExpiry);
-      if (expiry < new Date()) {
-        return { success: false, message: `Seu acesso expirou em ${expiry.toLocaleDateString('pt-BR')}. Entre em contato com o administrador.` };
+      if (expiry < new Date() && foundUser.username.toLowerCase() !== 'vbsjunior.biomagnetismo') {
+        setShowSubscriptionGate(true);
       }
     }
 
     const normalizedUser = { ...foundUser, username: foundUser.username.toLowerCase() };
+
+    // 6. Verificar expiração de Trial
+    const createdDate = normalizedUser.createdAt ? new Date(normalizedUser.createdAt) : new Date();
+    const trialExpiry = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const isTrialExpired = (normalizedUser.planType === 'trial' || !normalizedUser.planType) && trialExpiry < new Date();
+    
+    if (isTrialExpired && normalizedUser.username !== 'vbsjunior.biomagnetismo') {
+        setShowSubscriptionGate(true);
+    } else if (!foundUser.approvalExpiry || new Date(foundUser.approvalExpiry) >= new Date() || foundUser.username.toLowerCase() === 'vbsjunior.biomagnetismo') {
+        setShowSubscriptionGate(false);
+    }
+
     setIsAuthenticated(true);
     setCurrentUser(normalizedUser);
     localStorage.setItem('biomagnetismo_user', JSON.stringify(normalizedUser));
@@ -740,7 +752,7 @@ const App: React.FC = () => {
       <div className="absolute top-4 right-4 z-10 print:hidden">
         <button onClick={handleLogout} className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 text-sm font-medium rounded-md shadow-sm text-slate-700 bg-white hover:bg-slate-100 transition-colors"><LogoutIcon className="w-5 h-5" /> Sair</button>
       </div>
-      <div className="container mx-auto p-4 md:p-8">
+      <div className={`container mx-auto p-4 md:p-8 ${viewingHistoricalSession ? 'print:hidden' : ''}`}>
         <header className="text-center mb-8 print:hidden">
           <h1 className="text-4xl font-bold text-teal-600">Assistente para Rastreios no Biomagnetismo</h1>
           <div className="flex flex-col items-center mt-4">

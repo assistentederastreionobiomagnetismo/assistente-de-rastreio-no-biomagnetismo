@@ -348,11 +348,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegister }) => {
 
                 <div className="mb-10 bg-white p-6 rounded-2xl border border-teal-100 shadow-sm">
                     <div className="text-slate-400 text-sm line-through font-bold mb-1">R$ 699,00</div>
-                    <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-5xl font-black text-teal-600 tracking-tighter">R$ 598,80</span>
-                        <span className="text-slate-500 font-bold text-sm uppercase">à vista</span>
+                    <div className="flex flex-wrap items-baseline gap-2 mb-2">
+                        <span className="text-4xl md:text-5xl font-black text-teal-600 tracking-tighter whitespace-nowrap">R$ 598,80</span>
+                        <span className="text-slate-500 font-bold text-sm uppercase whitespace-nowrap">à vista</span>
                     </div>
-                    <div className="inline-block bg-teal-50 text-teal-700 font-black text-lg px-4 py-2 rounded-xl">Ou 12x de R$ 49,90</div>
+                    <div className="inline-block bg-teal-50 text-teal-700 font-black text-sm md:text-lg px-4 py-2 rounded-xl">Ou 12x de R$ 49,90</div>
                 </div>
 
                 <ul className="space-y-5 mb-10 flex-grow">
@@ -392,8 +392,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegister }) => {
 
                 <div className="mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-100">
                     <div className="text-slate-400 text-xs font-black uppercase tracking-widest mb-2">Taxa Única de Adesão</div>
-                    <div className="text-5xl font-black text-slate-800 tracking-tighter mb-3">R$ 97,00</div>
-                    <div className="text-teal-700 font-black text-sm uppercase tracking-wide bg-teal-100/50 px-4 py-2 rounded-xl inline-block border border-teal-100">
+                    <div className="text-4xl md:text-5xl font-black text-slate-800 tracking-tighter mb-3 whitespace-nowrap">R$ 97,00</div>
+                    <div className="text-teal-700 font-black text-xs md:text-sm uppercase tracking-wide bg-teal-100/50 px-3 md:px-4 py-2 rounded-xl inline-block border border-teal-100">
                       Inclui 5 Sessões Gratuitas/Mês
                     </div>
                 </div>

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Patient, BiomagneticPair, PhenomenaData, ProtocolData, Session, SafetyCheck, ConsentForm, SessionScales, EmotionRelease, SensationRelease } from '../types';
-import { PrinterIcon } from './icons/Icons';
+import { PrinterIcon, WhatsAppIcon } from './icons/Icons';
 
 interface SessionSummaryProps {
   patient: Patient;
@@ -202,6 +202,46 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
     window.print();
   };
 
+  const handleWhatsAppShare = () => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    let text = `*Resumo de Atendimento - Biomagnetismo*\n`;
+    text += `*Paciente:* ${patient.name}\n`;
+    text += `*Data:* ${startTime ? new Date(startTime).toLocaleDateString('pt-BR') : 'N/A'}\n\n`;
+    
+    if (patient.mainComplaint) {
+      text += `*Queixas:* ${patient.mainComplaint}\n\n`;
+    }
+    
+    if (pairs.length > 0) {
+      text += `*Pares Impactados (${pairs.length}):*\n`;
+      pairs.forEach(p => text += `- ${p.name}\n`);
+      text += '\n';
+    }
+    
+    if ((emotionsData && emotionsData.length > 0) || (emotions && emotions.length > 0)) {
+       text += `*Emoções Liberadas:*\n`;
+       const emos = emotionsData ? emotionsData.map(e => e.name).join(', ') : emotions?.join(', ');
+       text += `${emos}\n\n`;
+    }
+
+    if (impactionTime) {
+       text += `*Tempo Recomendado:* ${impactionTime}\n\n`;
+    }
+
+    text += `_Nota: Este é um resumo rápido. O relatório técnico completo em PDF está disponível com o seu terapeuta._`;
+
+    const encodedText = encodeURIComponent(text);
+    
+    if (isMobile) {
+      // Tenta abrir o App no celular
+      window.open(`whatsapp://send?text=${encodedText}`, '_blank');
+    } else {
+      // Abre o WhatsApp Web no PC
+      window.open(`https://web.whatsapp.com/send?text=${encodedText}`, '_blank');
+    }
+  };
+
   const getLevelLabel = (lvl: number) => {
       if (lvl === 1) return "Reservatórios";
       if (lvl === 2) return "Nível I";
@@ -216,11 +256,20 @@ const SessionSummary: React.FC<SessionSummaryProps> = ({
         <h2 className="text-2xl font-bold text-slate-700">Relatório da Sessão</h2>
         <div className="flex gap-3">
             <button
+                onClick={handleWhatsAppShare}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors shadow-md"
+                title="Atenção: O WhatsApp não permite o envio automático do arquivo PDF por link. Este botão enviará um resumo em texto. Para enviar o PDF, use o botão Imprimir e salve como PDF."
+            >
+                <WhatsAppIcon className="w-5 h-5" />
+                <span className="hidden sm:inline">Compartilhar</span>
+            </button>
+            <button
                 onClick={handlePrint}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition-colors shadow-md"
             >
                 <PrinterIcon className="w-5 h-5" />
-                Imprimir / PDF
+                <span className="hidden sm:inline">Imprimir / PDF</span>
+                <span className="sm:hidden">PDF</span>
             </button>
         </div>
       </div>
