@@ -48,8 +48,8 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) =>
     };
 
     return (
-        <div className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md flex items-start md:items-center justify-center p-2 md:p-4 overflow-y-auto">
-            <div className="max-w-5xl w-full bg-white rounded-[24px] md:rounded-[40px] shadow-2xl overflow-hidden animate-scale-in my-4 md:my-8">
+        <div className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md flex items-start justify-center p-2 md:p-4 overflow-y-auto">
+            <div className="max-w-5xl w-full bg-white rounded-[24px] md:rounded-[40px] shadow-2xl overflow-hidden animate-scale-in my-4 md:my-10">
                 
                 {/* Header */}
                 <div className="bg-teal-600 p-6 md:p-8 text-center text-white relative">
