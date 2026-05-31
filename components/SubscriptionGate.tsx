@@ -6,9 +6,10 @@ import { dbService } from '../services/dbService';
 interface SubscriptionGateProps {
     user: User;
     onClose?: () => void;
+    isOutOfSessions?: boolean;
 }
 
-const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) => {
+const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOutOfSessions = false }) => {
     const [settings, setSettings] = useState<{[key: string]: string}>({});
     
     useEffect(() => {
@@ -72,7 +73,7 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) =>
 
                 <div className="p-4 md:p-12">
                     {/* Alerta de Trial Expirado ou Perto de Expirar */}
-                    {(isTrialExpired || isTrialNearExpiry) && (
+                    {(isTrialExpired || isTrialNearExpiry) && !isOutOfSessions && (
                         <div className={`mb-6 md:mb-8 p-4 md:p-6 border-2 rounded-2xl md:rounded-3xl flex flex-col md:flex-row items-center gap-4 md:gap-6 animate-scale-in ${isTrialExpired ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
                             <div className={`p-3 md:p-4 rounded-full shrink-0 ${isTrialExpired ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
                                 <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -100,123 +101,218 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) =>
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-8 md:mb-12">
-                        
-                        {/* Plano Anual - DESTAQUE */}
-                        <div className="relative border-4 border-teal-500 rounded-[24px] md:rounded-[32px] p-6 md:p-8 bg-teal-50/30 flex flex-col group hover:shadow-2xl transition-all duration-500 mt-4 md:mt-0">
-                            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-teal-500 text-white px-4 md:px-6 py-1 md:py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-lg whitespace-nowrap">
-                                Mais Popular & Melhor Valor
+                    {/* Alerta de Sem Sessões (Híbrido) */}
+                    {isOutOfSessions && (
+                        <div className="mb-6 md:mb-8 p-4 md:p-6 border-2 border-amber-200 bg-amber-50 rounded-2xl md:rounded-3xl flex flex-col md:flex-row items-center gap-4 md:gap-6 animate-scale-in">
+                            <div className="p-3 md:p-4 rounded-full shrink-0 bg-amber-100 text-amber-600">
+                                <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                             </div>
-                            
-                            <div className="mb-4 md:mb-6 mt-2 md:mt-0">
-                                <h3 className="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-tight mb-1">Plano Master Anual</h3>
-                                <p className="text-slate-500 text-xs md:text-sm font-medium">Acesso total e ilimitado por 1 ano</p>
+                            <div className="flex-1 text-center md:text-left">
+                                <h3 className="text-amber-800 font-black text-lg md:text-xl mb-1">
+                                    Sessões do Mês Consumidas!
+                                </h3>
+                                <p className="text-amber-700 font-medium text-xs md:text-sm">
+                                    As sessões disponíveis para o mês vigente já foram consumidas. Escolha abaixo um pacote de recarga avulso para continuar atendendo ou altere para o Plano Ilimitado.
+                                </p>
                             </div>
-
-                            <div className="mb-6 md:mb-8">
-                                <div className="text-slate-400 text-xs md:text-sm line-through font-bold">R$ 699,00</div>
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-3xl md:text-4xl font-black text-teal-600 tracking-tighter">R$ 598,80</span>
-                                    <span className="text-slate-500 font-bold text-xs md:text-sm uppercase">à vista</span>
+                            {onClose && (
+                                <div className="shrink-0 w-full md:w-auto mt-2 md:mt-0">
+                                    <button 
+                                        onClick={onClose}
+                                        className="w-full md:w-auto px-6 py-3 bg-white text-amber-700 font-black rounded-xl border-2 border-amber-200 shadow-sm hover:bg-amber-100 transition-all uppercase tracking-widest text-xs text-center"
+                                    >
+                                        Voltar ao painel
+                                    </button>
                                 </div>
-                                <div className="text-teal-600 font-black text-base md:text-lg mt-1 animate-pulse">Ou 12x de R$ 49,90</div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Renderização Condicional do Layout */}
+                    {isOutOfSessions ? (
+                        <>
+                            {/* Pacotes de Refil em Destaque */}
+                            <div className="bg-slate-50 rounded-[24px] md:rounded-[32px] p-6 md:p-8 border-2 border-teal-200 mb-8 md:mb-12 shadow-md">
+                                <div className="text-center mb-6 md:mb-8">
+                                    <h4 className="text-sm md:text-base font-black text-teal-600 uppercase tracking-[0.1em] md:tracking-[0.2em]">Recarregue Suas Sessões</h4>
+                                    <p className="text-slate-600 text-xs md:text-sm font-bold mt-1">Escolha um pacote avulso para continuar atendendo agora mesmo</p>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                                    {[
+                                        { sessions: 5, price: '9,90', url: PAYMENT_LINKS.REFILL_5 },
+                                        { sessions: 10, price: '14,90', url: PAYMENT_LINKS.REFILL_10 },
+                                        { sessions: 20, price: '25,90', url: PAYMENT_LINKS.REFILL_20 },
+                                        { sessions: 50, price: '54,90', url: PAYMENT_LINKS.REFILL_50, highlight: true }
+                                    ].map((pack, idx) => (
+                                        <button 
+                                            key={idx}
+                                            onClick={() => handlePayment(pack.url)}
+                                            className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-1 md:gap-2 ${pack.highlight ? 'bg-white border-teal-500 shadow-md md:scale-105' : 'bg-white border-slate-200 hover:border-teal-200'}`}
+                                        >
+                                            <span className="text-xl md:text-2xl font-black text-slate-800">{pack.sessions}</span>
+                                            <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Sessões</span>
+                                            <div className="h-px w-full bg-slate-100 my-1 md:my-2" />
+                                            <span className="text-base md:text-lg font-black text-teal-600">R$ {pack.price}</span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
-                            <ul className="space-y-3 md:space-y-4 mb-8 md:mb-10 flex-grow text-sm md:text-base">
-                                {[
-                                    'Sessões ILIMITADAS',
-                                    'Todos os Protocolos Liberados',
-                                    'Geração de Relatórios PDF',
-                                    'Assinatura Digital de Prontuários',
-                                    'Suporte Prioritário'
-                                ].map((item, idx) => (
-                                    <li key={idx} className="flex items-center gap-3 text-slate-700 font-medium">
-                                        <div className="p-1 md:p-1.5 bg-teal-100 text-teal-600 rounded-full shrink-0">
-                                            <CheckIcon className="w-3 h-3 md:w-4 md:h-4" />
+                            <div className="text-center mb-6">
+                                <span className="px-4 py-1 bg-slate-100 text-slate-500 font-bold uppercase tracking-widest text-[10px] rounded-full">Ou se preferir</span>
+                            </div>
+
+                            {/* Upgrade para Anual (Centralizado) */}
+                            <div className="max-w-xl mx-auto mb-12">
+                                <div className="relative border-4 border-teal-500 rounded-[24px] md:rounded-[32px] p-6 md:p-8 bg-teal-50/30 flex flex-col group hover:shadow-2xl transition-all duration-500">
+                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-teal-500 text-white px-4 md:px-6 py-1 md:py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-lg whitespace-nowrap">
+                                        Faça um Upgrade e não se preocupe mais
+                                    </div>
+                                    
+                                    <div className="mb-4 md:mb-6 mt-2 md:mt-0 text-center">
+                                        <h3 className="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-tight mb-1">Mudar para Ilimitado</h3>
+                                        <p className="text-slate-500 text-xs md:text-sm font-medium">Acesso total e sessões ilimitadas por 1 ano</p>
+                                    </div>
+
+                                    <div className="mb-6 md:mb-8 text-center">
+                                        <div className="text-slate-400 text-xs md:text-sm line-through font-bold">R$ 699,00</div>
+                                        <div className="flex items-baseline justify-center gap-2">
+                                            <span className="text-3xl md:text-4xl font-black text-teal-600 tracking-tighter">R$ 598,80</span>
+                                            <span className="text-slate-500 font-bold text-xs md:text-sm uppercase">à vista</span>
                                         </div>
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
+                                        <div className="text-teal-600 font-black text-base md:text-lg mt-1 animate-pulse">Ou 12x de R$ 49,90</div>
+                                    </div>
 
-                            <button 
-                                onClick={() => handlePayment(PAYMENT_LINKS.ANNUAL)}
-                                className="w-full py-4 md:py-5 bg-teal-600 text-white font-black rounded-2xl shadow-xl hover:bg-teal-700 transition-all transform hover:scale-[1.02] active:scale-95 uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-2 md:gap-3"
-                            >
-                                <SparklesIcon className="w-4 h-4 md:w-5 md:h-5" /> Quero Acesso Ilimitado
-                            </button>
-                        </div>
-
-                        {/* Plano Híbrido */}
-                        <div className="border-2 border-slate-200 rounded-[24px] md:rounded-[32px] p-6 md:p-8 bg-white flex flex-col hover:border-teal-200 transition-all duration-300">
-                            <div className="mb-4 md:mb-6">
-                                <h3 className="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-tight mb-1">Plano Start (Híbrido)</h3>
-                                <p className="text-slate-500 text-xs md:text-sm font-medium">Para quem usa ocasionalmente</p>
+                                    <button 
+                                        onClick={() => handlePayment(PAYMENT_LINKS.ANNUAL)}
+                                        className="w-full py-4 md:py-5 bg-teal-600 text-white font-black rounded-2xl shadow-xl hover:bg-teal-700 transition-all transform hover:scale-[1.02] active:scale-95 uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-2 md:gap-3"
+                                    >
+                                        <SparklesIcon className="w-4 h-4 md:w-5 md:h-5" /> Quero Acesso Ilimitado
+                                    </button>
+                                </div>
                             </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-8 md:mb-12">
+                                {/* Plano Anual - DESTAQUE */}
+                                <div className="relative border-4 border-teal-500 rounded-[24px] md:rounded-[32px] p-6 md:p-8 bg-teal-50/30 flex flex-col group hover:shadow-2xl transition-all duration-500 mt-4 md:mt-0">
+                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-teal-500 text-white px-4 md:px-6 py-1 md:py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-lg whitespace-nowrap">
+                                        Mais Popular & Melhor Valor
+                                    </div>
+                                    
+                                    <div className="mb-4 md:mb-6 mt-2 md:mt-0">
+                                        <h3 className="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-tight mb-1">Plano Master Anual</h3>
+                                        <p className="text-slate-500 text-xs md:text-sm font-medium">Acesso total e ilimitado por 1 ano</p>
+                                    </div>
 
-                            <div className="mb-6 md:mb-8">
-                                <div className="text-slate-400 text-[10px] md:text-xs font-black uppercase tracking-widest mb-1">Taxa de Adesão Única</div>
-                                <div className="text-3xl md:text-4xl font-black text-slate-800 tracking-tighter">R$ 97,00</div>
-                                <div className="text-teal-600 font-black text-xs md:text-sm mt-2 uppercase tracking-wide bg-teal-50 px-3 py-1 rounded-lg inline-block">5 Sessões Gratuitas/Mês</div>
-                            </div>
-
-                            <ul className="space-y-3 md:space-y-4 mb-8 md:mb-10 flex-grow text-sm md:text-base">
-                                {[
-                                    'Incluso 5 sessões por mês',
-                                    'Sem mensalidade fixa',
-                                    'Recarregue apenas se precisar',
-                                    'Acesso a todos os protocolos',
-                                    'Relatórios inclusos'
-                                ].map((item, idx) => (
-                                    <li key={idx} className="flex items-center gap-3 text-slate-600 font-medium">
-                                        <div className="p-1 md:p-1.5 bg-slate-100 text-slate-400 rounded-full shrink-0">
-                                            <CheckIcon className="w-3 h-3 md:w-4 md:h-4" />
+                                    <div className="mb-6 md:mb-8">
+                                        <div className="text-slate-400 text-xs md:text-sm line-through font-bold">R$ 699,00</div>
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="text-3xl md:text-4xl font-black text-teal-600 tracking-tighter">R$ 598,80</span>
+                                            <span className="text-slate-500 font-bold text-xs md:text-sm uppercase">à vista</span>
                                         </div>
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
+                                        <div className="text-teal-600 font-black text-base md:text-lg mt-1 animate-pulse">Ou 12x de R$ 49,90</div>
+                                    </div>
 
-                            <button 
-                                onClick={() => handlePayment(PAYMENT_LINKS.ADHESION)}
-                                className="w-full py-4 md:py-5 bg-slate-800 text-white font-black rounded-2xl shadow-lg hover:bg-slate-900 transition-all transform active:scale-95 uppercase tracking-widest text-xs md:text-sm"
-                            >
-                                Ativar Plano Start
-                            </button>
-                        </div>
-                    </div>
+                                    <ul className="space-y-3 md:space-y-4 mb-8 md:mb-10 flex-grow text-sm md:text-base">
+                                        {[
+                                            'Sessões ILIMITADAS',
+                                            'Todos os Protocolos Liberados',
+                                            'Geração de Relatórios PDF',
+                                            'Assinatura Digital de Prontuários',
+                                            'Suporte Prioritário'
+                                        ].map((item, idx) => (
+                                            <li key={idx} className="flex items-center gap-3 text-slate-700 font-medium">
+                                                <div className="p-1 md:p-1.5 bg-teal-100 text-teal-600 rounded-full shrink-0">
+                                                    <CheckIcon className="w-3 h-3 md:w-4 md:h-4" />
+                                                </div>
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
 
-                    {/* Pacotes de Refil */}
-                    {(!isTrialExpired && !isAnnualExpired && user.planType && user.planType !== 'trial') && (
-                        <div className="bg-slate-50 rounded-[24px] md:rounded-[32px] p-6 md:p-8 border border-slate-200 mb-8 md:mb-12">
-                        <div className="text-center mb-6 md:mb-8">
-                            <h4 className="text-xs md:text-sm font-black text-slate-400 uppercase tracking-[0.1em] md:tracking-[0.2em]">Precisa de mais sessões?</h4>
-                            <p className="text-slate-600 text-xs md:text-sm font-bold mt-1">Compre pacotes de recarga (Disponível apenas para Plano Start)</p>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                            {[
-                                { sessions: 5, price: '9,90', url: PAYMENT_LINKS.REFILL_5 },
-                                { sessions: 10, price: '14,90', url: PAYMENT_LINKS.REFILL_10 },
-                                { sessions: 20, price: '25,90', url: PAYMENT_LINKS.REFILL_20 },
-                                { sessions: 50, price: '54,90', url: PAYMENT_LINKS.REFILL_50, highlight: true }
-                            ].map((pack, idx) => (
-                                <button 
-                                    key={idx}
-                                    onClick={() => handlePayment(pack.url)}
-                                    className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-1 md:gap-2 ${pack.highlight ? 'bg-white border-teal-500 shadow-md md:scale-105' : 'bg-white border-slate-200 hover:border-teal-200'}`}
-                                >
-                                    <span className="text-xl md:text-2xl font-black text-slate-800">{pack.sessions}</span>
-                                    <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Sessões</span>
-                                    <div className="h-px w-full bg-slate-100 my-1 md:my-2" />
-                                    <span className="text-base md:text-lg font-black text-teal-600">R$ {pack.price}</span>
-                                </button>
-                            ))}
-                        </div>
-                        {user.planType === 'annual' && (
-                            <p className="text-center text-[9px] md:text-[10px] text-teal-600 font-bold mt-6 uppercase tracking-widest">Seu plano atual é Ilimitado. Não é necessário comprar recargas.</p>
-                        )}
-                    </div>
+                                    <button 
+                                        onClick={() => handlePayment(PAYMENT_LINKS.ANNUAL)}
+                                        className="w-full py-4 md:py-5 bg-teal-600 text-white font-black rounded-2xl shadow-xl hover:bg-teal-700 transition-all transform hover:scale-[1.02] active:scale-95 uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-2 md:gap-3"
+                                    >
+                                        <SparklesIcon className="w-4 h-4 md:w-5 md:h-5" /> Quero Acesso Ilimitado
+                                    </button>
+                                </div>
+
+                                {/* Plano Híbrido */}
+                                <div className="border-2 border-slate-200 rounded-[24px] md:rounded-[32px] p-6 md:p-8 bg-white flex flex-col hover:border-teal-200 transition-all duration-300">
+                                    <div className="mb-4 md:mb-6">
+                                        <h3 className="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-tight mb-1">Plano Start (Híbrido)</h3>
+                                        <p className="text-slate-500 text-xs md:text-sm font-medium">Para quem usa ocasionalmente</p>
+                                    </div>
+
+                                    <div className="mb-6 md:mb-8">
+                                        <div className="text-slate-400 text-[10px] md:text-xs font-black uppercase tracking-widest mb-1">Taxa de Adesão Única</div>
+                                        <div className="text-3xl md:text-4xl font-black text-slate-800 tracking-tighter">R$ 97,00</div>
+                                        <div className="text-teal-600 font-black text-xs md:text-sm mt-2 uppercase tracking-wide bg-teal-50 px-3 py-1 rounded-lg inline-block">5 Sessões Gratuitas/Mês</div>
+                                    </div>
+
+                                    <ul className="space-y-3 md:space-y-4 mb-8 md:mb-10 flex-grow text-sm md:text-base">
+                                        {[
+                                            'Incluso 5 sessões por mês',
+                                            'Sem mensalidade fixa',
+                                            'Recarregue apenas se precisar',
+                                            'Acesso a todos os protocolos',
+                                            'Relatórios inclusos'
+                                        ].map((item, idx) => (
+                                            <li key={idx} className="flex items-center gap-3 text-slate-600 font-medium">
+                                                <div className="p-1 md:p-1.5 bg-slate-100 text-slate-400 rounded-full shrink-0">
+                                                    <CheckIcon className="w-3 h-3 md:w-4 md:h-4" />
+                                                </div>
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
+
+                                    <button 
+                                        onClick={() => handlePayment(PAYMENT_LINKS.ADHESION)}
+                                        className="w-full py-4 md:py-5 bg-slate-800 text-white font-black rounded-2xl shadow-lg hover:bg-slate-900 transition-all transform active:scale-95 uppercase tracking-widest text-xs md:text-sm"
+                                    >
+                                        Ativar Plano Start
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Pacotes de Refil */}
+                            {(!isTrialExpired && !isAnnualExpired && user.planType && user.planType !== 'trial') && (
+                                <div className="bg-slate-50 rounded-[24px] md:rounded-[32px] p-6 md:p-8 border border-slate-200 mb-8 md:mb-12">
+                                <div className="text-center mb-6 md:mb-8">
+                                    <h4 className="text-xs md:text-sm font-black text-slate-400 uppercase tracking-[0.1em] md:tracking-[0.2em]">Precisa de mais sessões?</h4>
+                                    <p className="text-slate-600 text-xs md:text-sm font-bold mt-1">Compre pacotes de recarga (Disponível apenas para Plano Start)</p>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                                    {[
+                                        { sessions: 5, price: '9,90', url: PAYMENT_LINKS.REFILL_5 },
+                                        { sessions: 10, price: '14,90', url: PAYMENT_LINKS.REFILL_10 },
+                                        { sessions: 20, price: '25,90', url: PAYMENT_LINKS.REFILL_20 },
+                                        { sessions: 50, price: '54,90', url: PAYMENT_LINKS.REFILL_50, highlight: true }
+                                    ].map((pack, idx) => (
+                                        <button 
+                                            key={idx}
+                                            onClick={() => handlePayment(pack.url)}
+                                            className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-1 md:gap-2 ${pack.highlight ? 'bg-white border-teal-500 shadow-md md:scale-105' : 'bg-white border-slate-200 hover:border-teal-200'}`}
+                                        >
+                                            <span className="text-xl md:text-2xl font-black text-slate-800">{pack.sessions}</span>
+                                            <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Sessões</span>
+                                            <div className="h-px w-full bg-slate-100 my-1 md:my-2" />
+                                            <span className="text-base md:text-lg font-black text-teal-600">R$ {pack.price}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                {user.planType === 'annual' && (
+                                    <p className="text-center text-[9px] md:text-[10px] text-teal-600 font-bold mt-6 uppercase tracking-widest">Seu plano atual é Ilimitado. Não é necessário comprar recargas.</p>
+                                )}
+                            </div>
+                            )}
+                        </>
                     )}
 
                     {/* Footer Info */}
