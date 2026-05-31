@@ -17,9 +17,15 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) =>
 
     // Verificação se é bloqueio total (Trial expirado)
     const createdDate = user.createdAt ? new Date(user.createdAt) : new Date();
-    const trialExpiry = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    
+    // Se o usuário tem uma data de expiração de aprovação (setada pelo admin), usamos ela. 
+    // Caso contrário, o fallback é 30 dias após a criação.
+    const trialExpiry = user.approvalExpiry 
+        ? new Date(user.approvalExpiry) 
+        : new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+        
     const isTrialExpired = (user.planType === 'trial' || !user.planType) && trialExpiry < new Date();
-    const isAnnualExpired = user.approvalExpiry && new Date(user.approvalExpiry) < new Date();
+    const isAnnualExpired = user.planType !== 'trial' && user.approvalExpiry && new Date(user.approvalExpiry) < new Date();
     
     const isHardBlocked = (isTrialExpired || isAnnualExpired) && user.username !== 'vbsjunior.biomagnetismo';
     
@@ -35,31 +41,6 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) =>
 
     const handlePayment = (url: string) => {
         window.open(url, '_blank');
-    };
-
-    const handleNotifyPayment = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        if (!confirm("Confirmar envio de comprovante para análise?")) return;
-
-        try {
-            // Reutilizando upload de fotos (pode usar o mesmo bucket ou outro)
-            const publicUrl = await dbService.uploadPairImage(file);
-            
-            const updatedUser = {
-                ...user,
-                paymentStatus: 'pending' as const,
-                paymentProofUrl: publicUrl
-            };
-            
-            await dbService.updateUser(updatedUser);
-            alert("Comprovante enviado com sucesso! O administrador foi notificado e seu acesso será liberado em breve.");
-            if (onClose && !isHardBlocked) onClose();
-        } catch (error) {
-            console.error("Erro ao enviar comprovante:", error);
-            alert("Erro ao enviar arquivo. Tente novamente.");
-        }
     };
 
     return (
@@ -86,6 +67,19 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) =>
                 </div>
 
                 <div className="p-8 md:p-12">
+                    {/* Alerta de Trial Expirado */}
+                    {isTrialExpired && (
+                        <div className="mb-8 p-6 bg-red-50 border-2 border-red-200 rounded-3xl flex items-center gap-4 animate-scale-in">
+                            <div className="p-3 bg-red-100 text-red-600 rounded-full shrink-0">
+                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                            </div>
+                            <div>
+                                <h3 className="text-red-800 font-black text-xl mb-1">Seu acesso de teste expirou!</h3>
+                                <p className="text-red-600 font-medium">Para continuar utilizando o Assistente de Biomagnetismo e manter todos os seus dados e prontuários, por favor escolha um dos planos abaixo.</p>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                         
                         {/* Plano Anual - DESTAQUE */}
@@ -173,7 +167,8 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) =>
                     </div>
 
                     {/* Pacotes de Refil */}
-                    <div className="bg-slate-50 rounded-[32px] p-8 border border-slate-200">
+                    {(!isTrialExpired && !isAnnualExpired && user.planType && user.planType !== 'trial') && (
+                        <div className="bg-slate-50 rounded-[32px] p-8 border border-slate-200 mb-12">
                         <div className="text-center mb-8">
                             <h4 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em]">Precisa de mais sessões?</h4>
                             <p className="text-slate-600 text-sm font-bold">Compre pacotes de recarga (Disponível apenas para Plano Start)</p>
@@ -202,25 +197,28 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) =>
                             <p className="text-center text-[10px] text-teal-600 font-bold mt-6 uppercase tracking-widest">Seu plano atual é Ilimitado. Não é necessário comprar recargas.</p>
                         )}
                     </div>
+                    )}
 
                     {/* Footer Info */}
                         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                             <div className="flex items-center gap-4">
-                                <img src="https://infinitepay.io/favicon.ico" className="w-5 h-5 grayscale" alt="InfinitePay" />
+                                <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
                                 <span className="text-xs font-bold text-slate-500">Pagamento Seguro via InfinitePay</span>
                             </div>
 
                             <div className="flex items-center gap-4">
-                                <label className="flex items-center gap-2 px-6 py-3 bg-amber-100 text-amber-700 font-black rounded-xl cursor-pointer hover:bg-amber-200 transition-all text-[10px] uppercase tracking-widest shadow-sm">
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        className="hidden" 
-                                        onChange={handleNotifyPayment}
-                                    />
+                                <button 
+                                    onClick={() => window.open('https://wa.me/5562982458451?text=Olá, acabei de realizar o pagamento e gostaria de enviar meu comprovante.', '_blank')}
+                                    className="flex items-center gap-2 px-6 py-3 bg-amber-100 text-amber-700 font-black rounded-xl cursor-pointer hover:bg-amber-200 transition-all text-[10px] uppercase tracking-widest shadow-sm"
+                                >
                                     <span>JÁ PAGUEI / ENVIAR COMPROVANTE</span>
-                                </label>
-                                <button className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest hover:text-teal-600 transition-colors">
+                                </button>
+                                <button 
+                                    onClick={() => window.open('https://wa.me/5562982458451?text=Olá, estou na tela de planos e tenho uma dúvida.', '_blank')}
+                                    className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest hover:text-teal-600 transition-colors"
+                                >
                                     <WhatsAppIcon className="w-4 h-4" /> Dúvidas?
                                 </button>
                             </div>

@@ -65,6 +65,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         if (type === 'permanent') return undefined;
         const now = new Date();
         switch (type) {
+            case '5min': return new Date(now.getTime() + 5 * 60 * 1000).toISOString();
             case '1month': return new Date(now.setMonth(now.getMonth() + 1)).toISOString();
             case '1year': return new Date(now.setFullYear(now.getFullYear() + 1)).toISOString();
             default: return undefined;
@@ -329,6 +330,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                                     onChange={e => setNewUser({ ...newUser, approvalType: e.target.value as ApprovalPeriod })}
                                     className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 font-black text-xs uppercase"
                                 >
+                                    <option value="5min">5 Minutos (Teste)</option>
                                     <option value="1month">30 Dias (Trial)</option>
                                     <option value="1year">1 Ano</option>
                                     <option value="permanent">Permanente</option>
@@ -445,7 +447,12 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                                                         <div className="flex flex-col items-center gap-3">
                                                             <span className={`text-[10px] font-black uppercase ${isExpired ? 'text-red-500' : 'text-slate-500'}`}>{user.approvalExpiry ? expiryDate?.toLocaleDateString('pt-BR') : 'Permanente'}</span>
                                                             <div className="flex items-center gap-1">
-                                                                <select value={pendingExpiries[user.username] || user.approvalType} onChange={(e) => setPendingExpiries(prev => ({ ...prev, [user.username]: e.target.value as ApprovalPeriod }))} className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-2 py-1.5 outline-none cursor-pointer transition-colors ${pendingExpiries[user.username] ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' : 'bg-slate-100 text-slate-500'}`}><option value="1month">30 Dias</option><option value="1year">1 Ano</option><option value="permanent">Permanente</option></select>
+                                                                <select value={pendingExpiries[user.username] || user.approvalType} onChange={(e) => setPendingExpiries(prev => ({ ...prev, [user.username]: e.target.value as ApprovalPeriod }))} className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-2 py-1.5 outline-none cursor-pointer transition-colors ${pendingExpiries[user.username] ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' : 'bg-slate-100 text-slate-500'}`}>
+                                                                    <option value="5min">5 Min (Teste)</option>
+                                                                    <option value="1month">30 Dias</option>
+                                                                    <option value="1year">1 Ano</option>
+                                                                    <option value="permanent">Permanente</option>
+                                                                </select>
                                                                 {(pendingExpiries[user.username] || pendingPlans[user.username] || pendingExtras[user.username] !== undefined) && (
                                                                     <button onClick={() => handleUpdateExpiry(user.username)} disabled={savingUsername === user.username} className="p-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 shadow-md transition-all animate-pulse flex items-center justify-center min-w-[30px]">{savingUsername === user.username ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <CheckIcon className="w-4 h-4" />}</button>
                                                                 )}
