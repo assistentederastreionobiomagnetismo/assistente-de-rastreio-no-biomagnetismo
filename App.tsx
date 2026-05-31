@@ -337,20 +337,18 @@ const App: React.FC = () => {
     levelIINotes, levelIIINotes, phenomenaNotes, sessionStartTime, sessionEndTime, therapistSignature
   ]);
 
-  // Efeito para monitorar expiração de acesso + 5 minutos de carência
+  // Efeito para monitorar expiração de acesso
   useEffect(() => {
     if (isAuthenticated && currentUser && currentUser.approvalExpiry && currentUser.approvalType !== 'permanent') {
       const expiry = new Date(currentUser.approvalExpiry);
-      const gracePeriodMs = 5 * 60 * 1000;
-      const logoutTimeLimit = expiry.getTime() + gracePeriodMs;
-
-      if (currentTime.getTime() >= logoutTimeLimit) {
-        console.warn("Acesso expirado há mais de 5 minutos. Logout automático realizado.");
-        handleLogout();
-        window.location.reload(); // Refresh automático solicitado pelo usuário
+      
+      // Se a data de expiração já passou, mostramos a tela de bloqueio (Subscription Gate)
+      // em vez de deslogar o usuário.
+      if (currentTime.getTime() >= expiry.getTime() && currentUser.username !== 'vbsjunior.biomagnetismo') {
+         setShowSubscriptionGate(true);
       }
     }
-  }, [currentTime, isAuthenticated, currentUser, handleLogout]);
+  }, [currentTime, isAuthenticated, currentUser]);
 
   useEffect(() => {
     if (currentUser && !isLoading) {
