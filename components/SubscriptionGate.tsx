@@ -27,6 +27,10 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) =>
     const isTrialExpired = (user.planType === 'trial' || !user.planType) && trialExpiry < new Date();
     const isAnnualExpired = user.planType !== 'trial' && user.approvalExpiry && new Date(user.approvalExpiry) < new Date();
     
+    const diff = trialExpiry.getTime() - new Date().getTime();
+    const daysRemaining = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    const isTrialNearExpiry = (user.planType === 'trial' || !user.planType) && daysRemaining <= 5 && daysRemaining > 0;
+    
     const isHardBlocked = (isTrialExpired || isAnnualExpired) && user.username !== 'vbsjunior.biomagnetismo';
     
     // Links de Pagamento Dinâmicos (Carregados do Admin)
@@ -67,16 +71,32 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose }) =>
                 </div>
 
                 <div className="p-8 md:p-12">
-                    {/* Alerta de Trial Expirado */}
-                    {isTrialExpired && (
-                        <div className="mb-8 p-6 bg-red-50 border-2 border-red-200 rounded-3xl flex items-center gap-4 animate-scale-in">
-                            <div className="p-3 bg-red-100 text-red-600 rounded-full shrink-0">
+                    {/* Alerta de Trial Expirado ou Perto de Expirar */}
+                    {(isTrialExpired || isTrialNearExpiry) && (
+                        <div className={`mb-8 p-6 border-2 rounded-3xl flex flex-col md:flex-row items-center gap-6 animate-scale-in ${isTrialExpired ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
+                            <div className={`p-4 rounded-full shrink-0 ${isTrialExpired ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
                                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                             </div>
-                            <div>
-                                <h3 className="text-red-800 font-black text-xl mb-1">Seu acesso de teste expirou!</h3>
-                                <p className="text-red-600 font-medium">Para continuar utilizando o Assistente de Biomagnetismo e manter todos os seus dados e prontuários, por favor escolha um dos planos abaixo.</p>
+                            <div className="flex-1 text-center md:text-left">
+                                <h3 className={`${isTrialExpired ? 'text-red-800' : 'text-amber-800'} font-black text-xl mb-1`}>
+                                    {isTrialExpired ? 'Seu período de testes venceu!' : `Seu período de testes vence em: ${trialExpiry.toLocaleDateString('pt-BR')} às ${trialExpiry.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
+                                </h3>
+                                <p className={`${isTrialExpired ? 'text-red-600' : 'text-amber-700'} font-medium`}>
+                                    {isTrialExpired 
+                                        ? 'Escolha abaixo o pacote que mais se adequa às suas necessidades para continuar utilizando o Assistente de Biomagnetismo.' 
+                                        : 'Aproveite seus últimos dias de teste! Para garantir o acesso contínuo após essa data, escolha um dos planos abaixo.'}
+                                </p>
                             </div>
+                            {isTrialNearExpiry && onClose && (
+                                <div className="shrink-0">
+                                    <button 
+                                        onClick={onClose}
+                                        className="px-6 py-3 bg-white text-amber-700 font-black rounded-xl border-2 border-amber-200 shadow-sm hover:bg-amber-100 transition-all uppercase tracking-widest text-xs"
+                                    >
+                                        Ir para meu painel
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
 

@@ -253,12 +253,18 @@ const App: React.FC = () => {
 
           if (authenticatedUser.requiresPasswordChange) setAppView('changePassword');
 
-          // Verificação de Trial de 30 dias
+          // Verificação de Trial de 30 dias ou perto de expirar
           const createdDate = authenticatedUser.createdAt ? new Date(authenticatedUser.createdAt) : new Date();
-          const trialExpiry = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+          const trialExpiry = authenticatedUser.approvalExpiry 
+            ? new Date(authenticatedUser.approvalExpiry) 
+            : new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+            
           const isTrialExpired = (authenticatedUser.planType === 'trial' || !authenticatedUser.planType) && trialExpiry < new Date();
+          const diff = trialExpiry.getTime() - new Date().getTime();
+          const daysRemaining = Math.ceil(diff / (1000 * 60 * 60 * 24));
+          const isTrialNearExpiry = (authenticatedUser.planType === 'trial' || !authenticatedUser.planType) && daysRemaining <= 5 && daysRemaining > 0;
           
-          if (isTrialExpired && authenticatedUser.username !== 'vbsjunior.biomagnetismo') {
+          if ((isTrialExpired || isTrialNearExpiry) && authenticatedUser.username !== 'vbsjunior.biomagnetismo') {
             setShowSubscriptionGate(true);
           }
 
@@ -431,10 +437,16 @@ const App: React.FC = () => {
 
     // 6. Verificar expiração de Trial
     const createdDate = normalizedUser.createdAt ? new Date(normalizedUser.createdAt) : new Date();
-    const trialExpiry = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const trialExpiry = normalizedUser.approvalExpiry 
+        ? new Date(normalizedUser.approvalExpiry) 
+        : new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+        
     const isTrialExpired = (normalizedUser.planType === 'trial' || !normalizedUser.planType) && trialExpiry < new Date();
+    const diff = trialExpiry.getTime() - new Date().getTime();
+    const daysRemaining = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    const isTrialNearExpiry = (normalizedUser.planType === 'trial' || !normalizedUser.planType) && daysRemaining <= 5 && daysRemaining > 0;
     
-    if (isTrialExpired && normalizedUser.username !== 'vbsjunior.biomagnetismo') {
+    if ((isTrialExpired || isTrialNearExpiry) && normalizedUser.username !== 'vbsjunior.biomagnetismo') {
         setShowSubscriptionGate(true);
     } else if (!foundUser.approvalExpiry || new Date(foundUser.approvalExpiry) >= new Date() || foundUser.username.toLowerCase() === 'vbsjunior.biomagnetismo') {
         setShowSubscriptionGate(false);
