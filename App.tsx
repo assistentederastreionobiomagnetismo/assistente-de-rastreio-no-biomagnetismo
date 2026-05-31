@@ -279,6 +279,15 @@ const App: React.FC = () => {
         const users = await dbService.getUsers();
         setAllUsers(users);
 
+        if (authenticatedUser) {
+          const latestDbUser = users.find(u => u.username === authenticatedUser.username);
+          if (latestDbUser) {
+              authenticatedUser = { ...latestDbUser, password: latestDbUser.password };
+              setCurrentUser(authenticatedUser);
+              localStorage.setItem('biomagnetismo_user', JSON.stringify(authenticatedUser));
+          }
+        }
+
         setIsLoading(false);
       } catch (e) {
         console.error("Erro na inicialização dos dados:", e);

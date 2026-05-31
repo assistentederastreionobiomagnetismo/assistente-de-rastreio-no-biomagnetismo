@@ -21,6 +21,7 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
     const [pendingExpiries, setPendingExpiries] = useState<{ [key: string]: ApprovalPeriod }>({});
     const [pendingPlans, setPendingPlans] = useState<{ [key: string]: PlanType }>({});
     const [pendingExtras, setPendingExtras] = useState<{ [key: string]: number }>({});
+    const [selectedRefill, setSelectedRefill] = useState<{ [key: string]: number }>({});
     const [savingUsername, setSavingUsername] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'users' | 'settings' | 'tutorials'>(initialTab);
 
@@ -148,6 +149,31 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         }
     };
 
+    const handleCreditPackage = async (username: string) => {
+        const amount = selectedRefill[username];
+        if (!amount) return;
+
+        const userToUpdate = users.find(u => u.username === username);
+        if (!userToUpdate) return;
+
+        const currentExtras = userToUpdate.extraSessions || 0;
+        const newExtras = currentExtras + amount;
+        setSavingUsername(username);
+
+        try {
+            const updatedUser = { ...userToUpdate, extraSessions: newExtras };
+            await dbService.updateUser(updatedUser);
+            setUsers(prev => prev.map(u => u.username === username ? updatedUser : u));
+            setSelectedRefill(prev => { const next = {...prev}; delete next[username]; return next; });
+            alert(`+${amount} sessões creditadas com sucesso! Novo saldo extra: ${newExtras}`);
+        } catch(e) {
+            console.error("Erro ao creditar pacote:", e);
+            alert("Erro ao creditar sessões.");
+        } finally {
+            setSavingUsername(null);
+        }
+    };
+
     const handleToggleBlock = async (username: string) => {
         const userToUpdate = users.find(u => u.username === username);
         if (!userToUpdate) return;
@@ -161,6 +187,62 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
             alert("Erro ao salvar no Supabase.");
         }
     };
+
+    const handleActivateOrder = async (username: string, orderType: string) => {
+        const userToUpdate = users.find(u => u.username === username);
+        if (!userToUpdate) return;
+        
+        let updatedUser = { ...userToUpdate, paymentStatus: 'approved' as const };
+        
+        if (orderType === 'pending_annual') {
+            updatedUser.planType = 'annual';
+            updatedUser.approvalType = '1year';
+            updatedUser.approvalExpiry = calculateExpiry('1year');
+        } else if (orderType === 'pending_hybrid') {
+            updatedUser.planType = 'hybrid';
+            updatedUser.approvalType = 'permanent';
+            updatedUser.approvalExpiry = calculateExpiry('permanent');
+        } else if (orderType.startsWith('pending_refill_')) {
+            const amount = parseInt(orderType.replace('pending_refill_', ''));
+            updatedUser.extraSessions = (updatedUser.extraSessions || 0) + amount;
+        }
+
+        try {
+            await dbService.updateUser(updatedUser);
+            setUsers(prev => prev.map(u => u.username === username ? updatedUser : u));
+            alert("Compra ativada com sucesso no painel do usuário!");
+        } catch(e) {
+            console.error("Erro ao ativar", e);
+            alert("Erro ao ativar compra.");
+        }
+    };
+
+    const handleRejectOrder = async (username: string) => {
+        if (!window.confirm("Deseja cancelar esta intenção de compra? O usuário terá que gerar novamente caso pague depois.")) return;
+        
+        const userToUpdate = users.find(u => u.username === username);
+        if (!userToUpdate) return;
+        
+        const updatedUser = { ...userToUpdate, paymentStatus: 'none' as const };
+        try {
+            await dbService.updateUser(updatedUser);
+            setUsers(prev => prev.map(u => u.username === username ? updatedUser : u));
+        } catch(e) {
+            alert("Erro ao cancelar.");
+        }
+    };
+
+    const getOrderDetails = (orderType: string) => {
+        if (orderType === 'pending_annual') return { title: 'Plano Master Anual', color: 'bg-teal-100 text-teal-700 border-teal-200' };
+        if (orderType === 'pending_hybrid') return { title: 'Plano Start (Híbrido)', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' };
+        if (orderType.startsWith('pending_refill_')) {
+            const amount = orderType.replace('pending_refill_', '');
+            return { title: `Pacote: +${amount} Sessões`, color: 'bg-amber-100 text-amber-700 border-amber-200' };
+        }
+        return { title: 'Desconhecido', color: 'bg-slate-100 text-slate-700 border-slate-200' };
+    };
+
+    const pendingActivations = users.filter(u => u.paymentStatus && u.paymentStatus.startsWith('pending_'));
 
     const handleResetPassword = async (username: string, fullName: string) => {
         const generatedPassword = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -356,7 +438,60 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                         </form>
                     </div>
 
-                    {/* 3. TERAPEUTAS NA BASE */}
+                    {/* 3. FILA DE ATIVAÇÕES (Condicional) */}
+                    {pendingActivations.length > 0 && (
+                        <div className="bg-amber-50 rounded-3xl shadow-md border-2 border-amber-200 overflow-hidden mb-8 animate-fade-in">
+                            <div className="px-8 py-6 border-b border-amber-100 flex items-center justify-between bg-amber-100/50">
+                                <div>
+                                    <h3 className="text-xl font-black text-amber-800 uppercase tracking-tight flex items-center gap-2">
+                                        <div className="relative flex h-3 w-3 mr-2">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                                        </div>
+                                        Fila de Ativações Pendentes
+                                    </h3>
+                                    <p className="text-[10px] text-amber-600 font-black uppercase tracking-widest mt-1">Valide os comprovantes via whatsapp e ative com 1 clique</p>
+                                </div>
+                                <span className="bg-amber-500 text-white px-4 py-1.5 rounded-full text-[12px] font-black uppercase tracking-widest shadow-sm">{pendingActivations.length} Pendentes</span>
+                            </div>
+                            <div className="p-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {pendingActivations.map(user => {
+                                        const orderDetails = getOrderDetails(user.paymentStatus!);
+                                        return (
+                                            <div key={user.username} className="bg-white rounded-2xl border border-amber-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <div>
+                                                        <p className="font-black text-slate-800 text-sm truncate">{user.fullName}</p>
+                                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">@{user.username}</p>
+                                                    </div>
+                                                </div>
+                                                <div className={`mb-4 px-3 py-2 rounded-xl border text-xs font-black uppercase tracking-widest text-center ${orderDetails.color}`}>
+                                                    {orderDetails.title}
+                                                </div>
+                                                <div className="mt-auto flex gap-2">
+                                                    <button 
+                                                        onClick={() => handleRejectOrder(user.username)}
+                                                        className="px-3 py-2 text-[9px] font-black uppercase tracking-widest text-slate-400 border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
+                                                    >
+                                                        Cancelar
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleActivateOrder(user.username, user.paymentStatus!)}
+                                                        className="flex-1 py-2 text-[9px] font-black uppercase tracking-widest text-white bg-amber-500 rounded-xl hover:bg-amber-600 shadow-sm transition-all flex items-center justify-center gap-1"
+                                                    >
+                                                        <CheckIcon className="w-3 h-3" /> Confirmar Ativação
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 4. TERAPEUTAS NA BASE */}
                     <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
                         <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <div>
@@ -421,10 +556,32 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                                                             <option value="annual">Anual/Vitalício</option>
                                                             <option value="hybrid">Start (Sessões)</option>
                                                         </select>
-                                                        {(pendingPlans[user.username] === 'hybrid' || (!pendingPlans[user.username] && user.planType === 'hybrid')) && (
-                                                            <div className="flex items-center gap-1 mt-1">
-                                                                <span className="text-[8px] font-black text-slate-400">Extras:</span>
-                                                                <input type="number" value={pendingExtras[user.username] !== undefined ? pendingExtras[user.username] : (user.extraSessions || 0)} onChange={(e) => setPendingExtras(prev => ({ ...prev, [user.username]: parseInt(e.target.value) || 0 }))} className="w-12 text-center text-[9px] font-black border-none rounded bg-slate-50 outline-none" />
+                                                        {(user.planType === 'hybrid' || pendingPlans[user.username] === 'hybrid') && (
+                                                            <div className="flex flex-col gap-1 mt-2 p-2 bg-slate-50 rounded-lg border border-slate-100 w-full max-w-[140px]">
+                                                                <div className="flex justify-between items-center px-1">
+                                                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Sessões Extras</span>
+                                                                    <span className="text-[10px] font-black text-teal-600">{user.extraSessions || 0}</span>
+                                                                </div>
+                                                                <div className="flex gap-1 mt-1">
+                                                                    <select
+                                                                        value={selectedRefill[user.username] || ""}
+                                                                        onChange={(e) => setSelectedRefill(prev => ({ ...prev, [user.username]: parseInt(e.target.value) }))}
+                                                                        className="flex-1 text-[8px] font-black uppercase tracking-widest border border-slate-200 rounded px-1 py-1 outline-none cursor-pointer bg-white text-slate-600"
+                                                                    >
+                                                                        <option value="">Selecione...</option>
+                                                                        <option value="5">+ 5 Sessões</option>
+                                                                        <option value="10">+ 10 Sessões</option>
+                                                                        <option value="20">+ 20 Sessões</option>
+                                                                        <option value="50">+ 50 Sessões</option>
+                                                                    </select>
+                                                                    <button
+                                                                        disabled={!selectedRefill[user.username] || savingUsername === user.username}
+                                                                        onClick={() => handleCreditPackage(user.username)}
+                                                                        className={`px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest transition-all ${selectedRefill[user.username] ? 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                                                                    >
+                                                                        {savingUsername === user.username ? '...' : 'Add'}
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         )}
                                                     </div>

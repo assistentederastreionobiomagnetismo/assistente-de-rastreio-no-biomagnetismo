@@ -44,7 +44,13 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOu
         REFILL_50: settings.link_pacote_50 || "https://pay.infinitepay.io/refill-50"
     };
 
-    const handlePayment = (url: string) => {
+    const handlePayment = async (url: string, orderType: string) => {
+        try {
+            const updatedUser = { ...user, paymentStatus: `pending_${orderType}` };
+            await dbService.updateUser(updatedUser);
+        } catch (e) {
+            console.error("Erro ao registrar intenção de compra", e);
+        }
         window.open(url, '_blank');
     };
 
@@ -147,7 +153,7 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOu
                                     ].map((pack, idx) => (
                                         <button 
                                             key={idx}
-                                            onClick={() => handlePayment(pack.url)}
+                                            onClick={() => handlePayment(pack.url, `refill_${pack.sessions}`)}
                                             className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-1 md:gap-2 ${pack.highlight ? 'bg-white border-teal-500 shadow-md md:scale-105' : 'bg-white border-slate-200 hover:border-teal-200'}`}
                                         >
                                             <span className="text-xl md:text-2xl font-black text-slate-800">{pack.sessions}</span>
@@ -185,7 +191,7 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOu
                                     </div>
 
                                     <button 
-                                        onClick={() => handlePayment(PAYMENT_LINKS.ANNUAL)}
+                                        onClick={() => handlePayment(PAYMENT_LINKS.ANNUAL, 'annual')}
                                         className="w-full py-4 md:py-5 bg-teal-600 text-white font-black rounded-2xl shadow-xl hover:bg-teal-700 transition-all transform hover:scale-[1.02] active:scale-95 uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-2 md:gap-3"
                                     >
                                         <SparklesIcon className="w-4 h-4 md:w-5 md:h-5" /> Quero Acesso Ilimitado
@@ -234,7 +240,7 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOu
                                     </ul>
 
                                     <button 
-                                        onClick={() => handlePayment(PAYMENT_LINKS.ANNUAL)}
+                                        onClick={() => handlePayment(PAYMENT_LINKS.ANNUAL, 'annual')}
                                         className="w-full py-4 md:py-5 bg-teal-600 text-white font-black rounded-2xl shadow-xl hover:bg-teal-700 transition-all transform hover:scale-[1.02] active:scale-95 uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-2 md:gap-3"
                                     >
                                         <SparklesIcon className="w-4 h-4 md:w-5 md:h-5" /> Quero Acesso Ilimitado
@@ -272,7 +278,7 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOu
                                     </ul>
 
                                     <button 
-                                        onClick={() => handlePayment(PAYMENT_LINKS.ADHESION)}
+                                        onClick={() => handlePayment(PAYMENT_LINKS.ADHESION, 'hybrid')}
                                         className="w-full py-4 md:py-5 bg-slate-800 text-white font-black rounded-2xl shadow-lg hover:bg-slate-900 transition-all transform active:scale-95 uppercase tracking-widest text-xs md:text-sm"
                                     >
                                         Ativar Plano Start
@@ -297,7 +303,7 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOu
                                     ].map((pack, idx) => (
                                         <button 
                                             key={idx}
-                                            onClick={() => handlePayment(pack.url)}
+                                            onClick={() => handlePayment(pack.url, `refill_${pack.sessions}`)}
                                             className={`p-4 md:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-1 md:gap-2 ${pack.highlight ? 'bg-white border-teal-500 shadow-md md:scale-105' : 'bg-white border-slate-200 hover:border-teal-200'}`}
                                         >
                                             <span className="text-xl md:text-2xl font-black text-slate-800">{pack.sessions}</span>

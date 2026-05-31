@@ -53,7 +53,7 @@ export interface User {
   requiresPasswordChange?: boolean;
   planType?: PlanType;
   extraSessions?: number;
-  paymentStatus?: 'none' | 'pending' | 'approved';
+  paymentStatus?: string;
   paymentProofUrl?: string;
   createdAt?: string;
 }
