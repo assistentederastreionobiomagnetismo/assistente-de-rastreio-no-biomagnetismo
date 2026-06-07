@@ -135,7 +135,7 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOu
                     )}
 
                     {/* Renderização Condicional do Layout */}
-                    {isOutOfSessions ? (
+                    {user.planType === 'hybrid' ? (
                         <>
                             {/* Pacotes de Refil em Destaque */}
                             <div className="bg-slate-50 rounded-[24px] md:rounded-[32px] p-6 md:p-8 border-2 border-teal-200 mb-8 md:mb-12 shadow-md">
