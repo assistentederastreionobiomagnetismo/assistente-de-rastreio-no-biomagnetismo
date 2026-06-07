@@ -382,6 +382,44 @@ const App: React.FC = () => {
     }
   }, [currentUser, isLoading]);
 
+  // Polling: quando o SubscriptionGate está aberto, verifica a cada 15s se o admin
+  // ativou o pedido pendente do usuário (paymentStatus: pending_* → approved).
+  // Isso garante que o currentUser é sempre atualizado com os dados mais recentes
+  // (sessionPackages, extraSessions, etc.) sem exigir que o terapeuta faça logout.
+  useEffect(() => {
+    if (!isAuthenticated || !currentUser || !showSubscriptionGate) return;
+
+    const checkPendingActivation = async () => {
+      try {
+        const users = await dbService.getUsers();
+        const freshUser = users.find(u => u.username === currentUser.username);
+        if (!freshUser) return;
+
+        const wasPending = currentUser.paymentStatus?.startsWith('pending_');
+        const isNowApproved = freshUser.paymentStatus === 'approved' || freshUser.paymentStatus === 'none';
+
+        if (wasPending && isNowApproved) {
+          // Admin ativou o pedido: atualiza estado local e fecha a loja
+          setCurrentUser(freshUser);
+          localStorage.setItem('biomagnetismo_user', JSON.stringify(freshUser));
+          setShowSubscriptionGate(false);
+          // Recarregar uso do ciclo se for plano híbrido
+          if (freshUser.planType === 'hybrid') {
+            const cycleStart = SessionUtils.getActiveCycleStart(freshUser);
+            const usage = await dbService.getCycleUsage(freshUser.username, cycleStart);
+            setMonthlyUsage(usage);
+          }
+          alert('✅ Seu pacote foi ativado pelo administrador! Boas sessões!');
+        }
+      } catch (e) {
+        console.error('Erro no polling de ativação:', e);
+      }
+    };
+
+    const interval = setInterval(checkPendingActivation, 15000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, currentUser, showSubscriptionGate]);
+
   const handleImportSync = async (syncCode: string): Promise<boolean> => {
     // Sincronização offline desativada em favor da persistência em nuvem (Supabase).
     console.warn("Sincronização por código não é mais necessária com o Supabase.");
@@ -542,11 +580,28 @@ const App: React.FC = () => {
   const handleStartSession = async () => {
     if (!currentUser) return;
     
+    // Sempre buscar dados frescos do Supabase para garantir que sessionPackages
+    // e extraSessions ativados pelo admin sejam considerados corretamente.
+    let freshUser = currentUser;
+    try {
+      const users = await dbService.getUsers();
+      const found = users.find(u => u.username === currentUser.username);
+      if (found) {
+        freshUser = found;
+        // Atualizar estado local e localStorage
+        setCurrentUser(freshUser);
+        localStorage.setItem('biomagnetismo_user', JSON.stringify(freshUser));
+      }
+    } catch (e) {
+      console.error('Erro ao buscar dados frescos do usuário:', e);
+    }
+    
     // Verificação de Limites (Plano Híbrido)
-    if (currentUser.planType === 'hybrid' && currentUser.username !== 'vbsjunior.biomagnetismo') {
-        const cycleStart = SessionUtils.getActiveCycleStart(currentUser);
-        const usage = await dbService.getCycleUsage(currentUser.username, cycleStart);
-        const totalAvailable = SessionUtils.getAvailableSessions(currentUser, usage);
+    if (freshUser.planType === 'hybrid' && freshUser.username !== 'vbsjunior.biomagnetismo') {
+        const cycleStart = SessionUtils.getActiveCycleStart(freshUser);
+        const usage = await dbService.getCycleUsage(freshUser.username, cycleStart);
+        setMonthlyUsage(usage);
+        const totalAvailable = SessionUtils.getAvailableSessions(freshUser, usage);
         if (totalAvailable <= 0) {
             setShowSubscriptionGate(true);
             return;
@@ -554,9 +609,9 @@ const App: React.FC = () => {
     }
 
     // Verificação de Expiração Anual / Trial
-    if (currentUser.approvalExpiry) {
-        const expiry = new Date(currentUser.approvalExpiry);
-        if (expiry < new Date() && currentUser.username !== 'vbsjunior.biomagnetismo') {
+    if (freshUser.approvalExpiry) {
+        const expiry = new Date(freshUser.approvalExpiry);
+        if (expiry < new Date() && freshUser.username !== 'vbsjunior.biomagnetismo') {
             setShowSubscriptionGate(true);
             return;
         }

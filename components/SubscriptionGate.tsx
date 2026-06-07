@@ -46,7 +46,12 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOu
 
     const handlePayment = async (url: string, orderType: string) => {
         try {
-            const updatedUser = { ...user, paymentStatus: `pending_${orderType}` };
+            // Buscar dados frescos do Supabase para não sobrescrever
+            // dados atualizados pelo admin (ex: sessionPackages recém-ativados)
+            const allUsers = await dbService.getUsers();
+            const freshUser = allUsers.find(u => u.username === user.username);
+            const baseUser = freshUser || user;
+            const updatedUser = { ...baseUser, paymentStatus: `pending_${orderType}` };
             await dbService.updateUser(updatedUser);
         } catch (e) {
             console.error("Erro ao registrar intenção de compra", e);
