@@ -443,10 +443,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegister }) => {
                   <div className="hidden lg:block absolute top-1/2 left-[75%] -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-teal-200/50 rounded-full blur-3xl pointer-events-none"></div>
 
                   {[
-                      { sessions: 5, price: '9,90' },
-                      { sessions: 10, price: '14,90' },
-                      { sessions: 20, price: '25,90' },
-                      { sessions: 50, price: '54,90', highlight: true }
+                      { sessions: 5, price: '9,90', days: 30 },
+                      { sessions: 10, price: '14,90', days: 35 },
+                      { sessions: 20, price: '25,90', days: 40 },
+                      { sessions: 50, price: '54,90', highlight: true, days: 45 }
                   ].map((pack, idx) => (
                       <div 
                           key={idx}
@@ -463,6 +463,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegister }) => {
                           )}
                           <span className={`text-5xl font-black ${pack.highlight ? 'text-teal-600' : 'text-slate-800'} mt-2`}>{pack.sessions}</span>
                           <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Sessões</span>
+                          <div className="bg-slate-50 border border-slate-100 rounded-full px-3 py-1 mt-1">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Válido por {pack.days} dias</span>
+                          </div>
                           <div className="h-px w-full bg-slate-100 my-3" />
                           <div className="flex flex-col items-center">
                             <span className="text-sm font-bold text-slate-400 mb-1">Por apenas</span>

@@ -146,10 +146,10 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOu
                                 
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                                     {[
-                                        { sessions: 5, price: '9,90', url: PAYMENT_LINKS.REFILL_5 },
-                                        { sessions: 10, price: '14,90', url: PAYMENT_LINKS.REFILL_10 },
-                                        { sessions: 20, price: '25,90', url: PAYMENT_LINKS.REFILL_20 },
-                                        { sessions: 50, price: '54,90', url: PAYMENT_LINKS.REFILL_50, highlight: true }
+                                        { sessions: 5, price: '9,90', url: PAYMENT_LINKS.REFILL_5, days: 30 },
+                                        { sessions: 10, price: '14,90', url: PAYMENT_LINKS.REFILL_10, days: 35 },
+                                        { sessions: 20, price: '25,90', url: PAYMENT_LINKS.REFILL_20, days: 40 },
+                                        { sessions: 50, price: '54,90', url: PAYMENT_LINKS.REFILL_50, highlight: true, days: 45 }
                                     ].map((pack, idx) => (
                                         <button 
                                             key={idx}
@@ -158,6 +158,9 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOu
                                         >
                                             <span className="text-xl md:text-2xl font-black text-slate-800">{pack.sessions}</span>
                                             <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Sessões</span>
+                                            <div className="bg-slate-100 rounded-full px-2 py-0.5 mt-0.5">
+                                                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Válido por {pack.days} dias</span>
+                                            </div>
                                             <div className="h-px w-full bg-slate-100 my-1 md:my-2" />
                                             <span className="text-base md:text-lg font-black text-teal-600">R$ {pack.price}</span>
                                         </button>
@@ -296,10 +299,10 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOu
                                 
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                                     {[
-                                        { sessions: 5, price: '9,90', url: PAYMENT_LINKS.REFILL_5 },
-                                        { sessions: 10, price: '14,90', url: PAYMENT_LINKS.REFILL_10 },
-                                        { sessions: 20, price: '25,90', url: PAYMENT_LINKS.REFILL_20 },
-                                        { sessions: 50, price: '54,90', url: PAYMENT_LINKS.REFILL_50, highlight: true }
+                                        { sessions: 5, price: '9,90', url: PAYMENT_LINKS.REFILL_5, days: 30 },
+                                        { sessions: 10, price: '14,90', url: PAYMENT_LINKS.REFILL_10, days: 35 },
+                                        { sessions: 20, price: '25,90', url: PAYMENT_LINKS.REFILL_20, days: 40 },
+                                        { sessions: 50, price: '54,90', url: PAYMENT_LINKS.REFILL_50, highlight: true, days: 45 }
                                     ].map((pack, idx) => (
                                         <button 
                                             key={idx}
@@ -308,6 +311,9 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ user, onClose, isOu
                                         >
                                             <span className="text-xl md:text-2xl font-black text-slate-800">{pack.sessions}</span>
                                             <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Sessões</span>
+                                            <div className="bg-slate-100 rounded-full px-2 py-0.5 mt-0.5">
+                                                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Válido por {pack.days} dias</span>
+                                            </div>
                                             <div className="h-px w-full bg-slate-100 my-1 md:my-2" />
                                             <span className="text-base md:text-lg font-black text-teal-600">R$ {pack.price}</span>
                                         </button>
