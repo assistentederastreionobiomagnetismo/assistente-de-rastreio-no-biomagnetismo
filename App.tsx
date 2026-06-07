@@ -780,7 +780,7 @@ const App: React.FC = () => {
       {showSubscriptionGate && currentUser && (
         <SubscriptionGate 
           user={currentUser} 
-          isOutOfSessions={currentUser.planType === 'hybrid' && monthlyUsage >= (5 + (currentUser.extraSessions || 0))}
+          isOutOfSessions={currentUser.planType === 'hybrid' && SessionUtils.getAvailableSessions(currentUser, monthlyUsage) <= 0}
           onClose={() => setShowSubscriptionGate(false)} 
         />
       )}

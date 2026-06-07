@@ -118,6 +118,13 @@ const Dashboard: React.FC<DashboardProps> = ({
                         </div>
                     </div>
                   )}
+
+                  {SessionUtils.getAvailableSessions(currentUser, monthlyUsage) <= 0 && (
+                      <div className="bg-red-50 border border-red-200 rounded-2xl px-6 py-3 flex flex-col gap-1 shadow-sm w-full mt-2">
+                          <span className="text-[10px] font-black text-red-600 uppercase tracking-widest text-center">Aviso de Limite</span>
+                          <p className="text-red-600 text-[11px] text-center font-medium">As sessões do mês vigente esgotaram. Adquira um pacote avulso em "Nova Sessão" ou altere seu plano para Ilimitado.</p>
+                      </div>
+                  )}
                 </div>
               )}
             </div>
