@@ -204,7 +204,8 @@ const App: React.FC = () => {
 
         if (authenticatedUser) {
           setIsAuthenticated(true);
-          setCurrentUser(authenticatedUser);
+          // Não setamos currentUser com dados do localStorage ainda
+          // Vamos esperar os dados frescos do Supabase para evitar inconsistências.
 
           // Tentar recuperar atendimento em curso
           const savedActiveSession = localStorage.getItem('biomagnetismo_active_session');
@@ -253,6 +254,23 @@ const App: React.FC = () => {
           }
 
           if (authenticatedUser.requiresPasswordChange) setAppView('changePassword');
+        }
+
+        // Carrega usuários para login (inicialmente necessário para o componente Login)
+        const users = await dbService.getUsers();
+        setAllUsers(users);
+
+        if (authenticatedUser) {
+          // Usar SEMPRE dados frescos do Supabase para o currentUser
+          const latestDbUser = users.find(u => u.username === authenticatedUser!.username);
+          if (latestDbUser) {
+              authenticatedUser = { ...latestDbUser };
+              setCurrentUser(authenticatedUser);
+              localStorage.setItem('biomagnetismo_user', JSON.stringify(authenticatedUser));
+          } else {
+              // Fallback: usar dados do localStorage se não encontrou no Supabase
+              setCurrentUser(authenticatedUser);
+          }
 
           // Verificação de Trial de 30 dias ou perto de expirar
           const createdDate = authenticatedUser.createdAt ? new Date(authenticatedUser.createdAt) : new Date();
@@ -269,24 +287,11 @@ const App: React.FC = () => {
             setShowSubscriptionGate(true);
           }
 
-          // Carregar uso mensal se for plano híbrido
+          // Calcular uso do ciclo SEMPRE com dados frescos do Supabase
           if (authenticatedUser.planType === 'hybrid') {
             const cycleStart = SessionUtils.getActiveCycleStart(authenticatedUser);
             const usage = await dbService.getCycleUsage(authenticatedUser.username, cycleStart);
             setMonthlyUsage(usage);
-          }
-        }
-
-        // Carrega usuários para login (inicialmente necessário para o componente Login)
-        const users = await dbService.getUsers();
-        setAllUsers(users);
-
-        if (authenticatedUser) {
-          const latestDbUser = users.find(u => u.username === authenticatedUser.username);
-          if (latestDbUser) {
-              authenticatedUser = { ...latestDbUser, password: latestDbUser.password };
-              setCurrentUser(authenticatedUser);
-              localStorage.setItem('biomagnetismo_user', JSON.stringify(authenticatedUser));
           }
         }
 
@@ -661,23 +666,41 @@ const App: React.FC = () => {
       
       // Registrar log de uso se não for edição
       if (!isEditing) {
+          // Primeiro registrar o log de uso no banco
+          await dbService.logUsage(currentUser!.username, newSession.id);
+
           if (currentUser!.planType === 'hybrid') {
-              const cycleStart = SessionUtils.getActiveCycleStart(currentUser!);
-              const usage = await dbService.getCycleUsage(currentUser!.username, cycleStart);
+              // Buscar dados frescos do usuário para garantir sessionPackages atualizados
+              const allUsers = await dbService.getUsers();
+              const freshUser = allUsers.find(u => u.username === currentUser!.username) || currentUser!;
               
-              if (usage >= 5) {
-                 // Consumo do pacote avulso
-                 const activePackages = currentUser!.sessionPackages?.filter(p => p.used < p.amount && new Date(p.expiresAt) > new Date()) || [];
-                 activePackages.sort((a, b) => new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime());
+              const cycleStart = SessionUtils.getActiveCycleStart(freshUser);
+              // Uso agora JA inclui a sessão recém logada
+              const usage = await dbService.getCycleUsage(freshUser.username, cycleStart);
+              setMonthlyUsage(usage);
+              
+              if (usage > 5) {
+                 // Consumo do pacote avulso: usage > 5 significa que já estourou as 5 gratuitas
+                 const freshPackages = (freshUser.sessionPackages || []).filter(
+                   p => p.used < p.amount && new Date(p.expiresAt) > new Date()
+                 );
+                 freshPackages.sort((a, b) => new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime());
                  
-                 if (activePackages.length > 0) {
-                     activePackages[0].used += 1;
-                     await dbService.updateUser(currentUser!);
+                 if (freshPackages.length > 0) {
+                     // Atualizar o pacote avulso mais antigo
+                     const updatedPackages = (freshUser.sessionPackages || []).map(p => {
+                         if (p.id === freshPackages[0].id) {
+                             return { ...p, used: p.used + 1 };
+                         }
+                         return p;
+                     });
+                     const updatedUser = { ...freshUser, sessionPackages: updatedPackages };
+                     await dbService.updateUser(updatedUser);
+                     setCurrentUser(updatedUser);
+                     localStorage.setItem('biomagnetismo_user', JSON.stringify(updatedUser));
                  }
               }
-              setMonthlyUsage(usage + 1); // Atualiza no front
           }
-          await dbService.logUsage(currentUser!.username, newSession.id);
       }
 
       if (isEditing) {
