@@ -23,6 +23,7 @@ import RemoteSignature from './components/RemoteSignature';
 import { hashPassword } from './lib/crypto';
 import StoreCTA from './components/StoreCTA';
 import SubscriptionGate from './components/SubscriptionGate';
+import { SessionUtils } from './utils';
 
 // --- SUPABASE MIGRATION IN PROGRESS ---
 // IndexedDB utils will be removed after full verification.
@@ -270,7 +271,8 @@ const App: React.FC = () => {
 
           // Carregar uso mensal se for plano híbrido
           if (authenticatedUser.planType === 'hybrid') {
-            const usage = await dbService.getMonthlyUsage(authenticatedUser.username);
+            const cycleStart = SessionUtils.getActiveCycleStart(authenticatedUser);
+            const usage = await dbService.getCycleUsage(authenticatedUser.username, cycleStart);
             setMonthlyUsage(usage);
           }
         }
@@ -542,9 +544,10 @@ const App: React.FC = () => {
     
     // Verificação de Limites (Plano Híbrido)
     if (currentUser.planType === 'hybrid' && currentUser.username !== 'vbsjunior.biomagnetismo') {
-        const usage = await dbService.getMonthlyUsage(currentUser.username);
-        const totalAvailable = 5 + (currentUser.extraSessions || 0);
-        if (usage >= totalAvailable) {
+        const cycleStart = SessionUtils.getActiveCycleStart(currentUser);
+        const usage = await dbService.getCycleUsage(currentUser.username, cycleStart);
+        const totalAvailable = SessionUtils.getAvailableSessions(currentUser, usage);
+        if (totalAvailable <= 0) {
             setShowSubscriptionGate(true);
             return;
         }
@@ -603,10 +606,23 @@ const App: React.FC = () => {
       
       // Registrar log de uso se não for edição
       if (!isEditing) {
-          await dbService.logUsage(currentUser!.username, newSession.id);
           if (currentUser!.planType === 'hybrid') {
-              setMonthlyUsage(prev => prev + 1);
+              const cycleStart = SessionUtils.getActiveCycleStart(currentUser!);
+              const usage = await dbService.getCycleUsage(currentUser!.username, cycleStart);
+              
+              if (usage >= 5) {
+                 // Consumo do pacote avulso
+                 const activePackages = currentUser!.sessionPackages?.filter(p => p.used < p.amount && new Date(p.expiresAt) > new Date()) || [];
+                 activePackages.sort((a, b) => new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime());
+                 
+                 if (activePackages.length > 0) {
+                     activePackages[0].used += 1;
+                     await dbService.updateUser(currentUser!);
+                 }
+              }
+              setMonthlyUsage(usage + 1); // Atualiza no front
           }
+          await dbService.logUsage(currentUser!.username, newSession.id);
       }
 
       if (isEditing) {

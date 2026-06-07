@@ -21,6 +21,7 @@ export const dbService = {
             whatsapp: u.whatsapp,
             planType: u.plan_type,
             extraSessions: u.extra_sessions,
+            sessionPackages: u.session_packages,
             paymentStatus: u.payment_status,
             paymentProofUrl: u.payment_proof_url,
             createdAt: u.created_at
@@ -43,6 +44,7 @@ export const dbService = {
                 requires_password_change: user.requiresPasswordChange,
                 plan_type: user.planType || 'trial',
                 extra_sessions: user.extraSessions || 0,
+                session_packages: user.sessionPackages || [],
                 payment_status: user.paymentStatus || 'none',
                 payment_proof_url: user.paymentProofUrl
             }, { onConflict: 'username' });
@@ -416,17 +418,14 @@ export const dbService = {
         if (error) throw error;
     },
 
-    async getMonthlyUsage(username: string): Promise<number> {
+    async getCycleUsage(username: string, cycleStart: Date): Promise<number> {
         if (!supabase) return 0;
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
 
         const { count, error } = await supabase
             .from('usage_logs')
             .select('*', { count: 'exact', head: true })
             .eq('username', username)
-            .gte('created_at', startOfMonth.toISOString());
+            .gte('created_at', cycleStart.toISOString());
         
         if (error) throw error;
         return count || 0;

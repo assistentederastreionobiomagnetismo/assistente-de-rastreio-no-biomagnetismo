@@ -21,3 +21,40 @@ export const getDirectImageUrl = (url: string | undefined): string => {
 
     return url;
 };
+
+import { User } from './types';
+
+export const SessionUtils = {
+  getActiveCycleStart: (user: User): Date => {
+    // Caso não tenha data de criação, assume agora.
+    if (!user.createdAt) return new Date();
+    
+    const created = new Date(user.createdAt);
+    const now = new Date();
+    const msIn30Days = 30 * 24 * 60 * 60 * 1000;
+    
+    // Se a data de criação for no futuro (anomalia), o ciclo atual é a própria data
+    if (now.getTime() < created.getTime()) {
+      return created;
+    }
+    
+    const diff = now.getTime() - created.getTime();
+    const cycles = Math.floor(diff / msIn30Days);
+    return new Date(created.getTime() + cycles * msIn30Days);
+  },
+
+  getAvailableSessions: (user: User, cycleUsage: number): number => {
+    // Saldo do plano gratuito (renova a cada 30 dias)
+    const freeRemaining = Math.max(0, 5 - cycleUsage);
+    
+    // Saldo de pacotes avulsos ativos e com saldo
+    const standaloneRemaining = user.sessionPackages?.reduce((acc, pkg) => {
+        if (new Date(pkg.expiresAt) > new Date()) {
+            return acc + Math.max(0, pkg.amount - pkg.used);
+        }
+        return acc;
+    }, 0) || 0;
+
+    return freeRemaining + standaloneRemaining;
+  }
+};

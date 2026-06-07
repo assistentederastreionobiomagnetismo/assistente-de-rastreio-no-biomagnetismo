@@ -160,12 +160,29 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         const newExtras = currentExtras + amount;
         setSavingUsername(username);
 
+        let days = 30;
+        if (amount === 10) days = 35;
+        else if (amount === 20) days = 40;
+        else if (amount === 50) days = 45;
+        
+        const newPkg = {
+            id: Date.now().toString() + Math.random().toString(36).substring(2),
+            amount,
+            used: 0,
+            createdAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
+        };
+
         try {
-            const updatedUser = { ...userToUpdate, extraSessions: newExtras };
+            const updatedUser = { 
+                ...userToUpdate, 
+                extraSessions: newExtras,
+                sessionPackages: [...(userToUpdate.sessionPackages || []), newPkg]
+            };
             await dbService.updateUser(updatedUser);
             setUsers(prev => prev.map(u => u.username === username ? updatedUser : u));
             setSelectedRefill(prev => { const next = {...prev}; delete next[username]; return next; });
-            alert(`+${amount} sessões creditadas com sucesso! Novo saldo extra: ${newExtras}`);
+            alert(`+${amount} sessões avulsas (validade de ${days} dias) creditadas com sucesso!`);
         } catch(e) {
             console.error("Erro ao creditar pacote:", e);
             alert("Erro ao creditar sessões.");
@@ -205,6 +222,19 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
         } else if (orderType.startsWith('pending_refill_')) {
             const amount = parseInt(orderType.replace('pending_refill_', ''));
             updatedUser.extraSessions = (updatedUser.extraSessions || 0) + amount;
+            
+            let days = 30;
+            if (amount === 10) days = 35;
+            else if (amount === 20) days = 40;
+            else if (amount === 50) days = 45;
+            const newPkg = {
+                id: Date.now().toString() + Math.random().toString(36).substring(2),
+                amount,
+                used: 0,
+                createdAt: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
+            };
+            updatedUser.sessionPackages = [...(updatedUser.sessionPackages || []), newPkg];
         }
 
         try {
@@ -559,8 +589,10 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                                                         {(user.planType === 'hybrid' || pendingPlans[user.username] === 'hybrid') && (
                                                             <div className="flex flex-col gap-1 mt-2 p-2 bg-slate-50 rounded-lg border border-slate-100 w-full max-w-[140px]">
                                                                 <div className="flex justify-between items-center px-1">
-                                                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Sessões Extras</span>
-                                                                    <span className="text-[10px] font-black text-teal-600">{user.extraSessions || 0}</span>
+                                                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Saldos Avulsos</span>
+                                                                    <span className="text-[10px] font-black text-teal-600">
+                                                                        {user.sessionPackages?.reduce((acc, p) => acc + (new Date(p.expiresAt) > new Date() ? Math.max(0, p.amount - p.used) : 0), 0) || 0}
+                                                                    </span>
                                                                 </div>
                                                                 <div className="flex gap-1 mt-1">
                                                                     <select

@@ -39,6 +39,14 @@ export interface PhenomenaData {
 export type ApprovalPeriod = '5min' | '1month' | '3months' | '6months' | '1year' | 'permanent';
 export type PlanType = 'trial' | 'annual' | 'hybrid' | 'expired';
 
+export interface SessionPackage {
+  id: string;
+  amount: number;
+  used: number;
+  createdAt: string; // ISO Date String
+  expiresAt: string; // ISO Date String
+}
+
 export interface User {
   username: string;
   password: string;
@@ -52,7 +60,8 @@ export interface User {
   pendingPassword?: string;
   requiresPasswordChange?: boolean;
   planType?: PlanType;
-  extraSessions?: number;
+  extraSessions?: number; // Maintained for backwards compatibility
+  sessionPackages?: SessionPackage[];
   paymentStatus?: string;
   paymentProofUrl?: string;
   createdAt?: string;

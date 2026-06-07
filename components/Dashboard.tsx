@@ -6,6 +6,7 @@ import SessionHistory from './SessionHistory';
 import PairListManager from './PairListManager';
 import PatientManager from './PatientManager';
 import StoreCTA from './StoreCTA';
+import { SessionUtils } from '../utils';
 
 interface DashboardProps {
   onStartNewSession: () => void;
@@ -84,19 +85,39 @@ const Dashboard: React.FC<DashboardProps> = ({
               
               {/* Contador de Sessões (Plano Start) */}
               {currentUser?.planType === 'hybrid' && !isCurrentUserAdmin && (
-                <div className="mt-4 bg-teal-50 border border-teal-100 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm animate-fade-in">
-                  <div className="flex flex-col items-start">
-                    <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Sessões Disponíveis</span>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-black text-teal-700">{Math.max(0, (5 + (currentUser.extraSessions || 0)) - monthlyUsage)}</span>
-                      <span className="text-xs font-bold text-teal-600">restantes este mês</span>
+                <div className="mt-4 flex flex-col gap-2 animate-fade-in w-full">
+                  <div className="bg-teal-50 border border-teal-100 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm w-full">
+                    <div className="flex flex-col items-start flex-1">
+                      <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Plano Grátis</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-black text-teal-700">{Math.max(0, 5 - monthlyUsage)}</span>
+                        <span className="text-xs font-bold text-teal-600">restantes do ciclo</span>
+                      </div>
+                    </div>
+                    <div className="h-8 w-px bg-teal-200" />
+                    <div className="text-left flex-1">
+                      <p className="text-[9px] font-bold text-teal-600 uppercase leading-tight">Plano Start Ativo</p>
+                      <p className="text-[9px] text-teal-500 leading-tight">Renova a cada 30 dias automaticamente.</p>
                     </div>
                   </div>
-                  <div className="h-8 w-px bg-teal-200" />
-                  <div className="text-left">
-                    <p className="text-[9px] font-bold text-teal-600 uppercase leading-tight">Plano Start Ativo</p>
-                    <p className="text-[9px] text-teal-500 leading-tight">Renova 5 sessões automaticamente todo dia 01.</p>
-                  </div>
+                  
+                  {currentUser.sessionPackages && currentUser.sessionPackages.filter(p => new Date(p.expiresAt) > new Date() && p.amount > p.used).length > 0 && (
+                    <div className="bg-indigo-50 border border-indigo-100 rounded-2xl px-6 py-3 flex flex-col gap-2 shadow-sm w-full">
+                        <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest text-left">Pacotes Avulsos Adquiridos</span>
+                        <div className="flex flex-col gap-1.5">
+                            {currentUser.sessionPackages.filter(p => new Date(p.expiresAt) > new Date() && p.amount > p.used).map(p => {
+                                const remaining = Math.max(0, p.amount - p.used);
+                                const expiresStr = new Date(p.expiresAt).toLocaleDateString('pt-BR');
+                                return (
+                                    <div key={p.id} className="flex justify-between items-center bg-white px-3 py-2 rounded-lg border border-indigo-100 text-xs">
+                                        <span className="font-bold text-indigo-700">{remaining} sessões disponíveis</span>
+                                        <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-widest">Válido até {expiresStr}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
