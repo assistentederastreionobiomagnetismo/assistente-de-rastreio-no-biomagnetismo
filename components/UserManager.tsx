@@ -546,7 +546,11 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                                 <tbody className="divide-y divide-slate-50">
                                     {users.map(user => {
                                         const isAdmin = user.username.toLowerCase() === 'vbsjunior.biomagnetismo';
-                                        const expiryDate = user.approvalExpiry ? new Date(user.approvalExpiry) : null;
+                                        const createdDate = user.createdAt ? new Date(user.createdAt) : new Date();
+                                        const defaultTrialExpiry = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+                                        const expiryDate = user.approvalExpiry 
+                                            ? new Date(user.approvalExpiry) 
+                                            : ((user.planType === 'trial' || !user.planType) ? defaultTrialExpiry : null);
                                         const isExpired = expiryDate && expiryDate < new Date();
                                         const isBlocked = !user.isApproved || isExpired;
 
@@ -634,9 +638,9 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
                                                         <div className="text-center"><span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Vitalício</span></div>
                                                     ) : (
                                                         <div className="flex flex-col items-center gap-3">
-                                                            <span className={`text-[10px] font-black uppercase ${isExpired ? 'text-red-500' : 'text-slate-500'}`}>{user.approvalExpiry ? expiryDate?.toLocaleDateString('pt-BR') : 'Permanente'}</span>
+                                                            <span className={`text-[10px] font-black uppercase ${isExpired ? 'text-red-500' : 'text-slate-500'}`}>{expiryDate ? expiryDate.toLocaleDateString('pt-BR') : 'Permanente'}</span>
                                                             <div className="flex items-center gap-1">
-                                                                <select value={pendingExpiries[user.username] || user.approvalType} onChange={(e) => setPendingExpiries(prev => ({ ...prev, [user.username]: e.target.value as ApprovalPeriod }))} className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-2 py-1.5 outline-none cursor-pointer transition-colors ${pendingExpiries[user.username] ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' : 'bg-slate-100 text-slate-500'}`}>
+                                                                <select value={pendingExpiries[user.username] || user.approvalType || ((user.planType === 'trial' || !user.planType) ? '1month' : 'permanent')} onChange={(e) => setPendingExpiries(prev => ({ ...prev, [user.username]: e.target.value as ApprovalPeriod }))} className={`text-[9px] font-black uppercase tracking-widest border-none rounded-lg px-2 py-1.5 outline-none cursor-pointer transition-colors ${pendingExpiries[user.username] ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' : 'bg-slate-100 text-slate-500'}`}>
                                                                     <option value="5min">5 Min (Teste)</option>
                                                                     <option value="1month">30 Dias</option>
                                                                     <option value="1year">1 Ano</option>

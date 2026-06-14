@@ -517,7 +517,9 @@ const App: React.FC = () => {
         // 2. Criar hash da senha
         const secureHash = await hashPassword(data.password);
 
-        // 3. Criar objeto de usuário (Trial por padrão)
+        // 3. Criar objeto de usuário (Trial por padrão de 30 dias)
+        const now = new Date();
+        const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
         const newUser: User = {
             username: data.username.toLowerCase(),
             password: secureHash,
@@ -526,7 +528,9 @@ const App: React.FC = () => {
             whatsapp: data.whatsapp,
             isApproved: true,
             planType: 'trial',
-            createdAt: new Date().toISOString(),
+            approvalType: '1month',
+            approvalExpiry: thirtyDaysLater.toISOString(),
+            createdAt: now.toISOString(),
             requiresPasswordChange: false
         };
 
