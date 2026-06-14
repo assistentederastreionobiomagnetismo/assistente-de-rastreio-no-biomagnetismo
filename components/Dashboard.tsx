@@ -88,16 +88,18 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <div className="mt-4 flex flex-col gap-2 animate-fade-in w-full">
                   <div className="bg-teal-50 border border-teal-100 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm w-full">
                     <div className="flex flex-col items-start flex-1">
-                      <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Plano Grátis</span>
+                      <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Pacote Mensal</span>
                       <div className="flex items-baseline gap-1">
                         <span className="text-2xl font-black text-teal-700">{Math.max(0, 5 - monthlyUsage)}</span>
-                        <span className="text-xs font-bold text-teal-600">restantes do ciclo</span>
+                        <span className="text-xs font-bold text-teal-600">sessões do ciclo</span>
                       </div>
                     </div>
                     <div className="h-8 w-px bg-teal-200" />
                     <div className="text-left flex-1">
                       <p className="text-[9px] font-bold text-teal-600 uppercase leading-tight">Plano Start Ativo</p>
-                      <p className="text-[9px] text-teal-500 leading-tight">Renova a cada 30 dias automaticamente.</p>
+                      <p className="text-[9px] text-teal-500 leading-tight">
+                        Seu ciclo de 5 sessões reinicia em {currentUser ? new Date(SessionUtils.getActiveCycleStart(currentUser).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR') : ''}.
+                      </p>
                     </div>
                   </div>
                   
