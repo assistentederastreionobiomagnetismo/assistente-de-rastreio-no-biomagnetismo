@@ -217,8 +217,8 @@ const UserManager: React.FC<UserManagerProps> = ({ users, setUsers, biomagneticP
             updatedUser.approvalExpiry = calculateExpiry('1year');
         } else if (orderType === 'pending_hybrid') {
             updatedUser.planType = 'hybrid';
-            updatedUser.approvalType = 'permanent';
-            updatedUser.approvalExpiry = calculateExpiry('permanent');
+            updatedUser.approvalType = '1year';
+            updatedUser.approvalExpiry = calculateExpiry('1year');
         } else if (orderType.startsWith('pending_refill_')) {
             const amount = parseInt(orderType.replace('pending_refill_', ''));
             updatedUser.extraSessions = (updatedUser.extraSessions || 0) + amount;
