@@ -229,39 +229,89 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
           </div>
 
           {/* Botões Anterior / Próximo — navegação rápida de página */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between gap-3 mt-3">
-              <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border font-black text-xs uppercase tracking-widest transition-all shadow-sm
-                  disabled:opacity-40 disabled:cursor-not-allowed
-                  bg-white text-slate-600 border-slate-300 hover:bg-slate-50 active:scale-95"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                </svg>
-                Anterior
-              </button>
+          {totalPages > 1 && (() => {
+            const currentPageChecked = isPageFullyChecked(currentPage);
+            const currentPagePairs = filteredPairs.slice((currentPage - 1) * PAIRS_PER_PAGE, currentPage * PAIRS_PER_PAGE);
+            const checkedCount = currentPagePairs.filter(p =>
+              (p.order !== undefined && guidedChecks.has(p.order)) || selectedPairs.some(sp => sp.order === p.order)
+            ).length;
+            const remaining = currentPagePairs.length - checkedCount;
 
-              <span className="text-xs font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">
-                {currentPage} / {totalPages}
-              </span>
+            return (
+              <div className="flex flex-col gap-2 mt-3">
+                {/* Barra de progresso da página atual */}
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${currentPageChecked ? 'bg-green-500' : 'bg-teal-400'}`}
+                      style={{ width: `${currentPagePairs.length > 0 ? (checkedCount / currentPagePairs.length) * 100 : 0}%` }}
+                    />
+                  </div>
+                  <span className={`text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${currentPageChecked ? 'text-green-600' : 'text-slate-400'}`}>
+                    {checkedCount}/{currentPagePairs.length} testados
+                  </span>
+                </div>
 
-              <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border font-black text-xs uppercase tracking-widest transition-all shadow-sm
-                  disabled:opacity-40 disabled:cursor-not-allowed
-                  bg-teal-600 text-white border-teal-600 hover:bg-teal-700 active:scale-95"
-              >
-                Próximo
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          )}
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border font-black text-xs uppercase tracking-widest transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed bg-white text-slate-600 border-slate-300 hover:bg-slate-50 active:scale-95"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Anterior
+                  </button>
+
+                  <span className="text-xs font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                    {currentPage} / {totalPages}
+                  </span>
+
+                  <div className="flex-1 relative group/nextbtn">
+                    <button
+                      onClick={() => {
+                        if (currentPageChecked) {
+                          setCurrentPage(p => Math.min(totalPages, p + 1));
+                        }
+                      }}
+                      disabled={currentPage === totalPages || !currentPageChecked}
+                      className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border font-black text-xs uppercase tracking-widest transition-all shadow-sm
+                        disabled:cursor-not-allowed
+                        ${currentPageChecked
+                          ? 'bg-teal-600 text-white border-teal-600 hover:bg-teal-700 active:scale-95'
+                          : 'bg-slate-200 text-slate-400 border-slate-300 opacity-70'
+                        }`}
+                      title={!currentPageChecked ? `Teste os ${remaining} par(es) restante(s) antes de avançar` : 'Avançar para a próxima página'}
+                    >
+                      {!currentPageChecked ? (
+                        <>
+                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                          <span>{remaining} par{remaining !== 1 ? 'es' : ''} restante{remaining !== 1 ? 's' : ''}</span>
+                        </>
+                      ) : (
+                        <>
+                          Próximo
+                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Aviso quando bloqueado */}
+                {!currentPageChecked && (
+                  <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest text-center animate-pulse">
+                    ⚠ Teste todos os pares desta página para continuar
+                  </p>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Grade de páginas para salto rápido */}
           {totalPages > 1 && (
