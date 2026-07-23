@@ -32,36 +32,6 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
         <h2 className="text-2xl font-bold text-slate-700 uppercase tracking-widest">
           {isDistancia ? 'PREPARAÇÃO PARA INICIAR O TRATAMENTO - SESSÃO A DISTÂNCIA' : 'PREPARAÇÃO PARA INICIAR O TRATAMENTO'}
         </h2>
-
-        <div className="mt-6 mb-2">
-          <p className="text-red-600 font-extrabold text-base uppercase tracking-tighter">IMPORTANTE!</p>
-          <p className="text-slate-600 text-sm max-w-2xl mx-auto font-medium leading-relaxed">
-            Antes de iniciar o tratamento, realizar a anamnese do paciente para identificar a(s) queixa(s), identificar se não se enquadra em nenhuma das contra-indicações ou se não possui nenhuma restrição ao tratamento.
-          </p>
-        </div>
-
-        {/* Seleção de Tipo de Sessão */}
-        <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-6 print:hidden">
-          <button
-            onClick={() => setData({ ...data, sessionType: 'presencial', antennaResponse: '' })}
-            className={`group relative flex flex-col items-center justify-center w-full sm:w-64 py-4 px-6 rounded-2xl border-4 transition-all duration-300 transform hover:scale-105 ${data.sessionType === 'presencial' ? 'bg-teal-600 text-white border-teal-400 shadow-[0_10px_20px_rgba(13,148,136,0.3)]' : 'bg-white text-slate-500 border-slate-100 hover:border-teal-200 shadow-lg'}`}
-          >
-            <span className="text-lg font-black uppercase tracking-wider">Sessão Presencial</span>
-            <span className={`text-[10px] mt-1 uppercase font-bold ${data.sessionType === 'presencial' ? 'text-teal-100' : 'text-slate-400'}`}>Atendimento Local</span>
-            {data.sessionType === 'presencial' && <div className="absolute -top-3 -right-3 bg-white text-teal-600 rounded-full p-1 border-2 border-teal-600">✓</div>}
-          </button>
-
-          <button
-            onClick={() => setData({ ...data, sessionType: 'distancia' })}
-            className={`group relative flex flex-col items-center justify-center w-full sm:w-64 py-4 px-6 rounded-2xl border-4 transition-all duration-300 transform hover:scale-105 ${data.sessionType === 'distancia' ? 'bg-indigo-600 text-white border-indigo-400 shadow-[0_10px_20px_rgba(79,70,229,0.3)]' : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200 shadow-lg'}`}
-          >
-            <span className="text-lg font-black uppercase tracking-wider">Sessão à Distância</span>
-            <span className={`text-[10px] mt-1 uppercase font-bold ${data.sessionType === 'distancia' ? 'text-indigo-100' : 'text-slate-400'}`}>Uso de Antena</span>
-            {data.sessionType === 'distancia' && <div className="absolute -top-3 -right-3 bg-white text-indigo-600 rounded-full p-1 border-2 border-indigo-600">✓</div>}
-          </button>
-        </div>
-
-        <p className="text-slate-700 font-bold text-sm mt-8 border-t pt-4">Feito conforme descrito acima, proceder com o protocolo a seguir:</p>
       </div>
 
       <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
@@ -70,6 +40,41 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
           {/* ITEM 1 */}
           <div className="flex gap-4 items-start border-b pb-6">
             <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">1</span>
+            <div className="flex-1">
+              <p className="mb-3">
+                Esta sessão é presencial ou à distância (via antena)?
+              </p>
+              <div className="flex flex-wrap items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <span className="text-sm font-black text-teal-700 uppercase tracking-tight w-full sm:w-auto">Tipo de Sessão:</span>
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="sessionType"
+                    value="presencial"
+                    checked={data.sessionType === 'presencial'}
+                    onChange={() => setData({ ...data, sessionType: 'presencial', antennaResponse: '' })}
+                    className="w-5 h-5 text-teal-600 focus:ring-teal-500 border-slate-300"
+                  />
+                  <span className={`text-sm font-bold transition-colors ${data.sessionType === 'presencial' ? 'text-teal-700' : 'text-slate-500 group-hover:text-slate-700'}`}>Sessão Presencial</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="sessionType"
+                    value="distancia"
+                    checked={data.sessionType === 'distancia'}
+                    onChange={() => setData({ ...data, sessionType: 'distancia' })}
+                    className="w-5 h-5 text-teal-600 focus:ring-teal-500 border-slate-300"
+                  />
+                  <span className={`text-sm font-bold transition-colors ${data.sessionType === 'distancia' ? 'text-teal-700' : 'text-slate-500 group-hover:text-slate-700'}`}>Sessão à Distância (via antena)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* ITEM 2 */}
+          <div className="flex gap-4 items-start border-b pb-6">
+            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">2</span>
             <div className="flex-1">
               <p className="mb-3">
                 Polarizar os 3 planos corporais (terapeuta e paciente) e em seguida fazer o risco no pé direito, transferindo para o pé esquerdo para obter o SIM.
@@ -102,22 +107,22 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
             </div>
           </div>
 
-          {/* ITEM 2 */}
+          {/* ITEM 3 */}
           <div className="flex gap-4 items-start">
-            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">2</span>
+            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">3</span>
             <p className="pt-1">
               <strong>Pedir permissão:</strong> Universo, licença para entrar em contato com esse Organismo. Organismo, licença para entrar em contato com você. Confirme com o sim do organismo.
             </p>
           </div>
 
-          {/* ITEM 3 - PROTOCOLO ANTENA (SOMENTE DISTÂNCIA) */}
+          {/* ITEM 4 - PROTOCOLO ANTENA (SOMENTE DISTÂNCIA) */}
           {isDistancia && (
             <div className="flex gap-4 p-5 bg-indigo-50 border-2 border-indigo-100 rounded-xl animate-fade-in ring-4 ring-indigo-50">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">3</span>
+              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">4</span>
               <div className="flex-1 space-y-4">
                 <p className="font-bold text-indigo-900 uppercase text-xs tracking-widest border-b border-indigo-200 pb-2">Protocolo de Conexão (Antena)</p>
 
-                {/* CAIXAS DE SELEÇÃO SOLICITADAS NO ITEM 3 */}
+                {/* CAIXAS DE SELEÇÃO SOLICITADAS NO ITEM 4 */}
                 <div className="flex flex-wrap items-center gap-4 p-4 bg-white rounded-xl border border-indigo-200 shadow-sm">
                   <span className="text-sm font-black text-indigo-700 uppercase tracking-tight w-full sm:w-auto">Sim da Antena:</span>
                   <label className="flex items-center gap-2 cursor-pointer group">
@@ -152,33 +157,33 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
                   <span className="italic font-medium text-indigo-700">"Organismo, você é o(a) {patientName || 'O PACIENTE'}?"</span>.
                   <br />Em caso positivo, dar continuidade à sessão.
                 </p>
-                <p className="text-red-600 font-black text-[10px] uppercase italic tracking-tighter pt-2 border-t border-indigo-100">A partir de agora, seguem-se os mesmos passos já descritos abaixo nos passos 4 até 10.</p>
+                <p className="text-red-600 font-black text-[10px] uppercase italic tracking-tighter pt-2 border-t border-indigo-100">A partir de agora, seguem-se os mesmos passos já descritos abaixo nos passos 5 até 11.</p>
               </div>
             </div>
           )}
 
           {/* ITENS RESTANTES (RE-NUMERADOS AUTOMATICAMENTE) */}
           <div className="flex gap-4">
-            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '4' : '3'}</span>
+            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '5' : '4'}</span>
             <p className="pt-1">
               <strong>Pedir permissão:</strong> Organismo, há algum programa ou sistema neste Organismo que impede a eficiência desta terapia? Se a resposta do organismo for sim, dar o comando: <span className="text-purple-700 font-bold italic">Desativando programa ou sistema que impede a eficiência desta terapia. Desativando, desativando, desativando!</span> Confirmar com o sim do organismo, se foi desativado.
             </p>
           </div>
 
           <div className="flex gap-4">
-            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '5' : '4'}</span>
+            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '6' : '5'}</span>
             <p className="pt-1">Pedir permissão ao organismo para rastrear em todas as camadas.</p>
           </div>
 
           <div className="flex gap-4">
-            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '6' : '5'}</span>
+            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '7' : '6'}</span>
             <p className="pt-1">
               <strong>Dar o comando:</strong> Inserindo a frequência – <span className="bg-yellow-100 px-3 py-1 rounded-md font-mono font-black text-teal-800 tracking-[0.3em] border border-yellow-300">4 4 3 2 5 7 9 3 3 3</span> (verbalizar número por número).
             </p>
           </div>
 
           <div className="flex gap-4">
-            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '7' : '6'}</span>
+            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '8' : '7'}</span>
             <div className="pt-1 w-full">
               <p className="text-slate-700 font-medium">
                 Validar com o Organismo a(s) queixa(s) ou sintoma(s) do dia:
@@ -200,21 +205,21 @@ const StartProtocol: React.FC<StartProtocolProps> = ({ data, setData, notes, set
           </div>
 
           <div className="flex gap-4">
-            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '8' : '7'}</span>
+            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '9' : '8'}</span>
             <p className="pt-1">
               Organismo, comando que você me passe todos os pontos que suportam informações, presença, frequência, ressonância, reservatório, pontos de sobrevivências, toxinas, venenos, mucoproteínas tóxicas, lesões, doenças, desconfortos, produtos e subprodutos de qualquer patógeno e qualquer de suas versões, distorções de PH, disfunção de glândulas que tenha ligação ou causa a(s) sua(s) queixa(s) do dia.
             </p>
           </div>
 
           <div className="flex gap-4">
-            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '9' : '8'}</span>
+            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold">{isDistancia ? '10' : '9'}</span>
             <p className="pt-1">
               <strong>Dar o comando:</strong> <span className="text-purple-700 font-bold italic">Organismo, eu fecho e lacro todos os seus reservatórios.</span>
             </p>
           </div>
 
           <div className="flex gap-4 items-center">
-            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold animate-bounce">{isDistancia ? '10' : '9'}</span>
+            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold animate-bounce">{isDistancia ? '11' : '10'}</span>
             <p className="font-black text-teal-700 uppercase tracking-tighter pt-1">Ir para o rastreio dos pares na planilha, até finalizar.</p>
           </div>
 

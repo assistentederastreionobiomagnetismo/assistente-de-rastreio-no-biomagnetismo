@@ -167,7 +167,7 @@ const OfferManager: React.FC<OfferManagerProps> = ({ products, setProducts, onEx
               onClick={onExit}
               className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-all font-bold text-sm"
             >
-              Sair
+              Voltar
             </button>
           </div>
         </div>
