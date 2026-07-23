@@ -271,18 +271,29 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
                   <div className="flex-1 relative group/nextbtn">
                     <button
                       onClick={() => {
-                        if (currentPageChecked) {
-                          setCurrentPage(p => Math.min(totalPages, p + 1));
+                        if (!currentPageChecked) return;
+                        if (currentPage === totalPages) {
+                          onNext();
+                        } else {
+                          setCurrentPage(p => p + 1);
                         }
                       }}
-                      disabled={currentPage === totalPages || !currentPageChecked}
+                      disabled={!currentPageChecked}
                       className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border font-black text-xs uppercase tracking-widest transition-all shadow-sm
                         disabled:cursor-not-allowed
                         ${currentPageChecked
-                          ? 'bg-teal-600 text-white border-teal-600 hover:bg-teal-700 active:scale-95'
+                          ? currentPage === totalPages
+                            ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 active:scale-95'
+                            : 'bg-teal-600 text-white border-teal-600 hover:bg-teal-700 active:scale-95'
                           : 'bg-slate-200 text-slate-400 border-slate-300 opacity-70'
                         }`}
-                      title={!currentPageChecked ? `Teste os ${remaining} par(es) restante(s) antes de avançar` : 'Avançar para a próxima página'}
+                      title={
+                        !currentPageChecked
+                          ? `Teste os ${remaining} par(es) restante(s) antes de avançar`
+                          : currentPage === totalPages
+                            ? 'Avançar para o próximo nível de rastreio'
+                            : 'Ir para a próxima página'
+                      }
                     >
                       {!currentPageChecked ? (
                         <>
@@ -290,6 +301,13 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                           </svg>
                           <span>{remaining} par{remaining !== 1 ? 'es' : ''} restante{remaining !== 1 ? 's' : ''}</span>
+                        </>
+                      ) : currentPage === totalPages ? (
+                        <>
+                          Avançar
+                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                          </svg>
                         </>
                       ) : (
                         <>
@@ -363,18 +381,12 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
         </div>
       </div>
 
-      <div className="flex justify-between pt-8 border-t border-slate-100 mt-6">
+      <div className="flex justify-start pt-8 border-t border-slate-100 mt-6">
         <button
           onClick={onBack}
           className="inline-flex items-center px-8 py-3 border border-slate-300 text-sm font-black uppercase tracking-widest rounded-xl shadow-sm text-slate-600 bg-white hover:bg-slate-50 transition-all"
         >
           Voltar
-        </button>
-        <button
-          onClick={onNext}
-          className="inline-flex items-center px-10 py-3 border border-transparent text-sm font-black uppercase tracking-widest rounded-xl shadow-lg text-white bg-teal-600 hover:bg-teal-700 transition-all transform hover:scale-[1.02]"
-        >
-          Avançar
         </button>
       </div>
     </div>
