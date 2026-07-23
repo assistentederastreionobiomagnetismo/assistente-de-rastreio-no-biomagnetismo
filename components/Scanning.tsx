@@ -313,35 +313,8 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
             );
           })()}
 
-          {/* Grade de páginas para salto rápido */}
-          {totalPages > 1 && (
-            <div className="flex flex-wrap border border-slate-200 rounded-2xl bg-slate-100 p-2 gap-1 items-center justify-center shadow-sm mt-2">
-              {Array.from({ length: totalPages }).map((_, i) => {
-                const pageNum = i + 1;
-                const isCurrent = currentPage === pageNum;
-                const isFullyChecked = isPageFullyChecked(pageNum);
 
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all border ${
-                      isCurrent 
-                        ? 'ring-2 ring-offset-1 ring-teal-500 bg-white shadow-sm' 
-                        : ''
-                    } ${
-                      isFullyChecked 
-                        ? 'bg-green-100 text-green-700 border-green-300 shadow-sm' 
-                        : isCurrent ? 'text-slate-700 border-slate-300' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-200'
-                    }`}
-                    title={isFullyChecked ? "Todos os pares desta página foram testados" : "Faltam pares a serem testados nesta página"}
-                  >
-                    Pág {pageNum} {isFullyChecked && <CheckIcon className="inline w-3 h-3 ml-1 mb-0.5" />}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+
         </div>
 
         <div className="flex flex-col">
