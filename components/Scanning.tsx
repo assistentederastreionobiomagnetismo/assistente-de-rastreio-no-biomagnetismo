@@ -169,7 +169,8 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
             </div>
           )}
 
-          <div className={`h-[420px] overflow-y-auto border ${totalPages > 1 ? 'rounded-t-2xl border-b-0' : 'rounded-2xl'} p-2 bg-slate-50 shadow-inner`}>
+          {/* Lista de pares — sem scroll para garantir que todos os 6 fiquem visíveis */}
+          <div className={`border rounded-2xl p-2 bg-slate-50 shadow-inner`}>
             <ul className="divide-y divide-slate-200">
               {currentPairs.map((pair, idx) => {
                 const isChecked = pair.order !== undefined && guidedChecks.has(pair.order);
@@ -226,8 +227,45 @@ const Scanning: React.FC<ScanningProps> = ({ levelTitle, selectedPairs, setSelec
               )}
             </ul>
           </div>
+
+          {/* Botões Anterior / Próximo — navegação rápida de página */}
           {totalPages > 1 && (
-            <div className="flex flex-wrap border border-slate-200 rounded-b-2xl bg-slate-100 p-2 gap-1 items-center justify-center shadow-sm">
+            <div className="flex items-center justify-between gap-3 mt-3">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border font-black text-xs uppercase tracking-widest transition-all shadow-sm
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                  bg-white text-slate-600 border-slate-300 hover:bg-slate-50 active:scale-95"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                </svg>
+                Anterior
+              </button>
+
+              <span className="text-xs font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                {currentPage} / {totalPages}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border font-black text-xs uppercase tracking-widest transition-all shadow-sm
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                  bg-teal-600 text-white border-teal-600 hover:bg-teal-700 active:scale-95"
+              >
+                Próximo
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {/* Grade de páginas para salto rápido */}
+          {totalPages > 1 && (
+            <div className="flex flex-wrap border border-slate-200 rounded-2xl bg-slate-100 p-2 gap-1 items-center justify-center shadow-sm mt-2">
               {Array.from({ length: totalPages }).map((_, i) => {
                 const pageNum = i + 1;
                 const isCurrent = currentPage === pageNum;
